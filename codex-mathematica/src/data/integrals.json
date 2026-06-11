@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "problem_latex": "\\int \\frac{\\partial}{\\partial x} e^{- x^{2} + x + 1} \\, dx",
+    "solution_latex": "e^{- x^{2} + x + 1}",
+    "problem_raw": "Derivative(e**(-x**2 + x + 1), x)",
+    "solution_raw": "e**(-x**2 + x + 1)",
+    "ratio": "33/18",
+    "difficulty": "Novice",
+    "xp": 50
+  },
+  {
+    "id": 2,
+    "problem_latex": "\\int x^2 e^x \\, dx",
+    "solution_latex": "e^x(x^2 - 2x + 2) + C",
+    "problem_raw": "x**2 * exp(x)",
+    "solution_raw": "exp(x)*(x**2 - 2*x + 2)",
+    "ratio": "18/10",
+    "difficulty": "Apprentice",
+    "xp": 75
+  },
+  {
+    "id": 3,
+    "problem_latex": "\\int \\frac{1}{\\sqrt{1 - x^2}} \\, dx",
+    "solution_latex": "\\arcsin(x) + C",
+    "problem_raw": "1/sqrt(1 - x**2)",
+    "solution_raw": "asin(x)",
+    "ratio": "10/6",
+    "difficulty": "Apprentice",
+    "xp": 75
+  }
+]
