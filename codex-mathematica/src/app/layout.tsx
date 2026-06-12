@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, IM_Fell_English } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -29,6 +31,8 @@ export const metadata: Metadata = {
   },
 };
 
+import PrintableManuscript from "@/components/PrintableManuscript";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,7 +40,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${imFell.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased h-full">
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="print:hidden h-full">
+              {children}
+            </div>
+            <PrintableManuscript />
+          </AuthProvider>
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

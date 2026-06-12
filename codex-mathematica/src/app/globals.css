@@ -146,3 +146,33 @@ textarea::-webkit-scrollbar-thumb:hover {
 .ledger-preview .katex {
   font-size: 0.82em;
 }
+
+/* ── Sunlit Scriptorium (Light Mode) ────────────────────────────── */
+.theme-light body {
+  background: #f5ebd7 !important;
+}
+.theme-light .codex-view {
+  background: transparent !important;
+}
+.theme-light h1, .theme-light h2, .theme-light h3, .theme-light p {
+  color: #1c1917 !important;
+  text-shadow: none !important;
+}
+.theme-light .katex,
+.theme-light .katex-display,
+.theme-light .katex * {
+  color: #1c1917 !important;
+}
+.theme-light .fragment-card {
+  background: #f4f0ea !important;
+  border-color: #d1d5db !important; /* stone-300 */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+}
+.theme-light .math-box {
+  background: #eadecc !important;
+  border-color: #d1d5db !important;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.03) !important;
+}
+.theme-light .math-box-label {
+  color: #44403c !important; /* stone-700 */
+}
