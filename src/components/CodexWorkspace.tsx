@@ -20,6 +20,7 @@ import {
   Flame,
   NotebookPen,
   Scroll,
+  Unlock,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
 
@@ -880,6 +881,7 @@ function ParchmentDesk({
   const [answer, setAnswer] = useState("");
   const [journalText, setJournalText] = useState("");
   const [sealStatus, setSealStatus] = useState<"idle" | "saving" | "sealed" | "error">("idle");
+  const [isEditing, setIsEditing] = useState(false);
   const uid = useId();
   const archiveRef = useRef<HTMLDivElement>(null);
   const { isGuestMode, scholar } = useAuth();
@@ -954,8 +956,9 @@ function ParchmentDesk({
         chapter:     chapterIndex,
         proof_markdown: journalText,
         sealed_at:   serverTimestamp(),
-      });
+      }, { merge: true });
       setSealStatus("sealed");
+      setIsEditing(false);
       // Reset the success badge after 3 s so the button is reusable
       setTimeout(() => setSealStatus("idle"), 3000);
     } catch {
@@ -1383,48 +1386,79 @@ function ParchmentDesk({
               </div>
 
               {/* Journal heading */}
-              <div className="flex items-center gap-2.5 mb-1">
-                <NotebookPen
-                  strokeWidth={1.5}
-                  style={{ width: "13px", height: "13px", color: "rgba(200,146,42,0.45)", flexShrink: 0 }}
-                />
-                <p
-                  className="uppercase tracking-[0.32em]"
-                  style={{ fontFamily: "Georgia, serif", fontSize: "0.57rem", color: "rgba(200,146,42,0.45)" }}
-                >
-                  Ink &amp; Quill Journal
-                </p>
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2.5">
+                  <NotebookPen
+                    strokeWidth={1.5}
+                    style={{ width: "13px", height: "13px", color: "rgba(200,146,42,0.45)", flexShrink: 0 }}
+                  />
+                  <p
+                    className="uppercase tracking-[0.32em]"
+                    style={{ fontFamily: "Georgia, serif", fontSize: "0.57rem", color: "rgba(200,146,42,0.45)" }}
+                  >
+                    Ink &amp; Quill Journal
+                  </p>
+                </div>
+                {sealStatus === "idle" && !isEditing && phase === "conquered" && (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-1.5 px-3 py-1 text-[0.6rem] uppercase tracking-widest transition-colors duration-200"
+                    style={{
+                      fontFamily: "Georgia, serif",
+                      color: isLightMode ? "#966812" : "rgba(200,146,42,0.6)",
+                      border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.3)",
+                      borderRadius: "2px",
+                      background: isLightMode ? "#fcfaf7" : "rgba(10,8,6,0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)";
+                      e.currentTarget.style.borderColor = isLightMode ? "#78716c" : "rgba(200,146,42,0.55)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.6)";
+                      e.currentTarget.style.borderColor = isLightMode ? "#d1d5db" : "rgba(200,146,42,0.3)";
+                    }}
+                  >
+                    <Unlock className="w-3 h-3" strokeWidth={2} />
+                    Edit Proof
+                  </button>
+                )}
               </div>
-              <p
-                className="mb-5 italic leading-relaxed"
-                style={{
-                  fontFamily: "Georgia, serif",
-                  fontSize: "0.8rem",
-                  color: "rgba(140,128,105,0.65)",
-                }}
-              >
-                Commit your full workings. Markdown and $\LaTeX$ are supported.
-              </p>
+              
+              {(!isEditing && sealStatus === "idle" && phase === "conquered") ? null : (
+                <>
+                  <p
+                    className="mb-5 italic leading-relaxed"
+                    style={{
+                      fontFamily: "Georgia, serif",
+                      fontSize: "0.8rem",
+                      color: "rgba(140,128,105,0.65)",
+                    }}
+                  >
+                    Commit your full workings. Markdown and $\LaTeX$ are supported.
+                  </p>
 
-              {/* Textarea — dark inkwell */}
-              <textarea
-                id={`${uid}-journal`}
-                value={journalText}
-                onChange={(e) => setJournalText(e.target.value)}
-                placeholder={`## Proof\n\nLet $u = x^2$, so $du = 2x\\,dx$\n\n**Step 1:** ...`}
-                rows={10}
-                className="w-full px-5 py-5 text-[0.88rem] leading-relaxed resize-y focus:outline-none transition-colors"
-                style={{
-                  fontFamily: "'Courier New', Courier, monospace",
-                  background: isLightMode ? "#ffffff" : "#0a0806",
-                  border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
-                  borderRadius: "2px 2px 0 0",
-                  color: isLightMode ? "#44403c" : "rgba(200,190,165,0.85)",
-                  caretColor: "#c8922a",
-                  boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 2px 8px rgba(0,0,0,0.55)",
-                }}
-                aria-label="Proof journal"
-              />
+                  {/* Textarea — dark inkwell */}
+                  <textarea
+                    id={`${uid}-journal`}
+                    value={journalText}
+                    onChange={(e) => setJournalText(e.target.value)}
+                    placeholder={`## Proof\n\nLet $u = x^2$, so $du = 2x\\,dx$\n\n**Step 1:** ...`}
+                    rows={10}
+                    className="w-full px-5 py-5 text-[0.88rem] leading-relaxed resize-y focus:outline-none transition-colors"
+                    style={{
+                      fontFamily: "'Courier New', Courier, monospace",
+                      background: isLightMode ? "#ffffff" : "#0a0806",
+                      border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
+                      borderRadius: "2px 2px 0 0",
+                      color: isLightMode ? "#44403c" : "rgba(200,190,165,0.85)",
+                      caretColor: "#c8922a",
+                      boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 2px 8px rgba(0,0,0,0.55)",
+                    }}
+                    aria-label="Proof journal"
+                  />
+                </>
+              )}
 
               {/* Live preview — parchment shadow well */}
               <div
@@ -1432,8 +1466,8 @@ function ParchmentDesk({
                 style={{
                   background: isLightMode ? "#fdfbf7" : "#12100e",
                   border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
-                  borderTop: "none",
-                  borderRadius: "0 0 2px 2px",
+                  borderTop: (!isEditing && sealStatus === "idle") ? (isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)") : "none",
+                  borderRadius: (!isEditing && sealStatus === "idle") ? "2px" : "0 0 2px 2px",
                   boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 4px 16px rgba(0,0,0,0.6), inset 0 1px 4px rgba(0,0,0,0.8)",
                   minHeight: "100px",
                   fontFamily: "Georgia, serif",
@@ -1458,7 +1492,8 @@ function ParchmentDesk({
               </div>
 
               {/* Seal Grimoire */}
-              <div className="mt-8 flex flex-col items-center gap-3">
+              {(!isEditing && sealStatus === "idle") ? null : (
+                <div className="mt-8 flex flex-col items-center gap-3">
                 <button
                   id={`${uid}-seal`}
                   onClick={handleSeal}
@@ -1533,7 +1568,7 @@ function ParchmentDesk({
                   {sealStatus === "saving" && "Inking Ledger\u2026"}
                   {sealStatus === "sealed" && "Grimoire Sealed"}
                   {sealStatus === "error"  && "Ink Failed — Retry"}
-                  {sealStatus === "idle"   && "Seal Grimoire"}
+                  {sealStatus === "idle"   && (isEditing ? "Update Grimoire" : "Seal Grimoire")}
                 </button>
 
                 {/* Error sub-text */}
@@ -1555,6 +1590,7 @@ function ParchmentDesk({
                 {/* Spin keyframe — scoped inline */}
                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
               </div>
+              )}
             </section>
           )}
         </div>
