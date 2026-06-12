@@ -882,6 +882,7 @@ function ParchmentDesk({
   const [journalText, setJournalText] = useState("");
   const [sealStatus, setSealStatus] = useState<"idle" | "saving" | "sealed" | "error">("idle");
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingAnswer, setIsEditingAnswer] = useState(false);
   const uid = useId();
   const archiveRef = useRef<HTMLDivElement>(null);
   const { isGuestMode, scholar } = useAuth();
@@ -899,6 +900,7 @@ function ParchmentDesk({
     setPhase("drafting");
     setSealStatus("idle");
     setIsEditing(false);
+    setIsEditingAnswer(false);
 
     const fetchDoc = async () => {
       try {
@@ -914,12 +916,14 @@ function ParchmentDesk({
           setPhase("conquered");
           setSealStatus("sealed");
           setIsEditing(false);
+          setIsEditingAnswer(false);
         } else {
           setJournalText("");
           setAnswer("");
           setPhase("drafting");
           setSealStatus("idle");
           setIsEditing(false);
+          setIsEditingAnswer(false);
         }
       } catch (e) {
         // Silently ignore if fails to load
@@ -948,9 +952,23 @@ function ParchmentDesk({
     }
   }, [phase]);
 
-  const handleCommit = useCallback(() => {
-    if (answer.trim()) setPhase("committed");
-  }, [answer]);
+  const handleCommit = useCallback(async () => {
+    if (!answer.trim()) return;
+    if (phase === "drafting") {
+      setPhase("committed");
+    } else {
+      setIsEditingAnswer(false);
+      if (phase === "conquered" && !isGuestMode && auth.currentUser) {
+        try {
+          const docRef = doc(db, "users", auth.currentUser.uid, "grimoire", String(fragment.id));
+          await setDoc(docRef, { user_answer: answer }, { merge: true });
+          window.dispatchEvent(new Event("grimoire-updated"));
+        } catch (e) {
+          console.error("Failed to update answer:", e);
+        }
+      }
+    }
+  }, [answer, phase, isGuestMode, fragment.id]);
 
   const handleConquered = useCallback(async () => {
     if (isGuestMode || !auth.currentUser) {
@@ -965,8 +983,9 @@ function ParchmentDesk({
         chapter:     chapterIndex,
         user_answer: answer,
         sealed_at:   serverTimestamp(),
-      });
+      }, { merge: true });
       setPhase("conquered");
+      window.dispatchEvent(new Event("grimoire-updated"));
     } catch (e) {
       console.error("Failed to save true conquest:", e);
     }
@@ -991,18 +1010,22 @@ function ParchmentDesk({
     try {
       const docRef = doc(db, "users", user.uid, "grimoire", String(fragment.id));
       await setDoc(docRef, {
+        fragment_id: fragment.id,
+        volume:      volume.id,
+        chapter:     chapterIndex,
         proof_markdown: journalText,
         sealed_at:   serverTimestamp(),
       }, { merge: true });
       setSealStatus("sealed");
       setIsEditing(false);
+      window.dispatchEvent(new Event("grimoire-updated"));
       // Reset the success badge after 3 s so the button is reusable
       setTimeout(() => setSealStatus("idle"), 3000);
     } catch {
       setSealStatus("error");
       setTimeout(() => setSealStatus("idle"), 4000);
     }
-  }, [sealStatus, isGuestMode, fragment.id, journalText]);
+  }, [sealStatus, isGuestMode, fragment.id, volume.id, chapterIndex, journalText]);
   const handleRetry = useCallback(() => {
     setAnswer("");
     setPhase("drafting");
@@ -1108,7 +1131,7 @@ function ParchmentDesk({
             </p>
 
             {/* ── DRAFTING: textarea + live preview ── */}
-            {phase === "drafting" && (
+            {(phase === "drafting" || isEditingAnswer) && (
               <>
                 {/* Dark LaTeX textarea */}
                 <div className="relative">
@@ -1224,7 +1247,7 @@ function ParchmentDesk({
             )}
 
             {/* ── COMMITTED / VERIFIED: locked answer + archive reveal ── */}
-            {(phase === "committed" || phase === "conquered") && (
+            {((phase === "committed" || phase === "conquered") && !isEditingAnswer) && (
               <>
                 {/* Locked answer display */}
                 <div
@@ -1242,20 +1265,45 @@ function ParchmentDesk({
                     style={{ width: "14px", height: "14px", color: "rgba(200,146,42,0.5)", marginTop: "3px" }}
                   />
                   <div className="flex-1 min-w-0">
-                    <p
-                      className="mb-1.5"
-                      style={{
-                        fontFamily: "Georgia, serif",
-                        fontSize: "0.6rem",
-                        letterSpacing: "0.25em",
-                        color: "rgba(200,146,42,0.5)",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      Committed Answer
-                    </p>
-                    <MathRenderer className="[&_.katex]:text-base text-stone-300 [&_.katex-display]:my-0">
-                      {`$${answer}$`}
+                    <div className="flex justify-between items-center mb-1.5">
+                      <p
+                        style={{
+                          fontFamily: "Georgia, serif",
+                          fontSize: "0.6rem",
+                          letterSpacing: "0.25em",
+                          color: "rgba(200,146,42,0.5)",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        Committed Answer
+                      </p>
+                      {phase === "conquered" && (
+                        <button
+                          onClick={() => setIsEditingAnswer(true)}
+                          className="flex items-center gap-1.5 px-2 py-0.5 text-[0.55rem] uppercase tracking-widest transition-colors duration-200"
+                          style={{
+                            fontFamily: "Georgia, serif",
+                            color: isLightMode ? "#966812" : "rgba(200,146,42,0.6)",
+                            border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.3)",
+                            borderRadius: "2px",
+                            background: isLightMode ? "#fcfaf7" : "rgba(10,8,6,0.5)",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)";
+                            e.currentTarget.style.borderColor = isLightMode ? "#78716c" : "rgba(200,146,42,0.55)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.6)";
+                            e.currentTarget.style.borderColor = isLightMode ? "#d1d5db" : "rgba(200,146,42,0.3)";
+                          }}
+                        >
+                          <Unlock className="w-2.5 h-2.5" strokeWidth={2} />
+                          Edit Answer
+                        </button>
+                      )}
+                    </div>
+                    <MathRenderer className="[&_.katex]:text-base text-stone-300 [&_.katex-display]:my-0 text-center w-full">
+                      {`$$\n${answer}\n$$`}
                     </MathRenderer>
                   </div>
                 </div>
