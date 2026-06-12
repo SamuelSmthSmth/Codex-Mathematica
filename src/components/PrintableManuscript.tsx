@@ -300,7 +300,7 @@ export default function PrintableManuscript() {
                       <span style={{ fontSize: "7.5pt", letterSpacing: "0.15em", textTransform: "uppercase", color: "#3a2a1a" }}>{vol}</span>
                     </td>
                     <td style={{ padding: "2mm", color: "#5a4a3a", fontStyle: "italic", fontSize: "9pt" }}>
-                      {volData?.title || "—"}
+                      {volData?.name || "—"}
                     </td>
                     <td style={{ padding: "2mm", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                       <strong>{count}</strong><span style={{ color: "#8b7355" }}> / {total}</span>
@@ -413,9 +413,9 @@ export default function PrintableManuscript() {
                     </h1>
                   </div>
 
-                  {volData?.title && (
+                  {volData?.name && (
                     <p style={{ fontSize: "13pt", color: "#5a4a3a", fontStyle: "italic", marginBottom: "8mm" }}>
-                      {volData.title}
+                      {volData.name}
                     </p>
                   )}
 
@@ -496,7 +496,7 @@ export default function PrintableManuscript() {
                       {/* Fragment heading */}
                       <div style={{ marginBottom: "4mm" }}>
                         <p style={{ fontSize: "6.5pt", letterSpacing: "0.35em", textTransform: "uppercase", color: "#a89070", margin: "0 0 1mm" }}>
-                          {chapterData?.title || `Chapter ${p.chapter}`}
+                          {chapterData?.theme || `Chapter ${p.chapter}`}
                         </p>
                         <h3 className="ms-display" style={{
                           fontSize: "17pt", fontWeight: 600, color: "#1a1510",

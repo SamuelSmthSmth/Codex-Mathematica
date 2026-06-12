@@ -15,20 +15,7 @@ import {
   Star,
 } from "lucide-react";
 
-// ─── Types ─────────────────────────────────────────────────────────────────
-
-interface Integral {
-  id: number;
-  problem_latex: string;
-  solution_latex: string;
-  problem_raw: string;
-  solution_raw: string;
-  ratio: string;
-  difficulty: string;
-  xp: number;
-}
-
-// ─── Difficulty badge colours ───────────────────────────────────────────────
+import { Fragment } from "@/data/codex-data";
 
 const DIFFICULTY_STYLES: Record<string, string> = {
   Novice: "bg-emerald-900/60 text-emerald-300 border border-emerald-700/50",
@@ -74,9 +61,7 @@ function DifficultyBadge({ difficulty, xp }: { difficulty: string; xp: number })
 
 // ─── Main Component ─────────────────────────────────────────────────────────
 
-export default function FragmentViewer() {
-  const fragment = integrals[0] as Integral;
-
+export default function FragmentViewer({ fragment }: { fragment: Fragment }) {
   const [proof, setProof] = useState<string>("");
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
   const [submitted, setSubmitted] = useState<boolean>(false);
@@ -182,7 +167,6 @@ export default function FragmentViewer() {
 
         {/* Card content */}
         <div className="relative p-8 md:p-10">
-          {/* ── Fragment header ─────────────────────────────────────────────── */}
           <div className="flex items-start justify-between mb-6">
             <div className="flex flex-col gap-2">
               <p
@@ -192,8 +176,8 @@ export default function FragmentViewer() {
                 Fragment #{String(fragment.id).padStart(3, "0")}
               </p>
               <DifficultyBadge
-                difficulty={fragment.difficulty}
-                xp={fragment.xp}
+                difficulty={"Scholar"}
+                xp={100}
               />
             </div>
             <Feather
@@ -347,7 +331,7 @@ export default function FragmentViewer() {
                 <>
                   <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
                   <span>
-                    <strong>Verified.</strong> The scroll accepts your proof. +{fragment.xp} XP awarded.
+                    <strong>Verified.</strong> The scroll accepts your proof. +150 XP awarded.
                   </span>
                 </>
               ) : (
