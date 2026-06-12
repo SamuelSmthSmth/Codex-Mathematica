@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useId } from "react";
+import { useState, useCallback, useId, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -12,6 +12,10 @@ import {
   PenLine,
   ScrollText,
   Send,
+  CheckCheck,
+  RotateCcw,
+  BookMarked,
+  Flame,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
 
@@ -744,15 +748,40 @@ function ParchmentDesk({
   chapterIndex: number;
   fragment: Fragment;
 }) {
+  // ── Inkwell state machine ──
+  // "drafting"  → user is typing their LaTeX answer
+  // "committed" → answer locked; archive solution revealed
+  // "verified"  → user declared their proof sound (future: [CONQUERED])
+  type InkwellPhase = "drafting" | "committed" | "verified";
+
+  const [phase, setPhase] = useState<InkwellPhase>("drafting");
   const [answer, setAnswer] = useState("");
-  const [submitted, setSubmitted] = useState(false);
   const [journalText, setJournalText] = useState("");
   const [journalTab, setJournalTab] = useState<"write" | "preview">("write");
   const uid = useId();
+  const archiveRef = useRef<HTMLDivElement>(null);
 
-  const handleSubmit = useCallback(() => {
-    if (answer.trim()) setSubmitted(true);
+  // Scroll archive section into view after commit
+  useEffect(() => {
+    if (phase === "committed" && archiveRef.current) {
+      setTimeout(() => {
+        archiveRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 350);
+    }
+  }, [phase]);
+
+  const handleCommit = useCallback(() => {
+    if (answer.trim()) setPhase("committed");
   }, [answer]);
+
+  const handleVerified = useCallback(() => {
+    setPhase("verified");
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setAnswer("");
+    setPhase("drafting");
+  }, []);
 
   return (
     <div 
@@ -839,78 +868,322 @@ function ParchmentDesk({
               className="py-12 px-6 text-center bg-[#0d0a08] border border-stone-800/80 rounded-sm"
             >
               <MathRenderer className="[&_.katex]:text-[2.2rem] [&_.katex-display]:my-0 text-stone-200">
-                {`$$${fragment.problem_latex}$$`}
+                {`$$\n${fragment.problem_latex}\n$$`}
               </MathRenderer>
             </div>
           </section>
 
-          {/* Solution input */}
-          {!submitted ? (
-            <section aria-label="Solution entry">
-              <p
-                className="uppercase tracking-widest mb-3 text-stone-500"
-                style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem" }}
-              >
-                Your Solution
-              </p>
-              <div className="flex gap-3">
-                <input
-                  id={`${uid}-solution`}
-                  type="text"
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  placeholder="Enter your answer…"
-                  className="flex-1 min-w-0 px-5 py-3 focus:outline-none transition-colors bg-[#0d0a08] border border-stone-800/80 rounded-sm text-stone-300 placeholder-stone-600/70 italic"
+          {/* ── Inkwell Solution Section ── */}
+          <section aria-label="Solution entry">
+            <p
+              className="uppercase tracking-widest mb-3 text-stone-500"
+              style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem" }}
+            >
+              Your Solution
+            </p>
+
+            {/* ── DRAFTING: textarea + live preview ── */}
+            {phase === "drafting" && (
+              <>
+                {/* Dark LaTeX textarea */}
+                <div className="relative">
+                  <textarea
+                    id={`${uid}-solution`}
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleCommit();
+                    }}
+                    placeholder={"\\frac{x^2}{2} + C"}
+                    rows={3}
+                    className="w-full px-5 py-4 text-sm leading-relaxed resize-none focus:outline-none transition-all duration-200"
+                    style={{
+                      fontFamily: "'Courier New', Courier, monospace",
+                      background: "#0a0806",
+                      border: "1px solid rgba(41,37,36,0.9)",
+                      borderRadius: "2px 2px 0 0",
+                      color: "rgba(200,190,165,0.9)",
+                      caretColor: "#c8922a",
+                      boxShadow: "inset 0 2px 8px rgba(0,0,0,0.6)",
+                    }}
+                    aria-label="LaTeX solution input"
+                  />
+                  {/* Cursor glow at bottom of textarea */}
+                  <div
+                    className="pointer-events-none absolute bottom-0 left-0 right-0 h-px"
+                    style={{
+                      background: answer.trim()
+                        ? "linear-gradient(to right, transparent, rgba(200,146,42,0.55), transparent)"
+                        : "linear-gradient(to right, transparent, rgba(80,70,55,0.3), transparent)",
+                      transition: "background 0.4s ease",
+                    }}
+                    aria-hidden="true"
+                  />
+                </div>
+
+                {/* Live preview — "wet ink" indentation */}
+                <div
+                  className="w-full px-5 py-4 transition-all duration-300"
                   style={{
-                    fontFamily: "var(--font-im-fell), Georgia, serif",
-                    fontSize: "1.1rem",
+                    background: "linear-gradient(to bottom, #0e0b09, #0a0806)",
+                    border: "1px solid rgba(41,37,36,0.9)",
+                    borderTop: "none",
+                    borderRadius: "0 0 2px 2px",
+                    boxShadow: "inset 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 3px rgba(0,0,0,0.8)",
+                    minHeight: "52px",
                   }}
-                  aria-label="Solution input"
-                />
-                <button
-                  id={`${uid}-submit`}
-                  onClick={handleSubmit}
-                  disabled={!answer.trim()}
-                  className="flex items-center gap-2 flex-shrink-0 px-6 py-3 text-xs uppercase tracking-widest font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-[#0d0a08] border border-stone-800/80 text-stone-400 hover:text-stone-300 rounded-sm"
+                  aria-live="polite"
+                  aria-label="Live LaTeX preview"
+                >
+                  {answer.trim() ? (
+                    <MathRenderer className="[&_.katex]:text-[1.6rem] text-stone-200/90 [&_.katex-display]:my-0 text-center">
+                      {`$$\n${answer}\n$$`}
+                    </MathRenderer>
+                  ) : (
+                    <p
+                      className="italic"
+                      style={{
+                        fontFamily: "Georgia, serif",
+                        fontSize: "0.78rem",
+                        color: "rgba(120,105,80,0.5)",
+                      }}
+                    >
+                      Live preview will appear here as you write…
+                    </p>
+                  )}
+                </div>
+
+                {/* + C disclaimer */}
+                <p
+                  className="mt-2 italic tracking-wide"
                   style={{
                     fontFamily: "Georgia, serif",
+                    fontSize: "0.68rem",
+                    color: "rgba(100,88,70,0.55)",
                   }}
                 >
-                  <Send className="w-3.5 h-3.5" strokeWidth={2} />
-                  Commit
-                </button>
-              </div>
-            </section>
-          ) : (
-            <div
-              className="flex items-start gap-3 px-4 py-3 bg-[#0d0a08] border border-stone-800/80 rounded-sm"
-              role="status"
-            >
-              <ScrollText
-                className="flex-shrink-0 mt-0.5 text-stone-500/60"
-                strokeWidth={1.5}
-                style={{ width: "15px", height: "15px" }}
-              />
-              <div>
-                <span
-                  className="text-sm font-medium text-stone-300"
-                  style={{ fontFamily: "Georgia, serif" }}
-                >
-                  Solution committed —{" "}
-                </span>
-                <code
-                  className="text-[0.8rem] text-stone-400"
-                  style={{ fontFamily: "'Courier New', Courier, monospace" }}
-                >
-                  {answer}
-                </code>
-              </div>
-            </div>
-          )}
+                  * Constants of integration (+ C) are implied within the Archive.
+                </p>
 
-          {/* ── Ink & Quill Journal ── */}
-          {submitted && (
+                {/* Commit button */}
+                <div className="mt-4 flex justify-end">
+                  <button
+                    id={`${uid}-commit`}
+                    onClick={handleCommit}
+                    disabled={!answer.trim()}
+                    className="group flex items-center gap-2.5 px-7 py-2.5 text-xs uppercase tracking-[0.22em] font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
+                    style={{
+                      fontFamily: "Georgia, serif",
+                      background: answer.trim()
+                        ? "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)"
+                        : "#0a0806",
+                      border: answer.trim()
+                        ? "1px solid rgba(200,146,42,0.35)"
+                        : "1px solid rgba(41,37,36,0.8)",
+                      borderRadius: "2px",
+                      color: answer.trim() ? "rgba(200,146,42,0.9)" : "rgba(120,110,90,0.5)",
+                      boxShadow: answer.trim()
+                        ? "0 0 20px rgba(200,146,42,0.08), inset 0 1px 0 rgba(255,220,100,0.06)"
+                        : "none",
+                      transition: "all 0.3s ease",
+                    }}
+                    aria-label="Commit your solution"
+                  >
+                    <Flame
+                      className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110"
+                      strokeWidth={2}
+                    />
+                    Commit
+                  </button>
+                </div>
+              </>
+            )}
+
+            {/* ── COMMITTED / VERIFIED: locked answer + archive reveal ── */}
+            {(phase === "committed" || phase === "verified") && (
+              <>
+                {/* Locked answer display */}
+                <div
+                  className="flex items-start gap-3 px-5 py-4 rounded-sm"
+                  role="status"
+                  style={{
+                    background: "#0a0806",
+                    border: "1px solid rgba(41,37,36,0.9)",
+                    boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <ScrollText
+                    className="flex-shrink-0 mt-0.5"
+                    strokeWidth={1.5}
+                    style={{ width: "14px", height: "14px", color: "rgba(200,146,42,0.5)", marginTop: "3px" }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className="mb-1.5"
+                      style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem", letterSpacing: "0.25em", color: "rgba(200,146,42,0.5)", textTransform: "uppercase" }}
+                    >
+                      Committed Answer
+                    </p>
+                    <MathRenderer className="[&_.katex]:text-base text-stone-300 [&_.katex-display]:my-0">
+                      {`$${answer}$`}
+                    </MathRenderer>
+                  </div>
+                </div>
+
+                {/* Archive solution reveal */}
+                <div
+                  ref={archiveRef}
+                  className="mt-6 overflow-hidden"
+                  style={{
+                    animation: "inkwell-unfurl 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+                  }}
+                >
+                  {/* Section label */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div
+                      className="flex-1 h-px"
+                      style={{ background: "linear-gradient(to right, transparent, rgba(200,146,42,0.25))" }}
+                      aria-hidden="true"
+                    />
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <BookMarked
+                        strokeWidth={1.5}
+                        style={{ width: "13px", height: "13px", color: "rgba(200,146,42,0.6)" }}
+                      />
+                      <p
+                        style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", letterSpacing: "0.32em", color: "rgba(200,146,42,0.6)", textTransform: "uppercase" }}
+                      >
+                        The Archive&apos;s Solution
+                      </p>
+                    </div>
+                    <div
+                      className="flex-1 h-px"
+                      style={{ background: "linear-gradient(to left, transparent, rgba(200,146,42,0.25))" }}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  {/* Archive solution box */}
+                  <div
+                    className="px-6 py-6 text-center"
+                    style={{
+                      background: "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)",
+                      border: "1px solid rgba(200,146,42,0.18)",
+                      borderRadius: "2px",
+                      boxShadow: "0 0 40px rgba(200,146,42,0.04), inset 0 1px 0 rgba(200,146,42,0.06)",
+                    }}
+                  >
+                    <MathRenderer className="[&_.katex]:text-2xl text-amber-100/85 [&_.katex-display]:my-0">
+                      {`$$${fragment.solution_latex}$$`}
+                    </MathRenderer>
+                    {fragment.solution_raw && (
+                      <p
+                        className="mt-3"
+                        style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.68rem", color: "rgba(150,130,90,0.45)", letterSpacing: "0.05em" }}
+                      >
+                        {fragment.solution_raw}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Verdict buttons */}
+                  {phase === "committed" && (
+                    <div className="mt-6 flex items-center gap-3 justify-center">
+                      {/* Sound proof */}
+                      <button
+                        id={`${uid}-sound`}
+                        onClick={handleVerified}
+                        className="group flex items-center gap-2.5 px-6 py-2.5 text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-200"
+                        style={{
+                          fontFamily: "Georgia, serif",
+                          background: "linear-gradient(135deg, #0f1a0d 0%, #0a1008 100%)",
+                          border: "1px solid rgba(110,180,80,0.3)",
+                          borderRadius: "2px",
+                          color: "rgba(130,200,100,0.85)",
+                          boxShadow: "0 0 20px rgba(100,180,60,0.06), inset 0 1px 0 rgba(150,220,100,0.05)",
+                        }}
+                        aria-label="My proof is sound"
+                      >
+                        <CheckCheck
+                          className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110"
+                          strokeWidth={2.5}
+                        />
+                        My Proof is Sound
+                      </button>
+
+                      {/* Retry */}
+                      <button
+                        id={`${uid}-retry`}
+                        onClick={handleRetry}
+                        className="group flex items-center gap-2.5 px-6 py-2.5 text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-200"
+                        style={{
+                          fontFamily: "Georgia, serif",
+                          background: "#0a0806",
+                          border: "1px solid rgba(41,37,36,0.9)",
+                          borderRadius: "2px",
+                          color: "rgba(150,140,120,0.6)",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.color = "rgba(200,180,140,0.9)";
+                          e.currentTarget.style.borderColor = "rgba(80,70,55,0.9)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.color = "rgba(150,140,120,0.6)";
+                          e.currentTarget.style.borderColor = "rgba(41,37,36,0.9)";
+                        }}
+                        aria-label="I need to retry"
+                      >
+                        <RotateCcw
+                          className="w-3.5 h-3.5 transition-transform duration-300 group-hover:-rotate-180"
+                          strokeWidth={2}
+                        />
+                        I Need to Retry
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Verified state — conquered banner */}
+                  {phase === "verified" && (
+                    <div
+                      className="mt-6 flex flex-col items-center gap-3 px-6 py-5 text-center"
+                      style={{
+                        background: "linear-gradient(135deg, #0f1a0d 0%, #0a1008 100%)",
+                        border: "1px solid rgba(110,180,80,0.25)",
+                        borderRadius: "2px",
+                        boxShadow: "0 0 30px rgba(100,180,60,0.05)",
+                        animation: "inkwell-unfurl 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards",
+                      }}
+                      role="status"
+                    >
+                      <CheckCheck
+                        strokeWidth={1.5}
+                        style={{ width: "22px", height: "22px", color: "rgba(130,200,100,0.7)" }}
+                      />
+                      <p
+                        style={{
+                          fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
+                          fontSize: "0.9rem",
+                          letterSpacing: "0.1em",
+                          color: "rgba(160,220,120,0.85)",
+                        }}
+                      >
+                        The Archive accepts your proof.
+                      </p>
+                      <p
+                        className="italic"
+                        style={{ fontFamily: "Georgia, serif", fontSize: "0.72rem", color: "rgba(120,160,90,0.55)" }}
+                      >
+                        Fragment {String(fragment.id).padStart(3, "0")} — conquered.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </section>
+
+          {/* ── Ink & Quill Journal (shown after committed/verified) ── */}
+          {(phase === "committed" || phase === "verified") && (
             <section className="mt-10 mb-6" aria-label="Ink and Quill Journal">
               <div className="mb-6">
                 <GoldRule />
