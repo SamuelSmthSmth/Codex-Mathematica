@@ -19,8 +19,21 @@ import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-
 // Utility
 // ─────────────────────────────────────────────────────────────────────────────
 
-const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
-const toRoman = (n: number) => ROMAN[n] ?? String(n + 1);
+function toRoman(index: number): string {
+  let num = index + 1;
+  const val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
+  const syb = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
+  let roman = "";
+  let i = 0;
+  while (num > 0) {
+    while (num >= val[i]) {
+      roman += syb[i];
+      num -= val[i];
+    }
+    i++;
+  }
+  return roman;
+}
 
 /** Lighten a #rrggbb hex colour by `amt` per channel. */
 function lightenHex(hex: string, amt: number): string {
@@ -41,8 +54,7 @@ const pad3 = (n: number) => String(n).padStart(3, "0");
 type AppView =
   | { screen: "shelf" }
   | { screen: "chapters"; volume: Volume }
-  | { screen: "ledger"; volume: Volume; chapterIndex: number }
-  | { screen: "workspace"; volume: Volume; chapterIndex: number; fragment: Fragment };
+  | { screen: "split-ledger"; volume: Volume; chapterIndex: number; fragment: Fragment | null };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Atoms
@@ -539,17 +551,19 @@ function ChapterRow({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VIEW 3 — Fragment Ledger (list of 50)
+// VIEW 3 & 4 — Split Ledger Workspace
 // ─────────────────────────────────────────────────────────────────────────────
 
-function FragmentLedger({
+function SplitLedgerView({
   volume,
   chapterIndex,
+  activeFragment,
   onSelectFragment,
   onBack,
 }: {
   volume: Volume;
   chapterIndex: number;
+  activeFragment: Fragment | null;
   onSelectFragment: (frag: Fragment) => void;
   onBack: () => void;
 }) {
@@ -558,7 +572,7 @@ function FragmentLedger({
   return (
     <SceneBackground volume={volume}>
       {/* Nav */}
-      <nav className="w-full max-w-2xl z-10 flex items-center justify-between mb-10">
+      <nav className="w-full max-w-[85rem] z-10 flex items-center justify-between mb-8">
         <BackButton onClick={onBack} label="Back to Chapters" />
         <Breadcrumb
           parts={[volume.name, `Chapter ${toRoman(chapterIndex)}`]}
@@ -566,75 +580,69 @@ function FragmentLedger({
         />
       </nav>
 
-      {/* Ledger header */}
-      <header className="w-full max-w-2xl z-10 mb-6">
-        <div className="flex items-baseline gap-4 mb-3">
-          <span
-            style={{
-              fontFamily:
-                "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
-              fontSize: "2rem",
-              color: volume.accent,
-              opacity: 0.8,
-              lineHeight: 1,
-            }}
-          >
-            {toRoman(chapterIndex)}
-          </span>
-          <div>
+      {/* Split Grid container */}
+      <div className="w-full max-w-[85rem] z-10 flex gap-10 flex-1 relative">
+        
+        {/* LEFT COLUMN (35%) */}
+        <aside className="w-[35%] flex flex-col border-t pt-5" style={{ borderColor: `${volume.accent}30` }}>
+          {/* Header */}
+          <div className="mb-5 flex-shrink-0">
             <h2
-              className="text-amber-100/75 font-light"
+              className="text-amber-100/80 font-light mb-1"
               style={{
-                fontFamily:
-                  "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
-                fontSize: "1.15rem",
+                fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
+                fontSize: "1.25rem",
                 letterSpacing: "0.05em",
               }}
             >
               Chapter {toRoman(chapterIndex)}
             </h2>
             <p
-              className="text-stone-500/60 italic"
-              style={{ fontFamily: "Georgia, serif", fontSize: "0.73rem" }}
+              className="text-stone-500/70 italic mb-5"
+              style={{ fontFamily: "Georgia, serif", fontSize: "0.8rem" }}
             >
               {chapter.theme}
             </p>
+            <GoldRule color={volume.accent} />
           </div>
-        </div>
-        <GoldRule color={volume.accent} />
-      </header>
 
-      {/* Fragment list */}
-      <main className="w-full max-w-2xl z-10 flex flex-col">
-        <p
-          className="mb-2 pl-1 text-stone-600/45 uppercase tracking-[0.35em]"
-          style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem" }}
-        >
-          {chapter.fragments.length} Fragments — Select to open workspace
-        </p>
+          <p
+            className="mb-3 pl-1 text-stone-600/50 uppercase tracking-[0.35em] flex-shrink-0"
+            style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem" }}
+          >
+            {chapter.fragments.length} Fragments
+          </p>
 
-        {/* Scrollable ledger */}
-        <div
-          className="overflow-y-auto"
-          style={{
-            maxHeight: "calc(100vh - 300px)",
-            borderTop: `1px solid ${volume.accent}20`,
-            scrollbarWidth: "thin",
-            scrollbarColor: `${volume.accent}40 transparent`,
-          }}
-          role="list"
-          aria-label={`Fragments in Chapter ${toRoman(chapterIndex)}`}
-        >
-          {chapter.fragments.map((frag) => (
-            <LedgerRow
-              key={frag.id}
-              fragment={frag}
-              volume={volume}
-              onSelect={() => onSelectFragment(frag)}
-            />
-          ))}
-        </div>
-      </main>
+          <div className="flex flex-col pr-3 pb-10">
+            {chapter.fragments.map((frag) => (
+              <LedgerRow
+                key={frag.id}
+                fragment={frag}
+                volume={volume}
+                isActive={activeFragment?.id === frag.id}
+                onSelect={() => onSelectFragment(frag)}
+              />
+            ))}
+          </div>
+        </aside>
+
+        {/* RIGHT COLUMN (65%) */}
+        <main className="w-[65%] sticky top-24 h-[calc(100vh-8rem)] flex flex-col items-center justify-center pl-8 border-l border-stone-800/50">
+          {activeFragment ? (
+            <ParchmentDesk key={activeFragment.id} volume={volume} chapterIndex={chapterIndex} fragment={activeFragment} />
+          ) : (
+            <div className="flex flex-col items-center justify-center rounded-sm transition-all duration-700 w-full h-full max-h-[600px]" style={{ border: `1px dashed ${volume.accent}30`, background: `radial-gradient(ellipse at center, ${volume.accent}0a 0%, transparent 60%)` }}>
+               <Feather strokeWidth={1} style={{ width: "24px", height: "24px", color: volume.accent, opacity: 0.4 }} className="mb-4" />
+               <p
+                 className="text-stone-500/60 italic text-center px-10"
+                 style={{ fontFamily: "Georgia, serif", fontSize: "1rem" }}
+               >
+                 Select a mathematical fragment to unroll the parchment...
+               </p>
+            </div>
+          )}
+        </main>
+      </div>
     </SceneBackground>
   );
 }
@@ -642,13 +650,16 @@ function FragmentLedger({
 function LedgerRow({
   fragment,
   volume,
+  isActive,
   onSelect,
 }: {
   fragment: Fragment;
   volume: Volume;
+  isActive: boolean;
   onSelect: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const isHighlighted = hovered || isActive;
 
   return (
     <div role="listitem">
@@ -659,27 +670,31 @@ function LedgerRow({
         onMouseLeave={() => setHovered(false)}
         onFocus={() => setHovered(true)}
         onBlur={() => setHovered(false)}
-        className="w-full text-left focus:outline-none"
+        className="w-full text-left focus:outline-none relative overflow-hidden"
         style={{
           display: "block",
           borderBottom: `1px solid ${volume.accent}14`,
-          background: hovered
-            ? `linear-gradient(to right, ${volume.leather}55, ${volume.leather}18, transparent)`
+          background: isHighlighted
+            ? `linear-gradient(to right, ${volume.leather}85, ${volume.leather}20, transparent)`
             : "transparent",
           transition: "background 0.2s ease",
         }}
       >
-        <div className="flex items-center gap-4 px-2 py-2.5">
+        {isActive && (
+          <div className="absolute left-0 top-0 bottom-0 w-[2px]" style={{ background: volume.accent }} />
+        )}
+        <div className="flex items-center gap-4 px-3 py-3">
           {/* Padded ID */}
           <span
             className="flex-shrink-0 tabular-nums"
             style={{
               fontFamily: "'Courier New', Courier, monospace",
-              fontSize: "0.68rem",
+              fontSize: "0.7rem",
               color: volume.accent,
-              opacity: 0.7,
+              opacity: isHighlighted ? 1 : 0.6,
               width: "2.2rem",
               textAlign: "right",
+              transition: "opacity 0.2s ease",
             }}
           >
             {pad3(fragment.id)}
@@ -688,7 +703,7 @@ function LedgerRow({
           {/* Vertical separator */}
           <div
             className="flex-shrink-0"
-            style={{ width: "1px", height: "22px", background: "rgba(255,255,255,0.07)" }}
+            style={{ width: "1px", height: "22px", background: isActive ? `${volume.accent}50` : "rgba(255,255,255,0.07)", transition: "background 0.2s ease" }}
           />
 
           {/* Problem raw preview */}
@@ -696,8 +711,8 @@ function LedgerRow({
             className="flex-1 min-w-0 truncate"
             style={{
               fontFamily: "'Courier New', Courier, monospace",
-              fontSize: "0.73rem",
-              color: hovered ? "rgba(220,200,160,0.9)" : "rgba(180,160,120,0.65)",
+              fontSize: "0.75rem",
+              color: isHighlighted ? "rgba(220,200,160,0.95)" : "rgba(180,160,120,0.65)",
               transition: "color 0.2s ease",
             }}
           >
@@ -706,12 +721,12 @@ function LedgerRow({
 
           {/* Chevron */}
           <ChevronRight
-            className="flex-shrink-0 w-3 h-3 transition-all duration-200"
-            strokeWidth={2}
+            className="flex-shrink-0 w-3.5 h-3.5 transition-all duration-200"
+            strokeWidth={isActive ? 2.5 : 2}
             style={{
               color: volume.accent,
-              opacity: hovered ? 0.75 : 0.18,
-              transform: hovered ? "translateX(2px)" : "translateX(0)",
+              opacity: isHighlighted ? 0.9 : 0.18,
+              transform: isHighlighted ? "translateX(2px)" : "translateX(0)",
             }}
           />
         </div>
@@ -720,20 +735,14 @@ function LedgerRow({
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// VIEW 4 — Parchment Workspace
-// ─────────────────────────────────────────────────────────────────────────────
-
-function FragmentWorkspace({
+function ParchmentDesk({
   volume,
   chapterIndex,
   fragment,
-  onBack,
 }: {
   volume: Volume;
   chapterIndex: number;
   fragment: Fragment;
-  onBack: () => void;
 }) {
   const [answer, setAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -746,306 +755,272 @@ function FragmentWorkspace({
   }, [answer]);
 
   return (
-    <SceneBackground volume={volume}>
-      {/* Nav */}
-      <nav className="w-full max-w-2xl z-10 flex items-center justify-between mb-10">
-        <BackButton onClick={onBack} label="Back to Fragments" />
-        <Breadcrumb
-          parts={[volume.name, `Chapter ${toRoman(chapterIndex)}`, `Fragment ${pad3(fragment.id)}`]}
-          accent={volume.accent}
-        />
-      </nav>
-
-      {/* ══ Parchment Card ══ */}
-      <main className="w-full max-w-2xl z-10">
-        <article
-          className="relative overflow-hidden"
+    <div 
+      className="w-full max-w-2xl h-fit max-h-full overflow-y-auto px-2 pb-6 animate-in fade-in duration-300"
+      style={{ scrollbarWidth: "none" }}
+    >
+      <article
+        className="relative flex flex-col h-fit rounded-xl overflow-hidden mt-2 mb-8 transition-all duration-500 ease-in-out"
+        style={{
+          background: "#12100e",
+          border: "1px solid rgba(45,40,35,0.8)",
+          boxShadow: [
+            "0 20px 40px rgba(0,0,0,0.8)",
+            "0 4px 16px rgba(0,0,0,0.6)",
+            "inset 0 1px 0 rgba(255,255,255,0.02)",
+          ].join(", "),
+        }}
+      >
+        {/* Fractal noise */}
+        <div
+          className="pointer-events-none absolute inset-0 mix-blend-multiply opacity-[0.05] z-0"
           style={{
-            background:
-              "radial-gradient(ellipse 110% 80% at 50% -5%, #faf0d4 0%, #f0d898 40%, #e6c86a 72%, #d2a63e 100%)",
-            borderRadius: "2px",
-            boxShadow: [
-              "0 0 0 1px rgba(180,140,60,0.28)",
-              "0 16px 70px rgba(0,0,0,0.92)",
-              "0 4px 16px rgba(0,0,0,0.75)",
-              "inset 0 1px 0 rgba(255,240,180,0.5)",
-            ].join(", "),
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            backgroundRepeat: "repeat",
           }}
+          aria-hidden="true"
+        />
+        {/* Ruled lines */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03] z-0"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, rgba(200,200,200,0.6) 31px, rgba(200,200,200,0.6) 32px)",
+            backgroundPositionY: "68px",
+          }}
+          aria-hidden="true"
+        />
+        {/* Age stain top */}
+        <div
+          className="pointer-events-none absolute top-0 inset-x-0 h-24 z-0"
+          style={{
+            background: "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)",
+          }}
+          aria-hidden="true"
+        />
+
+        <div 
+          className="relative px-8 py-10 md:px-12 md:py-12 z-10"
         >
-          {/* Fractal noise */}
-          <div
-            className="pointer-events-none absolute inset-0 mix-blend-multiply opacity-[0.09]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E")`,
-              backgroundRepeat: "repeat",
-            }}
-            aria-hidden="true"
-          />
-          {/* Ruled lines */}
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.1]"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(to bottom, transparent 0px, transparent 31px, rgba(100,65,15,0.6) 31px, rgba(100,65,15,0.6) 32px)",
-              backgroundPositionY: "68px",
-            }}
-            aria-hidden="true"
-          />
-          {/* Age stain top */}
-          <div
-            className="pointer-events-none absolute top-0 inset-x-0 h-24"
-            style={{
-              background: "linear-gradient(to bottom, rgba(90,50,10,0.22) 0%, transparent 100%)",
-            }}
-            aria-hidden="true"
-          />
-
-          <div className="relative px-8 py-10 md:px-12 md:py-12">
-
-            {/* Card header */}
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <p
-                  className="uppercase tracking-[0.35em] opacity-50"
-                  style={{ fontFamily: "Georgia, serif", fontSize: "0.57rem", color: "#4a2808" }}
-                >
-                  {volume.subtitle}
-                </p>
-                <p
-                  className="mt-0.5 uppercase tracking-[0.22em] opacity-40"
-                  style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem", color: "#5a3810" }}
-                >
-                  Chapter {toRoman(chapterIndex)} &middot; Fragment {pad3(fragment.id)}
-                </p>
-              </div>
-              <Feather
-                className="opacity-30 flex-shrink-0 mt-0.5"
-                strokeWidth={1.5}
-                style={{ width: "15px", height: "15px", color: "#6b3f10" }}
-              />
-            </div>
-
-            <GoldRule />
-
-            {/* Problem */}
-            <section className="mt-8 mb-8" aria-label="Mathematical problem">
+          {/* Card header */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
               <p
-                className="uppercase tracking-[0.35em] mb-5 opacity-55"
-                style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", color: "#4a2808" }}
+                className="uppercase tracking-[0.35em] text-amber-200/70"
+                style={{ fontFamily: "Georgia, serif", fontSize: "0.57rem" }}
               >
-                Problem
+                {volume.subtitle}
               </p>
-              <div
-                className="py-6 px-4 text-center"
-                style={{
-                  background: "rgba(140,85,15,0.07)",
-                  border: "1px solid rgba(100,65,15,0.2)",
-                  borderRadius: "2px",
-                  color: "#150c02",
-                }}
+              <p
+                className="mt-0.5 uppercase tracking-[0.22em] text-stone-300/50"
+                style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem" }}
               >
-                <MathRenderer className="[&_.katex]:text-[1.55rem] [&_.katex-display]:my-0">
-                  {`$$${fragment.problem_latex}$$`}
-                </MathRenderer>
-              </div>
-            </section>
-
-            {/* Solution input */}
-            {!submitted ? (
-              <section aria-label="Solution entry">
-                <p
-                  className="uppercase tracking-[0.35em] mb-3 opacity-55"
-                  style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", color: "#4a2808" }}
-                >
-                  Your Solution
-                </p>
-                <div className="flex gap-3">
-                  <input
-                    id={`${uid}-solution`}
-                    type="text"
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                    placeholder="Enter your answer…"
-                    className="flex-1 min-w-0 px-4 py-2.5 text-sm focus:outline-none transition-colors"
-                    style={{
-                      fontFamily: "'Courier New', Courier, monospace",
-                      background: "rgba(253,246,226,0.85)",
-                      color: "#1a0e04",
-                      border: "1px solid rgba(120,80,20,0.28)",
-                      borderRadius: "2px",
-                    }}
-                    aria-label="Solution input"
-                  />
-                  <button
-                    id={`${uid}-submit`}
-                    onClick={handleSubmit}
-                    disabled={!answer.trim()}
-                    className="flex items-center gap-2 flex-shrink-0 px-5 py-2.5 text-xs uppercase tracking-widest font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    style={{
-                      fontFamily: "Georgia, serif",
-                      background: "#1e1206",
-                      color: "#f0d060",
-                      border: "1px solid rgba(80,50,12,0.6)",
-                      borderRadius: "2px",
-                      boxShadow: "inset 0 1px 0 rgba(255,210,80,0.1)",
-                    }}
-                  >
-                    <Send className="w-3 h-3" strokeWidth={2} />
-                    Commit
-                  </button>
-                </div>
-              </section>
-            ) : (
-              <div
-                className="flex items-start gap-3 px-4 py-3"
-                style={{
-                  background: "rgba(30,50,18,0.12)",
-                  border: "1px solid rgba(60,90,30,0.28)",
-                  borderRadius: "2px",
-                }}
-                role="status"
-              >
-                <ScrollText
-                  className="flex-shrink-0 mt-0.5 opacity-60"
-                  strokeWidth={1.5}
-                  style={{ width: "14px", height: "14px", color: "#2a4018" }}
-                />
-                <div>
-                  <span
-                    className="text-sm font-medium"
-                    style={{ fontFamily: "Georgia, serif", color: "#243018" }}
-                  >
-                    Solution committed —{" "}
-                  </span>
-                  <code
-                    className="text-sm"
-                    style={{ fontFamily: "'Courier New', Courier, monospace", color: "#2e3a1a" }}
-                  >
-                    {answer}
-                  </code>
-                </div>
-              </div>
-            )}
-
-            {/* ── Ink & Quill Journal (expands after submission) ── */}
-            {submitted && (
-              <section className="mt-10" aria-label="Ink and Quill Journal">
-                <div className="mb-6">
-                  <GoldRule />
-                </div>
-
-                {/* Journal heading */}
-                <div className="flex items-center gap-2.5 mb-2">
-                  <Feather
-                    strokeWidth={1.5}
-                    style={{ width: "13px", height: "13px", color: "#5c3a0e", opacity: 0.7 }}
-                  />
-                  <p
-                    className="uppercase tracking-[0.28em] opacity-65"
-                    style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem", color: "#3e2408" }}
-                  >
-                    Ink &amp; Quill Journal
-                  </p>
-                </div>
-                <p
-                  className="mb-6 italic leading-relaxed opacity-70"
-                  style={{
-                    fontFamily: "var(--font-im-fell), Georgia, serif",
-                    fontSize: "0.82rem",
-                    color: "#5c3a10",
-                  }}
-                >
-                  Record your full proof, working notes, and reflections. Markdown and LaTeX are supported.
-                </p>
-
-                {/* Tabs */}
-                <div className="flex gap-1 mb-0">
-                  <ParchmentTab
-                    id={`${uid}-tab-write`}
-                    active={journalTab === "write"}
-                    onClick={() => setJournalTab("write")}
-                    icon={<PenLine className="w-3 h-3" strokeWidth={2} />}
-                    label="Write"
-                  />
-                  <ParchmentTab
-                    id={`${uid}-tab-preview`}
-                    active={journalTab === "preview"}
-                    onClick={() => setJournalTab("preview")}
-                    icon={<Eye className="w-3 h-3" strokeWidth={2} />}
-                    label="Preview"
-                  />
-                </div>
-
-                {/* Write */}
-                {journalTab === "write" && (
-                  <textarea
-                    id={`${uid}-journal`}
-                    value={journalText}
-                    onChange={(e) => setJournalText(e.target.value)}
-                    placeholder={`## Proof\n\nLet $f(x) = \\\\sin(x)$…\n\n**Step 1:** …`}
-                    rows={11}
-                    className="w-full px-4 py-4 text-sm leading-7 resize-y focus:outline-none transition-colors"
-                    style={{
-                      fontFamily: "'Courier New', Courier, monospace",
-                      background: "rgba(253,246,226,0.8)",
-                      color: "#1a0e04",
-                      border: "1px solid rgba(120,80,20,0.28)",
-                      borderTop: "none",
-                      borderRadius: "0 2px 2px 2px",
-                    }}
-                    aria-label="Proof journal — write mode"
-                  />
-                )}
-
-                {/* Preview */}
-                {journalTab === "preview" && (
-                  <div
-                    className="w-full min-h-[280px] px-5 py-5 text-sm leading-7 parchment-prose"
-                    style={{
-                      fontFamily: "var(--font-im-fell), Georgia, serif",
-                      background: "rgba(253,246,226,0.8)",
-                      border: "1px solid rgba(120,80,20,0.28)",
-                      borderTop: "none",
-                      borderRadius: "0 2px 2px 2px",
-                    }}
-                    aria-live="polite"
-                    aria-label="Proof journal — preview mode"
-                  >
-                    {journalText.trim() ? (
-                      <MathRenderer>{journalText}</MathRenderer>
-                    ) : (
-                      <p className="italic opacity-45" style={{ color: "#6b4018" }}>
-                        Nothing to preview yet — switch to Write and begin your proof.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </section>
-            )}
+                Chapter {toRoman(chapterIndex)} &middot; Fragment {pad3(fragment.id)}
+              </p>
+            </div>
+            <Feather
+              className="flex-shrink-0 mt-0.5 text-stone-600/50"
+              strokeWidth={1.5}
+              style={{ width: "15px", height: "15px" }}
+            />
           </div>
 
-          {/* Age stain bottom */}
-          <div
-            className="pointer-events-none absolute bottom-0 inset-x-0 h-20"
-            style={{
-              background: "linear-gradient(to top, rgba(80,45,8,0.28) 0%, transparent 100%)",
-            }}
-            aria-hidden="true"
-          />
-        </article>
-      </main>
+          <GoldRule />
+
+          {/* Problem */}
+          <section className="mt-8 mb-8" aria-label="Mathematical problem">
+            <p
+              className="uppercase tracking-widest mb-5 text-stone-500"
+              style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem" }}
+            >
+              Problem
+            </p>
+            <div
+              className="py-12 px-6 text-center bg-[#0d0a08] border border-stone-800/80 rounded-sm"
+            >
+              <MathRenderer className="[&_.katex]:text-[2.2rem] [&_.katex-display]:my-0 text-stone-200">
+                {`$$${fragment.problem_latex}$$`}
+              </MathRenderer>
+            </div>
+          </section>
+
+          {/* Solution input */}
+          {!submitted ? (
+            <section aria-label="Solution entry">
+              <p
+                className="uppercase tracking-widest mb-3 text-stone-500"
+                style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem" }}
+              >
+                Your Solution
+              </p>
+              <div className="flex gap-3">
+                <input
+                  id={`${uid}-solution`}
+                  type="text"
+                  value={answer}
+                  onChange={(e) => setAnswer(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                  placeholder="Enter your answer…"
+                  className="flex-1 min-w-0 px-5 py-3 focus:outline-none transition-colors bg-[#0d0a08] border border-stone-800/80 rounded-sm text-stone-300 placeholder-stone-600/70 italic"
+                  style={{
+                    fontFamily: "var(--font-im-fell), Georgia, serif",
+                    fontSize: "1.1rem",
+                  }}
+                  aria-label="Solution input"
+                />
+                <button
+                  id={`${uid}-submit`}
+                  onClick={handleSubmit}
+                  disabled={!answer.trim()}
+                  className="flex items-center gap-2 flex-shrink-0 px-6 py-3 text-xs uppercase tracking-widest font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all bg-[#0d0a08] border border-stone-800/80 text-stone-400 hover:text-stone-300 rounded-sm"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                  }}
+                >
+                  <Send className="w-3.5 h-3.5" strokeWidth={2} />
+                  Commit
+                </button>
+              </div>
+            </section>
+          ) : (
+            <div
+              className="flex items-start gap-3 px-4 py-3 bg-[#0d0a08] border border-stone-800/80 rounded-sm"
+              role="status"
+            >
+              <ScrollText
+                className="flex-shrink-0 mt-0.5 text-stone-500/60"
+                strokeWidth={1.5}
+                style={{ width: "15px", height: "15px" }}
+              />
+              <div>
+                <span
+                  className="text-sm font-medium text-stone-300"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
+                  Solution committed —{" "}
+                </span>
+                <code
+                  className="text-[0.8rem] text-stone-400"
+                  style={{ fontFamily: "'Courier New', Courier, monospace" }}
+                >
+                  {answer}
+                </code>
+              </div>
+            </div>
+          )}
+
+          {/* ── Ink & Quill Journal ── */}
+          {submitted && (
+            <section className="mt-10 mb-6" aria-label="Ink and Quill Journal">
+              <div className="mb-6">
+                <GoldRule />
+              </div>
+
+              {/* Journal heading */}
+              <div className="flex items-center gap-2.5 mb-2">
+                <Feather
+                  strokeWidth={1.5}
+                  className="text-stone-500/60"
+                  style={{ width: "14px", height: "14px" }}
+                />
+                <p
+                  className="uppercase tracking-[0.28em] text-amber-200/70"
+                  style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem" }}
+                >
+                  Ink &amp; Quill Journal
+                </p>
+              </div>
+              <p
+                className="mb-6 italic leading-relaxed text-stone-400/80"
+                style={{
+                  fontFamily: "var(--font-im-fell), Georgia, serif",
+                  fontSize: "0.85rem",
+                }}
+              >
+                Record your full proof, working notes, and reflections. Markdown and LaTeX are supported.
+              </p>
+
+              {/* Tabs */}
+              <div className="flex gap-1 mb-0">
+                <ParchmentTab
+                  id={`${uid}-tab-write`}
+                  active={journalTab === "write"}
+                  onClick={() => setJournalTab("write")}
+                  icon={<PenLine className="w-3.5 h-3.5" strokeWidth={2} />}
+                  label="Write"
+                />
+                <ParchmentTab
+                  id={`${uid}-tab-preview`}
+                  active={journalTab === "preview"}
+                  onClick={() => setJournalTab("preview")}
+                  icon={<Eye className="w-3.5 h-3.5" strokeWidth={2} />}
+                  label="Preview"
+                />
+              </div>
+
+              {/* Write */}
+              {journalTab === "write" && (
+                <textarea
+                  id={`${uid}-journal`}
+                  value={journalText}
+                  onChange={(e) => setJournalText(e.target.value)}
+                  placeholder={`## Proof\n\nLet $f(x) = \\\\sin(x)$…\n\n**Step 1:** …`}
+                  rows={14}
+                  className="w-full px-5 py-5 text-[0.9rem] leading-relaxed resize-y focus:outline-none transition-colors bg-[#0d0a08] border border-stone-800/80 text-stone-300 placeholder-stone-700"
+                  style={{
+                    fontFamily: "'Courier New', Courier, monospace",
+                    borderTop: "none",
+                    borderRadius: "0 2px 2px 2px",
+                  }}
+                  aria-label="Proof journal — write mode"
+                />
+              )}
+
+              {/* Preview */}
+              {journalTab === "preview" && (
+                <div
+                  className="w-full min-h-[350px] px-6 py-6 text-[0.95rem] leading-relaxed parchment-prose bg-[#0d0a08] border border-stone-800/80 text-stone-300"
+                  style={{
+                    fontFamily: "var(--font-im-fell), Georgia, serif",
+                    borderTop: "none",
+                    borderRadius: "0 2px 2px 2px",
+                  }}
+                  aria-live="polite"
+                  aria-label="Proof journal — preview mode"
+                >
+                  {journalText.trim() ? (
+                    <MathRenderer>{journalText}</MathRenderer>
+                  ) : (
+                    <p className="italic text-stone-600">
+                      Nothing to preview yet — switch to Write and begin your proof.
+                    </p>
+                  )}
+                </div>
+              )}
+            </section>
+          )}
+        </div>
+
+        {/* Age stain bottom */}
+        <div
+          className="pointer-events-none absolute bottom-0 inset-x-0 h-20 z-0"
+          style={{
+            background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)",
+          }}
+          aria-hidden="true"
+        />
+      </article>
 
       {/* Footer */}
-      <footer className="mt-10 z-10 text-center">
+      <footer className="flex-shrink-0 text-center pb-8 animate-in fade-in duration-700 delay-300">
         <p
-          className="italic opacity-25"
-          style={{ fontFamily: "Georgia, serif", fontSize: "0.7rem", color: "#c8922a", letterSpacing: "0.05em" }}
+          className="italic opacity-30 px-4 whitespace-normal break-words"
+          style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: "#c8922a", letterSpacing: "0.05em" }}
         >
           &ldquo;{fragment.problem_raw}&rdquo;
         </p>
       </footer>
-    </SceneBackground>
+    </div>
   );
 }
 
@@ -1113,11 +1088,11 @@ function ParchmentTab({
       style={{
         fontFamily: "Georgia, serif",
         borderRadius: "2px 2px 0 0",
-        background: active ? "rgba(253,246,226,0.8)" : "transparent",
-        color: active ? "#1a0e04" : "rgba(90,55,16,0.5)",
-        borderTop: active ? "1px solid rgba(120,80,20,0.28)" : "1px solid transparent",
-        borderLeft: active ? "1px solid rgba(120,80,20,0.28)" : "1px solid transparent",
-        borderRight: active ? "1px solid rgba(120,80,20,0.28)" : "1px solid transparent",
+        background: active ? "#0d0a08" : "transparent",
+        color: active ? "#d6d3d1" : "rgba(168,162,158,0.5)", // text-stone-300 / text-stone-400
+        borderTop: active ? "1px solid rgba(41,37,36,0.8)" : "1px solid transparent", // border-stone-800
+        borderLeft: active ? "1px solid rgba(41,37,36,0.8)" : "1px solid transparent",
+        borderRight: active ? "1px solid rgba(41,37,36,0.8)" : "1px solid transparent",
         borderBottom: "none",
         cursor: active ? "default" : "pointer",
       }}
@@ -1140,12 +1115,12 @@ export default function CodexWorkspace() {
   }, []);
 
   const openChapter = useCallback((volume: Volume, chapterIndex: number) => {
-    setView({ screen: "ledger", volume, chapterIndex });
+    setView({ screen: "split-ledger", volume, chapterIndex, fragment: null });
   }, []);
 
-  const openFragment = useCallback(
+  const selectFragment = useCallback(
     (volume: Volume, chapterIndex: number, fragment: Fragment) => {
-      setView({ screen: "workspace", volume, chapterIndex, fragment });
+      setView({ screen: "split-ledger", volume, chapterIndex, fragment });
     },
     []
   );
@@ -1156,10 +1131,6 @@ export default function CodexWorkspace() {
 
   const goToChapters = useCallback((volume: Volume) => {
     setView({ screen: "chapters", volume });
-  }, []);
-
-  const goToLedger = useCallback((volume: Volume, chapterIndex: number) => {
-    setView({ screen: "ledger", volume, chapterIndex });
   }, []);
 
   // ── Render ──
@@ -1177,26 +1148,15 @@ export default function CodexWorkspace() {
     );
   }
 
-  if (view.screen === "ledger") {
-    const { volume, chapterIndex } = view;
-    return (
-      <FragmentLedger
-        volume={volume}
-        chapterIndex={chapterIndex}
-        onSelectFragment={(frag) => openFragment(volume, chapterIndex, frag)}
-        onBack={() => goToChapters(volume)}
-      />
-    );
-  }
-
-  // workspace
+  // split-ledger
   const { volume, chapterIndex, fragment } = view;
   return (
-    <FragmentWorkspace
+    <SplitLedgerView
       volume={volume}
       chapterIndex={chapterIndex}
-      fragment={fragment}
-      onBack={() => goToLedger(volume, chapterIndex)}
+      activeFragment={fragment}
+      onSelectFragment={(frag) => selectFragment(volume, chapterIndex, frag)}
+      onBack={() => goToChapters(volume)}
     />
   );
 }
