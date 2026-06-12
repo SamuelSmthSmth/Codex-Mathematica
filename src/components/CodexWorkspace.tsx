@@ -894,6 +894,7 @@ function ParchmentDesk({
     let isMounted = true;
 
     // Clear state on fragment change
+    setAnswer("");
     setJournalText("");
     setPhase("drafting");
     setSealStatus("idle");
@@ -906,15 +907,19 @@ function ParchmentDesk({
         
         if (!isMounted) return;
 
-        if (snap.exists() && snap.data().proof_markdown) {
-          setJournalText(snap.data().proof_markdown);
+        if (snap.exists()) {
+          const data = snap.data();
+          setJournalText(data.proof_markdown || "");
+          setAnswer(data.user_answer || "");
           setPhase("conquered");
           setSealStatus("sealed");
           setIsEditing(false);
         } else {
           setJournalText("");
+          setAnswer("");
           setPhase("drafting");
           setSealStatus("idle");
+          setIsEditing(false);
         }
       } catch (e) {
         // Silently ignore if fails to load
@@ -947,9 +952,25 @@ function ParchmentDesk({
     if (answer.trim()) setPhase("committed");
   }, [answer]);
 
-  const handleConquered = useCallback(() => {
-    setPhase("conquered");
-  }, []);
+  const handleConquered = useCallback(async () => {
+    if (isGuestMode || !auth.currentUser) {
+      setPhase("conquered");
+      return;
+    }
+    try {
+      const docRef = doc(db, "users", auth.currentUser.uid, "grimoire", String(fragment.id));
+      await setDoc(docRef, {
+        fragment_id: fragment.id,
+        volume:      volume.id,
+        chapter:     chapterIndex,
+        user_answer: answer,
+        sealed_at:   serverTimestamp(),
+      });
+      setPhase("conquered");
+    } catch (e) {
+      console.error("Failed to save true conquest:", e);
+    }
+  }, [isGuestMode, fragment.id, volume.id, chapterIndex, answer]);
 
   const handleSeal = useCallback(async () => {
     if (sealStatus === "saving" || sealStatus === "sealed") return;
@@ -970,9 +991,6 @@ function ParchmentDesk({
     try {
       const docRef = doc(db, "users", user.uid, "grimoire", String(fragment.id));
       await setDoc(docRef, {
-        fragment_id: fragment.id,
-        volume:      volume.id,
-        chapter:     chapterIndex,
         proof_markdown: journalText,
         sealed_at:   serverTimestamp(),
       }, { merge: true });
@@ -984,7 +1002,7 @@ function ParchmentDesk({
       setSealStatus("error");
       setTimeout(() => setSealStatus("idle"), 4000);
     }
-  }, [sealStatus, isGuestMode, fragment.id, volume.id, chapterIndex, journalText]);
+  }, [sealStatus, isGuestMode, fragment.id, journalText]);
   const handleRetry = useCallback(() => {
     setAnswer("");
     setPhase("drafting");
@@ -1457,25 +1475,27 @@ function ParchmentDesk({
                     Commit your full workings. Markdown and $\LaTeX$ are supported.
                   </p>
 
-                  {/* Textarea — dark inkwell */}
-                  <textarea
-                    id={`${uid}-journal`}
-                    value={journalText}
-                    onChange={(e) => setJournalText(e.target.value)}
-                    placeholder={`## Proof\n\nLet $u = x^2$, so $du = 2x\\,dx$\n\n**Step 1:** ...`}
-                    rows={10}
-                    className="w-full px-5 py-5 text-[0.88rem] leading-relaxed resize-y focus:outline-none transition-colors"
-                    style={{
-                      fontFamily: "'Courier New', Courier, monospace",
-                      background: isLightMode ? "#ffffff" : "#0a0806",
-                      border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
-                      borderRadius: "2px 2px 0 0",
-                      color: isLightMode ? "#44403c" : "rgba(200,190,165,0.85)",
-                      caretColor: "#c8922a",
-                      boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 2px 8px rgba(0,0,0,0.55)",
-                    }}
-                    aria-label="Proof journal"
-                  />
+                  {/* Textarea container */}
+                  <div className="relative">
+                    <textarea
+                      id={`${uid}-journal`}
+                      value={journalText}
+                      onChange={(e) => setJournalText(e.target.value)}
+                      placeholder={`## Proof\n\nLet $u = x^2$, so $du = 2x\\,dx$\n\n**Step 1:** ...`}
+                      rows={10}
+                      className="w-full px-5 py-5 text-[0.88rem] leading-relaxed resize-y focus:outline-none transition-colors"
+                      style={{
+                        fontFamily: "'Courier New', Courier, monospace",
+                        background: isLightMode ? "#ffffff" : "#0a0806",
+                        border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
+                        borderRadius: "2px 2px 0 0",
+                        color: isLightMode ? "#44403c" : "rgba(200,190,165,0.85)",
+                        caretColor: "#c8922a",
+                        boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 2px 8px rgba(0,0,0,0.55)",
+                      }}
+                      aria-label="Proof journal"
+                    />
+                  </div>
                 </>
               )}
 
