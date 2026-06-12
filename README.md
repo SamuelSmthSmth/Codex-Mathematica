@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏛️ Codex Mathematica: The Grand Archive
 
-## Getting Started
+*A digital sanctuary for mathematical preservation and study.*
 
-First, run the development server:
+**Codex Mathematica** is a high-performance, serverless Next.js web application designed for scholars to solve, document, and archive over 600 calculus problems. Built with a deeply atmospheric "dark academia" aesthetic, the platform combines a distraction-free writing environment with real-time mathematical typesetting and cloud persistence.
 
+---
+
+## 📜 Core Features
+
+* **The Interactive Grimoire:** A custom markdown editor that parses live mathematical notation. Write complex proofs in standard LaTeX, and watch them render instantly into beautiful, centered equations using KaTeX.
+* **The Cloud Vault (Firebase):** Never lose a calculation. Secure authentication (Google, GitHub, and Email) paired with Firestore ensures that every "Conquered" fragment is permanently synced to the cloud.
+* **Dual-Environment Scriptorium:** Study in the default "Candlelit" dark oak theme, or flip the toggle in your profile to switch to the "Sunlit Scriptorium"—a high-contrast, parchment-cream light mode.
+* **Academic Manuscript Export:** Generate and download your completed proofs. Export raw Markdown for data backup, or generate a beautifully typeset, Cambridge-style Academic PDF (complete with a title page, volume watermarks, and table of contents).
+* **Deep Archive Mode (PWA):** Install the Archive directly to your desktop or mobile device. Cache the 600-fragment registry and work entirely offline when deep in the stacks; your proofs will sync automatically upon your return to Wi-Fi.
+* **Frictionless Mobile Layout:** A responsive architecture that gracefully transitions the side-by-side desktop ledger into a fluid, stacked mobile experience with sliding overlay cards.
+
+---
+
+## 🛠️ Architecture & Stack
+
+This project is built on a modern, edge-ready React stack:
+
+* **Framework:** [Next.js](https://nextjs.org/) (App Router)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **Database & Auth:** [Firebase / Firestore](https://firebase.google.com/)
+* **Math Rendering:** [KaTeX](https://katex.org/) via `react-markdown`, `remark-math`, and `rehype-katex`
+* **Offline Support:** `next-pwa`
+
+---
+
+## 🗝️ Unlocking the Archive (Local Setup)
+
+To run the Grand Archive locally on your own machine, follow these steps:
+
+### 1. Clone the Repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+git clone [https://github.com/your-username/codex-mathematica.git](https://github.com/your-username/codex-mathematica.git)
+cd codex-mathematica
