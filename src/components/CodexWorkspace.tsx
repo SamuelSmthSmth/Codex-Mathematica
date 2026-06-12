@@ -890,23 +890,42 @@ function ParchmentDesk({
   // ── Hydration ──
   useEffect(() => {
     if (isGuestMode || !scholar) return;
+
+    let isMounted = true;
+
+    // Clear state on fragment change
+    setJournalText("");
+    setPhase("drafting");
+    setSealStatus("idle");
+    setIsEditing(false);
+
     const fetchDoc = async () => {
       try {
         const docRef = doc(db, "users", scholar.uid, "grimoire", String(fragment.id));
         const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.proof_markdown) {
-            setJournalText(data.proof_markdown);
-            setPhase("conquered");
-            setSealStatus("sealed");
-          }
+        
+        if (!isMounted) return;
+
+        if (snap.exists() && snap.data().proof_markdown) {
+          setJournalText(snap.data().proof_markdown);
+          setPhase("conquered");
+          setSealStatus("sealed");
+          setIsEditing(false);
+        } else {
+          setJournalText("");
+          setPhase("drafting");
+          setSealStatus("idle");
         }
       } catch (e) {
         // Silently ignore if fails to load
       }
     };
+
     fetchDoc();
+
+    return () => {
+      isMounted = false;
+    };
   }, [fragment.id, isGuestMode, scholar]);
 
   // Scroll archive into view after commit; scroll journal into view after conquered
