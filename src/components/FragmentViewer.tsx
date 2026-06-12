@@ -14,7 +14,6 @@ import {
   XCircle,
   Star,
 } from "lucide-react";
-import integrals from "@/data/integrals.json";
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
