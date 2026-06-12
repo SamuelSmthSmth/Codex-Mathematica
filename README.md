@@ -1,48 +1,36 @@
-Welcome to the Great Library, Scholar. Step out of the noise of the world and into the quiet halls of **Codex Mathematica**.
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-You are no longer grinding casual math problems for a daily streak; you are entering a lifelong journey of mathematical decipherment and mastery.
+## Getting Started
 
-Here is your official guide to the Codex.
+First, run the development server:
 
----
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## ── THE SCHOLAR'S COVENANT ──
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### 1. The Archives (Your Dashboard)
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-When you enter the Codex, you are presented with your personal **Library Shelf**. Sitting on this dark oak wood are leather-bound volumes. Each volume represents a core discipline of calculus—such as the *Codex of Substitution*, the *Codex of Parts*, and the *Geometric Scrolls*.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-The library is organized by an ancient grading curriculum using the Greek alphabet:
+## Learn More
 
-* **Alpha ($\alpha$) Volume:** Foundational truths. Sharp, elegant, standard problems to calibrate your mind.
-* **Delta ($\delta$) Volume:** Intermediate trials. The math begins to twist here; multiple techniques begin to blend.
-* **Sigma ($\sigma$) Volume:** Advanced mastery. Intricate, heavy integrals designed to test the limits of your endurance.
-* **Gamma ($\Gamma$) Volume:** *The Anomalies*. The ultimate, mind-melting mathematical fragments discovered deep within the vault.
+To learn more about Next.js, take a look at the following resources:
 
-### 2. Deciphering a Fragment
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-Pull a volume from the shelf, and you will find it filled with unrolled papyrus fragments—individual integrals waiting to be solved.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-When you click a fragment, the library fades into the background. Lit only by candlelight, you face a weathered sheet of parchment with raw, handwritten math.
+## Deploy on Vercel
 
-Instead of guessing multiple-choice answers, you use a fluid, symbolic canvas to construct your exact algebraic proof. When your solution is flawless, a crimson wax seal drops onto the parchment: **[CONQUERED]**.
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### 3. The Ink & Quill Journal
-
-A true mathematician does not just guess an answer and run away. The moment your wax seal drops, the right-hand page of your ledger opens.
-
-Here, you dip your quill into the ink. You are given a dedicated space to **journal your thoughts, methodologies, and epiphanies**. You write down the traps you fell into, the beautiful algebraic collapses you noticed, or the exact moment a tricky trig identity saved your life.
-
-Over months of study, you aren't just increasing an arbitrary score—you are hand-authoring your personal **Grimoire**, a massive, searchable diary of your own mathematical growth.
-
-### 4. The Great Scriptorium
-
-There are no loud leaderboards or competitive matchmaking arenas here. Instead, students share their talent through **The Public Archives**.
-
-Every scholar has a public shelf. If another student visits your profile, they can pull your completed volumes off the shelf and **read your handwritten commentaries**. You earn prestige and respect within the community not by speed-running easy problems, but by writing the most breathtakingly elegant, insightful explanations for the hardest $\Gamma$-Tier integrals on Earth.
-
----
-
-Your Codex is currently being compiled, page by page, by a powerful 18-core computing engine, building a flawless curriculum of thousands of unique mathematical fragments just for you.
-
-Grab your quill, Scholar. The Library of Alexandria awaits.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
