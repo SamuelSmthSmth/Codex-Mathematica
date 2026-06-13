@@ -619,6 +619,7 @@ function SplitLedgerView({
 
   // ── Conquered IDs: fetch from Firestore when chapter opens ──
   const [conqueredIds, setConqueredIds] = useState<Set<number>>(new Set());
+  const [cachedChapterData, setCachedChapterData] = useState<Record<string, any>>({});
   const { isGuestMode } = useAuth();
   const { isFocusMode } = useTheme();
 
@@ -637,8 +638,14 @@ function SplitLedgerView({
     getDocs(q)
       .then((snap) => {
         const ids = new Set<number>();
-        snap.forEach((d) => ids.add(d.data().fragment_id as number));
+        const cache: Record<string, any> = {};
+        snap.forEach((d) => {
+          const data = d.data();
+          ids.add(data.fragment_id as number);
+          cache[data.fragment_id] = data;
+        });
         setConqueredIds(ids);
+        setCachedChapterData(cache);
       })
       .catch(() => { /* silently ignore */ });
   };
@@ -733,7 +740,14 @@ function SplitLedgerView({
           )}
 
           {activeFragment ? (
-            <ParchmentDesk key={activeFragment.id} volume={volume} chapterIndex={chapterIndex} fragment={activeFragment} />
+            <ParchmentDesk 
+              key={activeFragment.id} 
+              volume={volume} 
+              chapterIndex={chapterIndex} 
+              fragment={activeFragment}
+              cachedData={cachedChapterData[activeFragment.id]}
+              onCacheUpdate={(fragId, data) => setCachedChapterData(prev => ({ ...prev, [fragId]: data }))}
+            />
           ) : (
             <div className="hidden md:flex flex-col items-center justify-center rounded-sm transition-all duration-700 w-full h-full max-h-[600px]" style={{ border: `1px dashed ${volume.accent}30`, background: `radial-gradient(ellipse at center, ${volume.accent}0a 0%, transparent 60%)` }}>
                <Feather strokeWidth={1} style={{ width: "24px", height: "24px", color: volume.accent, opacity: 0.4 }} className="mb-4" />
@@ -866,10 +880,14 @@ function ParchmentDesk({
   volume,
   chapterIndex,
   fragment,
+  cachedData,
+  onCacheUpdate,
 }: {
   volume: Volume;
   chapterIndex: number;
   fragment: Fragment;
+  cachedData?: any;
+  onCacheUpdate: (fragId: number, data: any) => void;
 }) {
   // ── Inkwell state machine ──
   // "drafting"   → user is typing their LaTeX answer
@@ -903,6 +921,16 @@ function ParchmentDesk({
     setIsEditingAnswer(false);
 
     const fetchDoc = async () => {
+      if (cachedData) {
+        setJournalText(cachedData.proof_markdown || "");
+        setAnswer(cachedData.user_answer || "");
+        setPhase("conquered");
+        setSealStatus("sealed");
+        setIsEditing(false);
+        setIsEditingAnswer(false);
+        return;
+      }
+
       try {
         const docRef = doc(db, "users", scholar.uid, "grimoire", String(fragment.id));
         const snap = await getDoc(docRef);
@@ -911,6 +939,7 @@ function ParchmentDesk({
 
         if (snap.exists()) {
           const data = snap.data();
+          onCacheUpdate(fragment.id, data);
           setJournalText(data.proof_markdown || "");
           setAnswer(data.user_answer || "");
           setPhase("conquered");
