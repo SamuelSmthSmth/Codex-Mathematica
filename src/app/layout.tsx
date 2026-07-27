@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, IM_Fell_English } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { ProgressProvider } from "@/context/ProgressContext";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -43,13 +44,15 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} ${imFell.variable}`}>
       <body className="antialiased h-full">
         <ThemeProvider>
-          <AuthProvider>
-            <div className="print:hidden h-full">
-              {children}
-            </div>
-            <PrintableManuscript />
-            <Analytics />
-          </AuthProvider>
+          <ProgressProvider>
+            <AuthProvider>
+              <div className="print:hidden h-full">
+                {children}
+              </div>
+              <PrintableManuscript />
+              <Analytics />
+            </AuthProvider>
+          </ProgressProvider>
         </ThemeProvider>
       </body>
     </html>

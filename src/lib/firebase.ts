@@ -21,13 +21,31 @@ const firebaseConfig = {
   appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Check if Firebase is actually configured
+const isConfigured = !!firebaseConfig.apiKey;
+
 // Guard: re-use the already-initialised app on hot-reloads instead of
 // throwing "Firebase App named '[DEFAULT]' already exists".
-const app: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const app: FirebaseApp = isConfigured 
+  ? (getApps().length ? getApp() : initializeApp(firebaseConfig)) 
+  : ({} as FirebaseApp);
 
-const auth: Auth = getAuth(app);
-const db: Firestore = initializeFirestore(app, {
-  localCache: persistentLocalCache()
-});
+const auth: Auth = isConfigured 
+  ? getAuth(app) 
+  : ({ currentUser: null } as unknown as Auth);
+
+const db: Firestore = isConfigured 
+  ? initializeFirestore(app, { localCache: persistentLocalCache() }) 
+  : ({} as Firestore);
+
+// If running locally without env config, mock the auth state listener
+// so AuthContext doesn't crash trying to subscribe.
+if (!isConfigured) {
+  // @ts-ignore
+  auth.onAuthStateChanged = (callback) => {
+    callback(null);
+    return () => {};
+  };
+}
 
 export { app, auth, db };

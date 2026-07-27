@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useId, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import remarkBreaks from "remark-breaks";
@@ -9,18 +9,15 @@ import { doc, setDoc, getDoc, serverTimestamp, collection, getDocs, query, where
 import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useProgress, type SelfGrade } from "@/context/ProgressContext";
 import {
   ArrowLeft,
   ChevronRight,
   Feather,
-  ScrollText,
   CheckCheck,
   RotateCcw,
   BookMarked,
-  Flame,
-  NotebookPen,
-  Scroll,
-  Unlock,
+  Minus,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
 
@@ -876,6 +873,55 @@ function LedgerRow({
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Self-Grade Workspace (replaces old ParchmentDesk / LaTeX-input model)
+// Flow per PLAN §2:
+//   "problem"  → problem displayed, "Reveal Answer" button shown
+//   "revealed" → answer shown (animation stub), grade buttons shown
+//   "graded"   → grade recorded, credits awarded, next/retry offered
+// ─────────────────────────────────────────────────────────────────────────────
+
+type GradePhase = "problem" | "revealed" | "graded";
+
+const GRADE_OPTIONS: { grade: SelfGrade; label: string; icon: React.ReactNode; style: object }[] = [
+  {
+    grade: "correct",
+    label: "Correct",
+    icon: <CheckCheck size={14} strokeWidth={2.2} />,
+    style: {
+      color: "rgba(130,200,100,0.9)",
+      background: "rgba(80,180,50,0.08)",
+      border: "1px solid rgba(80,180,50,0.3)",
+    },
+  },
+  {
+    grade: "close",
+    label: "Close",
+    icon: <Minus size={14} strokeWidth={2.2} />,
+    style: {
+      color: "rgba(200,170,80,0.9)",
+      background: "rgba(200,150,40,0.08)",
+      border: "1px solid rgba(200,150,40,0.3)",
+    },
+  },
+  {
+    grade: "wrong",
+    label: "Incorrect",
+    icon: <RotateCcw size={14} strokeWidth={2} />,
+    style: {
+      color: "rgba(200,100,80,0.85)",
+      background: "rgba(180,70,50,0.06)",
+      border: "1px solid rgba(180,70,50,0.25)",
+    },
+  },
+];
+
+const CREDIT_MAP: Record<SelfGrade, number> = {
+  correct: 100,
+  close: 50,
+  wrong: 0,
+};
+
 function ParchmentDesk({
   volume,
   chapterIndex,
@@ -889,179 +935,95 @@ function ParchmentDesk({
   cachedData?: any;
   onCacheUpdate: (fragId: number, data: any) => void;
 }) {
-  // ── Inkwell state machine ──
-  // "drafting"   → user is typing their LaTeX answer
-  // "committed"  → answer locked; archive solution revealed
-  // "conquered"  → user declared proof sound; journal unlocked
-  type InkwellPhase = "drafting" | "committed" | "conquered";
+  type InkwellPhase = "drafting" | "committed" | "conquered"; // kept for TS compat below
 
-  const [phase, setPhase] = useState<InkwellPhase>("drafting");
-  const [answer, setAnswer] = useState("");
-  const [journalText, setJournalText] = useState("");
-  const [sealStatus, setSealStatus] = useState<"idle" | "saving" | "sealed" | "error">("idle");
-  const [isEditing, setIsEditing] = useState(false);
-  const [isEditingAnswer, setIsEditingAnswer] = useState(false);
-  const uid = useId();
+  const [gradePhase, setGradePhase] = useState<GradePhase>("problem");
+  const [chosenGrade, setChosenGrade] = useState<SelfGrade | null>(null);
+  const [isAlreadyConquered, setIsAlreadyConquered] = useState(false);
   const archiveRef = useRef<HTMLDivElement>(null);
   const { isGuestMode, scholar } = useAuth();
   const { isLightMode } = useTheme();
+  const { addCredits } = useProgress();
 
-  // ── Hydration ──
+  // ── Hydration: check if already conquered ──────────────────────────────────
   useEffect(() => {
+    setGradePhase("problem");
+    setChosenGrade(null);
+    setIsAlreadyConquered(false);
+
+    if (cachedData) {
+      setIsAlreadyConquered(true);
+      setChosenGrade((cachedData.grade as SelfGrade) ?? "correct");
+      setGradePhase("graded");
+      return;
+    }
+
     if (isGuestMode || !scholar) return;
 
     let isMounted = true;
-
-    // Clear state on fragment change
-    setAnswer("");
-    setJournalText("");
-    setPhase("drafting");
-    setSealStatus("idle");
-    setIsEditing(false);
-    setIsEditingAnswer(false);
-
     const fetchDoc = async () => {
-      if (cachedData) {
-        setJournalText(cachedData.proof_markdown || "");
-        setAnswer(cachedData.user_answer || "");
-        setPhase("conquered");
-        setSealStatus("sealed");
-        setIsEditing(false);
-        setIsEditingAnswer(false);
-        return;
-      }
-
       try {
         const docRef = doc(db, "users", scholar.uid, "grimoire", String(fragment.id));
         const snap = await getDoc(docRef);
-        
         if (!isMounted) return;
-
         if (snap.exists()) {
           const data = snap.data();
           onCacheUpdate(fragment.id, data);
-          setJournalText(data.proof_markdown || "");
-          setAnswer(data.user_answer || "");
-          setPhase("conquered");
-          setSealStatus("sealed");
-          setIsEditing(false);
-          setIsEditingAnswer(false);
-        } else {
-          setJournalText("");
-          setAnswer("");
-          setPhase("drafting");
-          setSealStatus("idle");
-          setIsEditing(false);
-          setIsEditingAnswer(false);
+          setIsAlreadyConquered(true);
+          setChosenGrade((data.grade as SelfGrade) ?? "correct");
+          setGradePhase("graded");
         }
-      } catch (e) {
-        // Silently ignore if fails to load
+      } catch {
+        // silently ignore
       }
     };
-
     fetchDoc();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [fragment.id, isGuestMode, scholar]);
 
-  // Scroll archive into view after commit; scroll journal into view after conquered
-  const journalRef = useRef<HTMLElement>(null);
+  // ── Scroll answer into view when revealed ─────────────────────────────────
   useEffect(() => {
-    if (phase === "committed" && archiveRef.current) {
-      setTimeout(() => {
-        archiveRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 350);
+    if (gradePhase === "revealed" && archiveRef.current) {
+      setTimeout(() => archiveRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 200);
     }
-    if (phase === "conquered" && journalRef.current) {
-      setTimeout(() => {
-        journalRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 400);
-    }
-  }, [phase]);
+  }, [gradePhase]);
 
-  const handleCommit = useCallback(async () => {
-    if (!answer.trim()) return;
-    if (phase === "drafting") {
-      setPhase("committed");
-    } else {
-      setIsEditingAnswer(false);
-      if (phase === "conquered" && !isGuestMode && auth.currentUser) {
-        try {
-          const docRef = doc(db, "users", auth.currentUser.uid, "grimoire", String(fragment.id));
-          await setDoc(docRef, { user_answer: answer }, { merge: true });
-          window.dispatchEvent(new Event("grimoire-updated"));
-        } catch (e) {
-          console.error("Failed to update answer:", e);
-        }
-      }
-    }
-  }, [answer, phase, isGuestMode, fragment.id]);
+  // ── Grade handler ─────────────────────────────────────────────────────────
+  const handleGrade = useCallback(async (grade: SelfGrade) => {
+    setChosenGrade(grade);
+    setGradePhase("graded");
+    addCredits(grade);
 
-  const handleConquered = useCallback(async () => {
-    if (isGuestMode || !auth.currentUser) {
-      setPhase("conquered");
-      return;
-    }
+    if (isGuestMode || !auth.currentUser) return;
     try {
       const docRef = doc(db, "users", auth.currentUser.uid, "grimoire", String(fragment.id));
       await setDoc(docRef, {
         fragment_id: fragment.id,
         volume:      volume.id,
         chapter:     chapterIndex,
-        user_answer: answer,
+        grade,
         sealed_at:   serverTimestamp(),
       }, { merge: true });
-      setPhase("conquered");
+      onCacheUpdate(fragment.id, { grade, fragment_id: fragment.id, volume: volume.id, chapter: chapterIndex });
       window.dispatchEvent(new Event("grimoire-updated"));
-    } catch (e) {
-      console.error("Failed to save true conquest:", e);
-    }
-  }, [isGuestMode, fragment.id, volume.id, chapterIndex, answer]);
-
-  const handleSeal = useCallback(async () => {
-    if (sealStatus === "saving" || sealStatus === "sealed") return;
-    setSealStatus("saving");
-
-    if (isGuestMode) {
-      // Mock save for guests
-      setTimeout(() => setSealStatus("sealed"), 800);
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
-      setSealStatus("idle");
-      return;
-    }
-    
-    try {
-      const docRef = doc(db, "users", user.uid, "grimoire", String(fragment.id));
-      await setDoc(docRef, {
-        fragment_id: fragment.id,
-        volume:      volume.id,
-        chapter:     chapterIndex,
-        proof_markdown: journalText,
-        sealed_at:   serverTimestamp(),
-      }, { merge: true });
-      setSealStatus("sealed");
-      setIsEditing(false);
-      window.dispatchEvent(new Event("grimoire-updated"));
-      // Reset the success badge after 3 s so the button is reusable
-      setTimeout(() => setSealStatus("idle"), 3000);
     } catch {
-      setSealStatus("error");
-      setTimeout(() => setSealStatus("idle"), 4000);
+      // silently ignore
     }
-  }, [sealStatus, isGuestMode, fragment.id, volume.id, chapterIndex, journalText]);
+  }, [isGuestMode, fragment.id, volume.id, chapterIndex, addCredits]);
+
+  // ── Reset ─────────────────────────────────────────────────────────────────
   const handleRetry = useCallback(() => {
-    setAnswer("");
-    setPhase("drafting");
+    setGradePhase("problem");
+    setChosenGrade(null);
+    setIsAlreadyConquered(false);
   }, []);
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Render
+  // ─────────────────────────────────────────────────────────────────────────
+
   return (
-    <div 
+    <div
       className="w-full max-w-2xl h-fit max-h-full overflow-y-auto px-2 pb-6 animate-in fade-in slide-in-from-bottom-2 duration-200 ease-out"
       style={{ scrollbarWidth: "none" }}
     >
@@ -1070,8 +1032,8 @@ function ParchmentDesk({
         style={{
           background: isLightMode ? "#fcfaf7" : "#0c0a08",
           border: isLightMode ? "1px solid #e5e7eb" : "1px solid #292524",
-          boxShadow: isLightMode 
-            ? "0 4px 12px rgba(0,0,0,0.03)" 
+          boxShadow: isLightMode
+            ? "0 4px 12px rgba(0,0,0,0.03)"
             : "0 20px 40px rgba(0,0,0,0.8), 0 4px 16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.02)",
         }}
       >
@@ -1098,16 +1060,14 @@ function ParchmentDesk({
         <div
           className="pointer-events-none absolute top-0 inset-x-0 h-24 z-0"
           style={{
-            background: isLightMode 
-              ? "linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, transparent 100%)" 
+            background: isLightMode
+              ? "linear-gradient(to bottom, rgba(255,255,255,0.8) 0%, transparent 100%)"
               : "linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 100%)",
           }}
           aria-hidden="true"
         />
 
-        <div 
-          className="relative px-8 py-10 md:px-12 md:py-12 z-10"
-        >
+        <div className="relative px-8 py-10 md:px-12 md:py-12 z-10">
           {/* Card header */}
           <div className="flex items-start justify-between mb-6">
             <div>
@@ -1133,7 +1093,7 @@ function ParchmentDesk({
 
           <GoldRule />
 
-          {/* Problem */}
+          {/* ── PROBLEM ── */}
           <section className="mt-8 mb-8" aria-label="Mathematical problem">
             <p
               className="math-box-label uppercase tracking-widest mb-5 text-stone-500"
@@ -1142,7 +1102,9 @@ function ParchmentDesk({
               Problem
             </p>
             <div
-              className={`py-12 px-6 text-center border rounded-sm transition-colors duration-300 ${isLightMode ? "bg-white border-stone-200" : "bg-black/50 border-stone-800"}`}
+              className={`math-box py-12 px-6 text-center border rounded-sm transition-colors duration-300 ${
+                isLightMode ? "bg-white border-stone-200" : "bg-black/50 border-stone-800"
+              }`}
             >
               <MathRenderer className="[&_.katex]:text-[2.2rem] [&_.katex-display]:my-0 text-stone-200">
                 {`$$\n${fragment.problem_latex}\n$$`}
@@ -1150,573 +1112,240 @@ function ParchmentDesk({
             </div>
           </section>
 
-          {/* ── Inkwell Solution Section ── */}
-          <section aria-label="Solution entry">
-            <p
-              className="math-box-label uppercase tracking-widest mb-3 text-stone-500"
-              style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem" }}
-            >
-              Your Solution
-            </p>
+          {/* ── ANSWER SECTION ── */}
+          <section aria-label="Answer reveal and grading">
 
-            {/* ── DRAFTING: textarea + live preview ── */}
-            {(phase === "drafting" || isEditingAnswer) && (
-              <>
-                {/* Dark LaTeX textarea */}
-                <div className="relative">
-                  <textarea
-                    id={`${uid}-solution`}
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleCommit();
-                    }}
-                    placeholder={"\\frac{x^2}{2} + C"}
-                    rows={3}
-                    className={`w-full px-5 py-4 text-sm leading-relaxed resize-none focus:outline-none transition-all duration-200 ${isLightMode ? "text-stone-900" : "text-stone-300"}`}
-                    style={{
-                      fontFamily: "'Courier New', Courier, monospace",
-                      background: isLightMode ? "#ffffff" : "rgba(0,0,0,0.5)",
-                      border: isLightMode ? "1px solid #e5e7eb" : "1px solid #292524",
-                      borderRadius: "2px 2px 0 0",
-                      caretColor: "#c8922a",
-                      boxShadow: isLightMode ? "none" : "inset 0 2px 8px rgba(0,0,0,0.6)",
-                    }}
-                    aria-label="LaTeX solution input"
-                  />
-                  {/* Cursor glow at bottom of textarea */}
+            {/* Phase: problem — Reveal button */}
+            {gradePhase === "problem" && (
+              <div className="flex justify-center mt-2 mb-4">
+                <button
+                  id={`reveal-${fragment.id}`}
+                  onClick={() => setGradePhase("revealed")}
+                  className="group flex items-center gap-2.5 px-8 py-3 text-xs uppercase tracking-[0.22em] transition-all duration-200 active:scale-95"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                    background: isLightMode
+                      ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)"
+                      : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)",
+                    border: isLightMode
+                      ? "1px solid rgba(200,146,42,0.5)"
+                      : "1px solid rgba(200,146,42,0.3)",
+                    borderRadius: "2px",
+                    color: isLightMode ? "#966812" : "rgba(200,146,42,0.9)",
+                    boxShadow: isLightMode
+                      ? "0 2px 5px rgba(0,0,0,0.05)"
+                      : "0 0 20px rgba(200,146,42,0.08), inset 0 1px 0 rgba(255,220,100,0.06)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)";
+                    e.currentTarget.style.borderColor = "rgba(200,146,42,0.6)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.9)";
+                    e.currentTarget.style.borderColor = isLightMode ? "rgba(200,146,42,0.5)" : "rgba(200,146,42,0.3)";
+                  }}
+                  aria-label="Reveal the answer"
+                >
+                  <BookMarked size={14} strokeWidth={1.8} />
+                  Reveal Answer
+                </button>
+              </div>
+            )}
+
+            {/* Phase: revealed or graded — show answer */}
+            {(gradePhase === "revealed" || gradePhase === "graded") && (
+              <div
+                ref={archiveRef}
+                className="overflow-hidden"
+                style={{ animation: "inkwell-unfurl 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+              >
+                {/* Divider */}
+                <div className="flex items-center gap-3 mb-5">
                   <div
-                    className="pointer-events-none absolute bottom-0 left-0 right-0 h-px"
+                    className="flex-1 h-px"
+                    style={{ background: "linear-gradient(to right, transparent, rgba(200,146,42,0.25))" }}
+                    aria-hidden="true"
+                  />
+                  <p
                     style={{
-                      background: answer.trim()
-                        ? "linear-gradient(to right, transparent, rgba(200,146,42,0.55), transparent)"
-                        : "linear-gradient(to right, transparent, rgba(80,70,55,0.3), transparent)",
-                      transition: "background 0.4s ease",
+                      fontFamily: "Georgia, serif",
+                      fontSize: "0.58rem",
+                      letterSpacing: "0.32em",
+                      color: "rgba(200,146,42,0.6)",
+                      textTransform: "uppercase",
+                      flexShrink: 0,
                     }}
+                  >
+                    The Archive&apos;s Solution
+                  </p>
+                  <div
+                    className="flex-1 h-px"
+                    style={{ background: "linear-gradient(to left, transparent, rgba(200,146,42,0.25))" }}
                     aria-hidden="true"
                   />
                 </div>
 
-                {/* Live preview — "wet ink" indentation */}
+                {/* Answer box */}
                 <div
-                  className="w-full px-5 py-4 transition-all duration-300"
+                  className="px-6 py-8 text-center mb-6"
                   style={{
-                    background: isLightMode ? "#ffffff" : "linear-gradient(to bottom, #0e0b09, #0a0806)",
-                    border: isLightMode ? "1px solid #e5e7eb" : "1px solid #292524",
-                    borderTop: "none",
-                    borderRadius: "0 0 2px 2px",
-                    boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 4px 12px rgba(0,0,0,0.5), inset 0 1px 3px rgba(0,0,0,0.8)",
-                    minHeight: "52px",
+                    background: isLightMode
+                      ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)"
+                      : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)",
+                    border: isLightMode
+                      ? "1px solid #d1d5db"
+                      : "1px solid rgba(200,146,42,0.18)",
+                    borderRadius: "2px",
+                    boxShadow: isLightMode
+                      ? "0 2px 5px rgba(0,0,0,0.05)"
+                      : "0 0 40px rgba(200,146,42,0.04), inset 0 1px 0 rgba(200,146,42,0.06)",
                   }}
-                  aria-live="polite"
-                  aria-label="Live LaTeX preview"
                 >
-                  {answer.trim() ? (
-                    <MathRenderer className="[&_.katex]:text-[1.6rem] text-stone-200/90 [&_.katex-display]:my-0 text-center">
-                      {`$$\n${answer}\n$$`}
-                    </MathRenderer>
-                  ) : (
+                  <MathRenderer className="[&_.katex]:text-3xl text-amber-100/85 [&_.katex-display]:my-0">
+                    {`$$${fragment.solution_latex}$$`}
+                  </MathRenderer>
+                  {fragment.solution_raw && (
                     <p
-                      className="italic"
+                      className="mt-3"
                       style={{
-                        fontFamily: "Georgia, serif",
-                        fontSize: "0.78rem",
-                        color: "rgba(120,105,80,0.5)",
+                        fontFamily: "'Courier New', Courier, monospace",
+                        fontSize: "0.68rem",
+                        color: "rgba(150,130,90,0.45)",
+                        letterSpacing: "0.05em",
                       }}
                     >
-                      Live preview will appear here as you write…
+                      {fragment.solution_raw}
                     </p>
                   )}
                 </div>
 
-                {/* + C disclaimer */}
-                <p
-                  className="mt-2 italic tracking-wide"
-                  style={{
-                    fontFamily: "Georgia, serif",
-                    fontSize: "0.68rem",
-                    color: "rgba(100,88,70,0.55)",
-                  }}
-                >
-                  * Constants of integration (+ C) are implied within the Archive.
-                </p>
+                {/* ── GRADING PROMPT ── */}
+                {gradePhase === "revealed" && (
+                  <div className="flex flex-col items-center gap-4">
+                    <p
+                      style={{
+                        fontFamily: "Georgia, serif",
+                        fontSize: "0.78rem",
+                        color: isLightMode ? "#78716c" : "rgba(168,155,128,0.65)",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      Did you get this right?
+                    </p>
 
-                {/* Commit button */}
-                <div className="mt-4 flex justify-end">
-                  <button
-                    id={`${uid}-commit`}
-                    onClick={handleCommit}
-                    disabled={!answer.trim()}
-                    className="group flex items-center gap-2.5 px-7 py-2.5 text-xs uppercase tracking-[0.22em] font-semibold disabled:opacity-30 disabled:cursor-not-allowed transition-transform duration-75 active:scale-95"
-                    style={{
-                      fontFamily: "Georgia, serif",
-                      background: answer.trim()
-                        ? isLightMode ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)"
-                        : isLightMode ? "#f4f0ea" : "#0a0806",
-                      border: answer.trim()
-                        ? isLightMode ? "1px solid rgba(200,146,42,0.6)" : "1px solid rgba(200,146,42,0.35)"
-                        : isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(41,37,36,0.8)",
-                      borderRadius: "2px",
-                      color: answer.trim() ? (isLightMode ? "#966812" : "rgba(200,146,42,0.9)") : (isLightMode ? "rgba(120,110,90,0.5)" : "rgba(120,110,90,0.5)"),
-                      boxShadow: answer.trim()
-                        ? isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px rgba(200,146,42,0.08), inset 0 1px 0 rgba(255,220,100,0.06)"
-                        : "none",
-                      transition: "all 0.3s ease",
-                    }}
-                    aria-label="Commit your solution"
-                  >
-                    <Flame
-                      className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110"
-                      strokeWidth={2}
-                    />
-                    Commit
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* ── COMMITTED / VERIFIED: locked answer + archive reveal ── */}
-            {((phase === "committed" || phase === "conquered") && !isEditingAnswer) && (
-              <>
-                {/* Locked answer display */}
-                <div
-                  className={`flex items-start gap-3 px-5 py-4 rounded-sm transition-colors duration-300 ${isLightMode ? "bg-white border-stone-200" : "bg-black/50 border-stone-800"}`}
-                  role="status"
-                  style={{
-                    borderWidth: "1px",
-                    borderStyle: "solid",
-                    boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 2px 8px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <ScrollText
-                    className="flex-shrink-0 mt-0.5"
-                    strokeWidth={1.5}
-                    style={{ width: "14px", height: "14px", color: "rgba(200,146,42,0.5)", marginTop: "3px" }}
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-center mb-1.5">
-                      <p
-                        style={{
-                          fontFamily: "Georgia, serif",
-                          fontSize: "0.6rem",
-                          letterSpacing: "0.25em",
-                          color: "rgba(200,146,42,0.5)",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        Committed Answer
-                      </p>
-                      {phase === "conquered" && (
+                    <div className="flex items-center gap-3">
+                      {GRADE_OPTIONS.map(({ grade, label, icon, style }) => (
                         <button
-                          onClick={() => setIsEditingAnswer(true)}
-                          className="flex items-center gap-1.5 px-2 py-0.5 text-[0.55rem] uppercase tracking-widest transition-colors duration-200"
+                          key={grade}
+                          id={`grade-${grade}-${fragment.id}`}
+                          onClick={() => handleGrade(grade)}
+                          className="flex items-center gap-2 px-5 py-2.5 rounded-sm uppercase tracking-widest transition-all duration-150 active:scale-95"
                           style={{
                             fontFamily: "Georgia, serif",
-                            color: isLightMode ? "#966812" : "rgba(200,146,42,0.6)",
-                            border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.3)",
-                            borderRadius: "2px",
-                            background: isLightMode ? "#fcfaf7" : "rgba(10,8,6,0.5)",
+                            fontSize: "0.62rem",
+                            letterSpacing: "0.15em",
+                            ...style,
                           }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)";
-                            e.currentTarget.style.borderColor = isLightMode ? "#78716c" : "rgba(200,146,42,0.55)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.6)";
-                            e.currentTarget.style.borderColor = isLightMode ? "#d1d5db" : "rgba(200,146,42,0.3)";
-                          }}
+                          aria-label={`Grade as ${label}`}
                         >
-                          <Unlock className="w-2.5 h-2.5" strokeWidth={2} />
-                          Edit Answer
+                          {icon}
+                          {label}
                         </button>
-                      )}
+                      ))}
                     </div>
-                    <MathRenderer className="[&_.katex]:text-base text-stone-300 [&_.katex-display]:my-0 text-center w-full">
-                      {`$$\n${answer}\n$$`}
-                    </MathRenderer>
                   </div>
-                </div>
+                )}
 
-                {/* Archive solution reveal */}
-                <div
-                  ref={archiveRef}
-                  className="mt-6 overflow-hidden"
-                  style={{
-                    animation: "inkwell-unfurl 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards",
-                  }}
-                >
-                  {/* Section label */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div
-                      className="flex-1 h-px"
-                      style={{ background: "linear-gradient(to right, transparent, rgba(200,146,42,0.25))" }}
-                      aria-hidden="true"
-                    />
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <BookMarked
-                        strokeWidth={1.5}
-                        style={{ width: "13px", height: "13px", color: "rgba(200,146,42,0.6)" }}
-                      />
-                      <p
-                        style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", letterSpacing: "0.32em", color: "rgba(200,146,42,0.6)", textTransform: "uppercase" }}
-                      >
-                        The Archive&apos;s Solution
-                      </p>
-                    </div>
-                    <div
-                      className="flex-1 h-px"
-                      style={{ background: "linear-gradient(to left, transparent, rgba(200,146,42,0.25))" }}
-                      aria-hidden="true"
-                    />
-                  </div>
-
-                  {/* Archive solution box */}
+                {/* ── GRADED result ── */}
+                {gradePhase === "graded" && chosenGrade !== null && (
                   <div
-                    className="px-6 py-6 text-center"
-                    style={{
-                      background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)",
-                      border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.18)",
-                      borderRadius: "2px",
-                      boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px rgba(200,146,42,0.04), inset 0 1px 0 rgba(200,146,42,0.06)",
-                    }}
+                    className="flex flex-col items-center gap-4"
+                    style={{ animation: "inkwell-unfurl 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards" }}
+                    role="status"
                   >
-                    <MathRenderer className="[&_.katex]:text-2xl text-amber-100/85 [&_.katex-display]:my-0">
-                      {`$$${fragment.solution_latex}$$`}
-                    </MathRenderer>
-                    {fragment.solution_raw && (
-                      <p
-                        className="mt-3"
-                        style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.68rem", color: "rgba(150,130,90,0.45)", letterSpacing: "0.05em" }}
+                    {/* Grade badge */}
+                    <div
+                      className="flex items-center gap-3 px-6 py-3 rounded-sm"
+                      style={{
+                        ...(GRADE_OPTIONS.find((g) => g.grade === chosenGrade)?.style ?? {}),
+                      }}
+                    >
+                      {GRADE_OPTIONS.find((g) => g.grade === chosenGrade)?.icon}
+                      <span
+                        style={{
+                          fontFamily: "Georgia, serif",
+                          fontSize: "0.72rem",
+                          letterSpacing: "0.2em",
+                          textTransform: "uppercase",
+                        }}
                       >
-                        {fragment.solution_raw}
+                        {chosenGrade === "correct" ? "Fragment Conquered" :
+                         chosenGrade === "close"   ? "Partial Credit" :
+                         "Needs More Work"}
+                      </span>
+                    </div>
+
+                    {/* Credit award */}
+                    {!isAlreadyConquered && CREDIT_MAP[chosenGrade] > 0 && (
+                      <p
+                        className="tracking-widest uppercase"
+                        style={{
+                          fontFamily: "'Courier New', monospace",
+                          fontSize: "0.68rem",
+                          color: "rgba(200,146,42,0.7)",
+                        }}
+                      >
+                        +{CREDIT_MAP[chosenGrade].toLocaleString()} Credits
                       </p>
                     )}
-                  </div>
 
-                  {/* Verdict buttons — hidden once conquered */}
-                  {phase === "committed" && (
-                    <div className="mt-6 flex items-center gap-3 justify-center">
-                      {/* Sound proof */}
+                    {/* Retry / re-grade controls */}
+                    <div className="flex items-center gap-3 mt-2">
+                      {!isAlreadyConquered && (
+                        <button
+                          id={`regrade-${fragment.id}`}
+                          onClick={() => setGradePhase("revealed")}
+                          className="flex items-center gap-2 px-4 py-2 rounded-sm uppercase tracking-widest transition-all duration-150"
+                          style={{
+                            fontFamily: "Georgia, serif",
+                            fontSize: "0.58rem",
+                            color: isLightMode ? "#78716c" : "rgba(150,138,115,0.65)",
+                            background: "transparent",
+                            border: isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(60,55,45,0.8)",
+                          }}
+                        >
+                          Re-grade
+                        </button>
+                      )}
                       <button
-                        id={`${uid}-sound`}
-                        onClick={handleConquered}
-                        className="group flex items-center gap-2.5 px-6 py-2.5 text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-200"
-                        style={{
-                          fontFamily: "Georgia, serif",
-                          background: isLightMode ? "#f4f0ea" : "linear-gradient(135deg, #0f1a0d 0%, #0a1008 100%)",
-                          border: isLightMode ? "1px solid #a3c293" : "1px solid rgba(110,180,80,0.3)",
-                          borderRadius: "2px",
-                          color: isLightMode ? "#2e5c20" : "rgba(130,200,100,0.85)",
-                          boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px rgba(100,180,60,0.06), inset 0 1px 0 rgba(150,220,100,0.05)",
-                        }}
-                        aria-label="My proof is sound"
-                      >
-                        <CheckCheck
-                          className="w-3.5 h-3.5 transition-transform duration-200 group-hover:scale-110"
-                          strokeWidth={2.5}
-                        />
-                        My Proof is Sound
-                      </button>
-
-                      {/* Retry */}
-                      <button
-                        id={`${uid}-retry`}
+                        id={`retry-${fragment.id}`}
                         onClick={handleRetry}
-                        className="group flex items-center gap-2.5 px-6 py-2.5 text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-200"
+                        className="flex items-center gap-2 px-4 py-2 rounded-sm uppercase tracking-widest transition-all duration-150"
                         style={{
                           fontFamily: "Georgia, serif",
-                          background: isLightMode ? "#fcfaf7" : "#0a0806",
-                          border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
-                          borderRadius: "2px",
-                          color: isLightMode ? "#78716c" : "rgba(150,140,120,0.6)",
+                          fontSize: "0.58rem",
+                          color: isLightMode ? "#78716c" : "rgba(150,138,115,0.65)",
+                          background: "transparent",
+                          border: isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(60,55,45,0.8)",
                         }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(200,180,140,0.9)";
-                          e.currentTarget.style.borderColor = isLightMode ? "#a8a29e" : "rgba(80,70,55,0.9)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.color = isLightMode ? "#78716c" : "rgba(150,140,120,0.6)";
-                          e.currentTarget.style.borderColor = isLightMode ? "#d1d5db" : "rgba(41,37,36,0.9)";
-                        }}
-                        aria-label="I need to retry"
                       >
-                        <RotateCcw
-                          className="w-3.5 h-3.5 transition-transform duration-300 group-hover:-rotate-180"
-                          strokeWidth={2}
-                        />
-                        I Need to Retry
+                        <RotateCcw size={11} strokeWidth={2} />
+                        Try Again
                       </button>
                     </div>
-                  )}
-
-                  {/* [CONQUERED] banner */}
-                  {phase === "conquered" && (
-                    <div
-                      className="mt-6 flex items-center justify-center gap-3 px-6 py-3"
-                      style={{
-                        background: isLightMode ? "linear-gradient(135deg, #eef5eb 0%, #e2ecd8 100%)" : "linear-gradient(135deg, #0f1a0d 0%, #0a1008 100%)",
-                        border: isLightMode ? "1px solid #a3c293" : "1px solid rgba(110,180,80,0.25)",
-                        borderRadius: "2px",
-                        boxShadow: "0 0 30px rgba(100,180,60,0.05)",
-                        animation: "inkwell-unfurl 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards",
-                      }}
-                      role="status"
-                    >
-                      <CheckCheck
-                        strokeWidth={1.8}
-                        style={{ width: "14px", height: "14px", color: isLightMode ? "#2e5c20" : "rgba(130,200,100,0.65)", flexShrink: 0 }}
-                      />
-                      <p
-                        style={{
-                          fontFamily: "Georgia, serif",
-                          fontSize: "0.68rem",
-                          letterSpacing: "0.22em",
-                          textTransform: "uppercase",
-                          color: isLightMode ? "#2e5c20" : "rgba(140,200,110,0.7)",
-                        }}
-                      >
-                        Fragment {String(fragment.id).padStart(3, "0")} &mdash; Conquered
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </>
+                  </div>
+                )}
+              </div>
             )}
           </section>
-
-          {/* ── Ink & Quill Journal — revealed on [CONQUERED] ── */}
-          {phase === "conquered" && (
-            <section
-              ref={journalRef}
-              className="mt-8 mb-2 overflow-hidden"
-              aria-label="Ink and Quill Journal"
-              style={{
-                animation: "inkwell-unfurl 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards",
-              }}
-            >
-              {/* Divider */}
-              <div className="mb-8 mt-2">
-                <GoldRule />
-              </div>
-
-              {/* Journal heading */}
-              <div className="flex items-center justify-between mb-1">
-                <div className="flex items-center gap-2.5">
-                  <NotebookPen
-                    strokeWidth={1.5}
-                    style={{ width: "13px", height: "13px", color: "rgba(200,146,42,0.45)", flexShrink: 0 }}
-                  />
-                  <p
-                    className="uppercase tracking-[0.32em]"
-                    style={{ fontFamily: "Georgia, serif", fontSize: "0.57rem", color: "rgba(200,146,42,0.45)" }}
-                  >
-                    Ink &amp; Quill Journal
-                  </p>
-                </div>
-                {sealStatus === "idle" && !isEditing && phase === "conquered" && (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-1.5 px-3 py-1 text-[0.6rem] uppercase tracking-widest transition-colors duration-200"
-                    style={{
-                      fontFamily: "Georgia, serif",
-                      color: isLightMode ? "#966812" : "rgba(200,146,42,0.6)",
-                      border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.3)",
-                      borderRadius: "2px",
-                      background: isLightMode ? "#fcfaf7" : "rgba(10,8,6,0.5)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)";
-                      e.currentTarget.style.borderColor = isLightMode ? "#78716c" : "rgba(200,146,42,0.55)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.6)";
-                      e.currentTarget.style.borderColor = isLightMode ? "#d1d5db" : "rgba(200,146,42,0.3)";
-                    }}
-                  >
-                    <Unlock className="w-3 h-3" strokeWidth={2} />
-                    Edit Proof
-                  </button>
-                )}
-              </div>
-              
-              {(!isEditing && sealStatus === "idle" && phase === "conquered") ? null : (
-                <>
-                  <p
-                    className="mb-5 italic leading-relaxed"
-                    style={{
-                      fontFamily: "Georgia, serif",
-                      fontSize: "0.8rem",
-                      color: "rgba(140,128,105,0.65)",
-                    }}
-                  >
-                    Commit your full workings. Markdown and $\LaTeX$ are supported.
-                  </p>
-
-                  {/* Textarea container */}
-                  <div className="relative">
-                    <textarea
-                      id={`${uid}-journal`}
-                      value={journalText}
-                      onChange={(e) => setJournalText(e.target.value)}
-                      placeholder={`## Proof\n\nLet $u = x^2$, so $du = 2x\\,dx$\n\n**Step 1:** ...`}
-                      rows={10}
-                      className="w-full px-5 py-5 text-[0.88rem] leading-relaxed resize-y focus:outline-none transition-colors"
-                      style={{
-                        fontFamily: "'Courier New', Courier, monospace",
-                        background: isLightMode ? "#ffffff" : "#0a0806",
-                        border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
-                        borderRadius: "2px 2px 0 0",
-                        color: isLightMode ? "#44403c" : "rgba(200,190,165,0.85)",
-                        caretColor: "#c8922a",
-                        boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 2px 8px rgba(0,0,0,0.55)",
-                      }}
-                      aria-label="Proof journal"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Live preview — parchment shadow well */}
-              <div
-                className="w-full px-6 py-5 leading-relaxed"
-                style={{
-                  background: isLightMode ? "#fdfbf7" : "#12100e",
-                  border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)",
-                  borderTop: (!isEditing && sealStatus === "idle") ? (isLightMode ? "1px solid #d1d5db" : "1px solid rgba(41,37,36,0.9)") : "none",
-                  borderRadius: (!isEditing && sealStatus === "idle") ? "2px" : "0 0 2px 2px",
-                  boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.03)" : "inset 0 4px 16px rgba(0,0,0,0.6), inset 0 1px 4px rgba(0,0,0,0.8)",
-                  minHeight: "100px",
-                  fontFamily: "Georgia, serif",
-                }}
-                aria-live="polite"
-                aria-label="Journal live preview"
-              >
-                {journalText.trim() ? (
-                  <MathRenderer
-                    className="text-stone-300/85 text-[0.9rem] leading-relaxed [&_h1]:text-amber-200/70 [&_h2]:text-amber-200/60 [&_h3]:text-stone-400/80 [&_h1]:font-normal [&_h2]:font-normal [&_h1]:tracking-wide [&_h2]:tracking-wide [&_h1]:mt-0 [&_strong]:text-stone-300 [&_em]:text-stone-400/80 [&_code]:bg-stone-900/80 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-amber-300/70 [&_blockquote]:border-l [&_blockquote]:border-stone-700 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-stone-500 [&_.katex-display]:!block [&_.katex-display]:!text-center [&_.katex-display]:!my-6 [&_.katex-display]:!w-full"
-                  >
-                    {journalText}
-                  </MathRenderer>
-                ) : (
-                  <p
-                    className="italic"
-                    style={{ fontFamily: "Georgia, serif", fontSize: "0.78rem", color: "rgba(100,88,70,0.45)" }}
-                  >
-                    Your proof will render here as you write&hellip;
-                  </p>
-                )}
-              </div>
-
-              {/* Seal Grimoire */}
-              {(!isEditing && sealStatus === "idle") ? null : (
-                <div className="mt-8 flex flex-col items-center gap-3">
-                <button
-                  id={`${uid}-seal`}
-                  onClick={handleSeal}
-                  disabled={sealStatus === "saving"}
-                  className="group relative flex items-center gap-3 px-10 py-3.5 text-xs uppercase tracking-[0.3em] font-semibold overflow-hidden disabled:cursor-not-allowed transition-transform duration-75 active:scale-95"
-                  style={{
-                    fontFamily: "Georgia, serif",
-                    background:
-                      sealStatus === "sealed"
-                        ? isLightMode ? "linear-gradient(160deg, #eef5eb 0%, #e2ecd8 100%)" : "linear-gradient(160deg, #0d1a09 0%, #091008 100%)"
-                        : sealStatus === "error"
-                          ? isLightMode ? "#fef2f2" : "linear-gradient(160deg, #1a0c09 0%, #100807 100%)"
-                          : isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #1a1208 0%, #0f0c07 100%)",
-                    border:
-                      sealStatus === "sealed"
-                        ? isLightMode ? "1px solid #a3c293" : "1px solid rgba(110,180,80,0.35)"
-                        : sealStatus === "error"
-                          ? isLightMode ? "1px solid #fecaca" : "1px solid rgba(180,70,50,0.35)"
-                          : isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.3)",
-                    borderRadius: "2px",
-                    color:
-                      sealStatus === "sealed"
-                        ? isLightMode ? "#2e5c20" : "rgba(130,200,100,0.85)"
-                        : sealStatus === "error"
-                          ? isLightMode ? "#b91c1c" : "rgba(200,90,70,0.8)"
-                          : isLightMode ? "#966812" : "rgba(200,146,42,0.75)",
-                    boxShadow:
-                      sealStatus === "sealed"
-                        ? "0 2px 5px rgba(0,0,0,0.05)"
-                        : sealStatus === "error"
-                          ? "none"
-                          : "0 0 30px rgba(200,146,42,0.06), inset 0 1px 0 rgba(255,220,100,0.05), inset 0 -1px 0 rgba(0,0,0,0.3)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (sealStatus !== "idle") return;
-                    e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)";
-                    e.currentTarget.style.borderColor = isLightMode ? "#78716c" : "rgba(200,146,42,0.55)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (sealStatus !== "idle") return;
-                    e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.75)";
-                    e.currentTarget.style.borderColor = isLightMode ? "#d1d5db" : "rgba(200,146,42,0.3)";
-                  }}
-                  aria-label={
-                    sealStatus === "saving" ? "Inking Ledger…" :
-                    sealStatus === "sealed" ? "Grimoire Sealed" :
-                    sealStatus === "error"  ? "Save failed — try again" :
-                    "Seal the grimoire"
-                  }
-                >
-                  {/* Icon / spinner */}
-                  {sealStatus === "saving" ? (
-                    <span
-                      className="inline-block w-3.5 h-3.5 rounded-full border-2 flex-shrink-0"
-                      style={{
-                        borderColor: isLightMode ? "#d1d5db" : "rgba(200,146,42,0.2)",
-                        borderTopColor: isLightMode ? "#966812" : "rgba(200,146,42,0.6)",
-                        animation: "spin 0.75s linear infinite",
-                      }}
-                      aria-hidden="true"
-                    />
-                  ) : sealStatus === "sealed" ? (
-                    <CheckCheck className="w-3.5 h-3.5 flex-shrink-0" strokeWidth={2} />
-                  ) : (
-                    <Scroll
-                      className="w-3.5 h-3.5 flex-shrink-0 transition-transform duration-300 group-hover:scale-110"
-                      strokeWidth={1.8}
-                    />
-                  )}
-
-                  {/* Label */}
-                  {sealStatus === "saving" && "Inking Ledger\u2026"}
-                  {sealStatus === "sealed" && "Grimoire Sealed"}
-                  {sealStatus === "error"  && "Ink Failed — Retry"}
-                  {sealStatus === "idle"   && (isEditing ? "Update Grimoire" : "Seal Grimoire")}
-                </button>
-
-                {/* Error sub-text */}
-                {sealStatus === "error" && (
-                  <p
-                    className="italic text-center"
-                    style={{
-                      fontFamily: "Georgia, serif",
-                      fontSize: "0.7rem",
-                      color: "rgba(180,80,60,0.7)",
-                      animation: "inkwell-unfurl 0.3s ease forwards",
-                    }}
-                    role="alert"
-                  >
-                    The Archive could not receive your proof. Check your connection and try again.
-                  </p>
-                )}
-
-                {/* Spin keyframe — scoped inline */}
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-              </div>
-              )}
-            </section>
-          )}
         </div>
 
         {/* Age stain bottom */}
         <div
           className="pointer-events-none absolute bottom-0 inset-x-0 h-20 z-0"
           style={{
-            background: isLightMode 
-              ? "linear-gradient(to top, rgba(255,255,255,0.8) 0%, transparent 100%)" 
+            background: isLightMode
+              ? "linear-gradient(to top, rgba(255,255,255,0.8) 0%, transparent 100%)"
               : "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)",
           }}
           aria-hidden="true"
@@ -1735,6 +1364,8 @@ function ParchmentDesk({
     </div>
   );
 }
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared micro-components
