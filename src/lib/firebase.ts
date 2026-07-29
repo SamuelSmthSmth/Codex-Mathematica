@@ -38,14 +38,4 @@ const db: Firestore = isConfigured
   ? initializeFirestore(app, { localCache: persistentLocalCache() }) 
   : ({} as Firestore);
 
-// If running locally without env config, mock the auth state listener
-// so AuthContext doesn't crash trying to subscribe.
-if (!isConfigured) {
-  // @ts-ignore
-  auth.onAuthStateChanged = (callback) => {
-    callback(null);
-    return () => {};
-  };
-}
-
-export { app, auth, db };
+export { app, auth, db, isConfigured };

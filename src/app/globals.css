@@ -4,6 +4,28 @@
 :root {
   --background: #0a0704;
   --foreground: #e8d5a3;
+  --codex-accent: #c8922a;
+}
+
+/* ── Theme packs (Phase 2) ──────────────────────────────────────── */
+.theme-plain-crimson {
+  --codex-accent: #9b1b30;
+}
+
+.theme-plain-neon {
+  --codex-accent: #39ff14;
+}
+
+.theme-mixtape {
+  --codex-accent: #ff6ec7;
+}
+
+.theme-diner {
+  --codex-accent: #e85d04;
+}
+
+.theme-windows-xp {
+  --codex-accent: #0078d7;
 }
 
 @theme inline {

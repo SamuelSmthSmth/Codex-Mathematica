@@ -33,6 +33,7 @@ export const metadata: Metadata = {
 };
 
 import PrintableManuscript from "@/components/PrintableManuscript";
+import ThemeSync from "@/components/ThemeSync";
 import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({
@@ -46,6 +47,7 @@ export default function RootLayout({
         <ThemeProvider>
           <ProgressProvider>
             <AuthProvider>
+              <ThemeSync />
               <div className="print:hidden h-full">
                 {children}
               </div>

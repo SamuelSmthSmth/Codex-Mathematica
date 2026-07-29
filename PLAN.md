@@ -165,21 +165,22 @@ The backend requires a robust JSON schema to feed the UI, populated via our dete
 
 ## 9. Implementation Roadmap
 
-### Phase 1: The "Antigravity" Skeleton (Minimal UI)
+### Phase 1: The "Antigravity" Skeleton (Minimal UI) ✅ COMPLETE
 
 - Build the core React components for all main areas:
-  - **Main Loop:** `<VolumeSelector/>`, `<ChapterSelector/>`, `<Workspace/>`
+  - **Main Loop:** `<VolumeSelector/>`, `<ChapterSelector/>`, `<Workspace/>` *(implemented as views inside `CodexWorkspace`)*
   - **Technique Library:** `<LibraryCarousel/>`, `<LibraryArticle/>`
   - **Storefront:** `<ShopLayout/>`, `<Inventory/>`
 - Ignore all themes, colors, and styling. Focus purely on data flow, routing, and layout skeleton.
 - Prove the navigation loop works across the Archive, Library, and Shop.
 
-### Phase 2: The Theme Engine
+### Phase 2: The Theme Engine 🔄 IN PROGRESS
 
-- Set up the global `ThemeContext`.
-- Build the conditional rendering logic (e.g., rendering `<MixtapeTheme/>` instead of `<DefaultTheme/>`).
-- Implement the CSS overrides and UI metaphors based on the sketches (CD cases, Diner menus, Windows XP folders).
-- Add the specific animations (ink reveal, typing, receipt printing).
+- [x] Set up the global `ThemeContext` with theme pack registry and CSS variable overrides
+- [x] Sync equipped Store themes via `ThemeSync`
+- [ ] Build the conditional rendering logic (e.g., rendering `<MixtapeTheme/>` instead of `<DefaultTheme/>`)
+- [ ] Implement the CSS overrides and UI metaphors based on the sketches (CD cases, Diner menus, Windows XP folders)
+- [ ] Add the specific animations (ink reveal, typing, receipt printing)
 
 ### Phase 3: Content Population & Gamification
 

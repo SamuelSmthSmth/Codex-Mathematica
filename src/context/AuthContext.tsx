@@ -40,7 +40,7 @@ import {
   signOut as firebaseSignOut,
   type User,
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, isConfigured } from "@/lib/firebase";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -130,6 +130,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isGuestMode, setIsGuestMode] = useState(false);
 
   useEffect(() => {
+    if (!isConfigured) {
+      setLoading(false);
+      return;
+    }
+
     const unsub = onAuthStateChanged(auth, (user) => {
       setScholar(user);
       setLoading(false);
@@ -202,7 +207,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     setAuthError(null);
     setIsGuestMode(false);
-    await firebaseSignOut(auth);
+    if (isConfigured) {
+      await firebaseSignOut(auth);
+    } else {
+      setScholar(null);
+    }
   }, []);
 
   return (

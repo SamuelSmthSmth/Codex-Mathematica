@@ -5,28 +5,32 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { X, User, LogOut, Check, Sun, Moon, BookOpen, Clock, EyeOff, Eye, Download, Flame, FileText } from "lucide-react";
 import { collection, getCountFromServer, getDocs, query, orderBy, writeBatch } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db, isConfigured } from "@/lib/firebase";
 
-export default function ProfilePanel() {
+interface ProfilePanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
   const { scholar, isGuestMode, signOut, updateScholarName } = useAuth();
-  const { isLightMode, toggleTheme, isFocusMode, setIsFocusMode, setPrintData } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
-  const [nameInput, setNameInput] = useState("");
+  const { isLightMode, toggleTheme, isFocusMode, setIsFocusMode, setPrintData, activeThemeName } = useTheme();
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
   const [conqueredCount, setConqueredCount] = useState<number | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
   useEffect(() => {
-    if (scholar && !isGuestMode && isOpen) {
-      getCountFromServer(collection(db, "users", scholar.uid, "grimoire"))
-        .then(snap => setConqueredCount(snap.data().count))
-        .catch(() => setConqueredCount(0));
-    }
+    if (!isConfigured || !scholar || isGuestMode || !isOpen) return;
+
+    getCountFromServer(collection(db, "users", scholar.uid, "grimoire"))
+      .then(snap => setConqueredCount(snap.data().count))
+      .catch(() => setConqueredCount(0));
   }, [scholar, isGuestMode, isOpen]);
 
   const handleExport = async () => {
-    if (!scholar) return;
+    if (!scholar || !isConfigured) return;
     try {
       const q = query(
         collection(db, "users", scholar.uid, "grimoire"),
@@ -59,7 +63,7 @@ export default function ProfilePanel() {
   };
 
   const handleExportPdf = async () => {
-    if (!scholar) return;
+    if (!scholar || !isConfigured) return;
     setIsGeneratingPdf(true);
     try {
       const q = query(
@@ -105,7 +109,7 @@ export default function ProfilePanel() {
   };
 
   const handleBurn = async () => {
-    if (!scholar) return;
+    if (!scholar || !isConfigured) return;
     const confirmed = window.confirm("Are you sure you want to burn your Grimoire? This will delete all saved proofs permanently.");
     if (!confirmed) return;
 
@@ -124,25 +128,20 @@ export default function ProfilePanel() {
     }
   };
 
-  // Sync internal input with actual display name
   useEffect(() => {
-    if (scholar?.displayName) {
-      setNameInput(scholar.displayName);
-    } else if (isGuestMode) {
-      setNameInput("Guest Scholar");
-    }
-  }, [scholar, isGuestMode, isOpen]);
+    setEditedName(scholar?.displayName ?? (isGuestMode ? "Guest Scholar" : ""));
+  }, [scholar?.displayName, isGuestMode, isOpen]);
 
   if (!scholar && !isGuestMode) return null;
 
   const handleUpdateName = async () => {
-    if (!scholar || isGuestMode || !nameInput.trim() || nameInput === scholar.displayName) return;
+    if (!scholar || isGuestMode || !editedName.trim() || editedName === scholar.displayName) return;
     setIsSavingName(true);
     try {
-      await updateScholarName(nameInput);
+      await updateScholarName(editedName);
       setNameSaved(true);
       setTimeout(() => setNameSaved(false), 2000);
-    } catch (err) {
+    } catch {
       // Ignored for now
     } finally {
       setIsSavingName(false);
@@ -158,42 +157,15 @@ export default function ProfilePanel() {
     return "Archive Scholar (Email)";
   };
 
-  const initial = scholar?.displayName?.charAt(0).toUpperCase() || (isGuestMode ? "G" : "?");
   const avatarUrl = scholar?.photoURL;
 
   return (
     <>
-      {/* ── Floating Trigger Button ── */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed top-6 right-6 z-40 w-12 h-12 rounded-full overflow-hidden flex items-center justify-center transition-transform hover:scale-105"
-        style={{
-          background: "#161009",
-          border: "1px solid rgba(200,146,42,0.3)",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.05)",
-        }}
-        aria-label="Open Profile"
-      >
-        {avatarUrl ? (
-          <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover opacity-90" />
-        ) : (
-          <span
-            style={{
-              fontFamily: "var(--font-playfair), serif",
-              fontSize: "1.3rem",
-              color: "rgba(200,146,42,0.8)",
-            }}
-          >
-            {initial}
-          </span>
-        )}
-      </button>
-
       {/* ── Backdrop ── */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -214,7 +186,7 @@ export default function ProfilePanel() {
             Scholar Profile
           </h2>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={onClose}
             className={`transition-colors ${isLightMode ? "text-stone-400 hover:text-stone-700" : "text-stone-500 hover:text-amber-200"}`}
             aria-label="Close Profile"
           >
@@ -265,8 +237,8 @@ export default function ProfilePanel() {
               <input
                 id="scholar-name"
                 type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
+                value={editedName}
+                onChange={(e) => setEditedName(e.target.value)}
                 disabled={isGuestMode || isSavingName}
                 className="flex-1 focus:outline-none"
                 style={{
@@ -285,7 +257,7 @@ export default function ProfilePanel() {
               {!isGuestMode && (
                 <button
                   onClick={handleUpdateName}
-                  disabled={isSavingName || nameInput.trim() === scholar?.displayName}
+                  disabled={isSavingName || editedName.trim() === scholar?.displayName}
                   className="px-3 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   style={{
                     background: nameSaved ? "rgba(40,140,60,0.15)" : "rgba(200,146,42,0.1)",
@@ -343,6 +315,39 @@ export default function ProfilePanel() {
                 </>
               )}
             </button>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label
+              style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "0.6rem",
+                letterSpacing: "0.2em",
+                color: "rgba(200,146,42,0.5)",
+                textTransform: "uppercase",
+              }}
+            >
+              Active Theme
+            </label>
+            <p
+              style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "0.85rem",
+                color: isLightMode ? "#44403c" : "rgba(220,205,170,0.9)",
+              }}
+            >
+              {activeThemeName}
+            </p>
+            <p
+              className="italic"
+              style={{
+                fontFamily: "Georgia, serif",
+                fontSize: "0.65rem",
+                color: isLightMode ? "#a8a29e" : "rgba(160,148,125,0.65)",
+              }}
+            >
+              Equip themes in the Store to change the Archive aesthetic.
+            </p>
           </div>
 
           {/* Archive Statistics */}
@@ -465,7 +470,7 @@ export default function ProfilePanel() {
         <div className="pt-6 border-t border-stone-800">
           <button
             onClick={() => {
-              setIsOpen(false);
+              onClose();
               signOut();
             }}
             className="w-full flex items-center justify-center gap-2 py-3 uppercase tracking-[0.15em] transition-colors duration-200 hover:bg-red-950/20 hover:text-red-400"

@@ -122,6 +122,7 @@ export default function Home() {
   const { scholar, loading, isGuestMode } = useAuth();
   const [activeArea, setActiveArea]       = useState<AppArea>("archive");
   const [isShopOpen,   setIsShopOpen]     = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const handleOpenShop = () => {
     setIsShopOpen(true);
@@ -148,10 +149,11 @@ export default function Home() {
       {/* ── Top Navigation ── */}
       <TopNav
         isShopOpen={isShopOpen}
-        isProfileOpen={false}
+        isProfileOpen={isProfileOpen}
         onOpenShop={handleOpenShop}
         onCloseShop={handleCloseShop}
-        onOpenProfile={() => {}}
+        onOpenProfile={() => setIsProfileOpen(true)}
+        onCloseProfile={() => setIsProfileOpen(false)}
         avatarUrl={scholar?.photoURL ?? null}
         avatarInitial={avatarInitial}
         activeArea={activeArea}
@@ -180,7 +182,10 @@ export default function Home() {
       </div>
 
       {/* ── Profile Panel ── */}
-      <ProfilePanel />
+      <ProfilePanel
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
 
       {/* ── Auth Gate ── */}
       {!loading && !scholar && !isGuestMode && <ScholarGate />}

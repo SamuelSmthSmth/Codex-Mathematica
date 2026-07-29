@@ -11,7 +11,7 @@
  * The nav sits at z-50 to overlay all content.
  */
 
-import { ShoppingBag, X, User } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 interface TopNavProps {
@@ -20,6 +20,7 @@ interface TopNavProps {
   onOpenShop: () => void;
   onCloseShop: () => void;
   onOpenProfile: () => void;
+  onCloseProfile: () => void;
   avatarUrl?: string | null;
   avatarInitial?: string;
   /** The active app area — used to hide nav icons in the Archive workspace if desired */
@@ -32,6 +33,7 @@ export default function TopNav({
   onOpenShop,
   onCloseShop,
   onOpenProfile,
+  onCloseProfile,
   avatarUrl,
   avatarInitial = "?",
 }: TopNavProps) {
@@ -84,13 +86,19 @@ export default function TopNav({
       {/* ── Avatar / Profile ── */}
       <button
         id="nav-profile-btn"
-        onClick={onOpenProfile}
+        onClick={isProfileOpen ? onCloseProfile : onOpenProfile}
         className={`${btnBase} pointer-events-auto hover:scale-105 overflow-hidden`}
         style={btnStyle}
-        aria-label="Open profile"
+        aria-label={isProfileOpen ? "Close profile" : "Open profile"}
         aria-expanded={isProfileOpen}
       >
-        {avatarUrl ? (
+        {isProfileOpen ? (
+          <X
+            size={18}
+            strokeWidth={1.8}
+            style={{ color: isLightMode ? "#78716c" : "rgba(200,146,42,0.8)" }}
+          />
+        ) : avatarUrl ? (
           <img
             src={avatarUrl}
             alt="Avatar"
