@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from "react";
+import { useProgress } from "./ProgressContext";
 import {
   type ThemePackId,
   THEME_PACKS,
@@ -24,6 +25,9 @@ interface ThemeContextValue {
   activeThemeId: ThemePackId;
   setActiveThemeId: (id: ThemePackId) => void;
   activeThemeName: string;
+  activeTheme: string;
+  activeAnimation: string | null;
+  activePalette: string | null;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -40,6 +44,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setActiveThemeIdState(id);
     localStorage.setItem(LS_THEME_PACK, id);
   }, []);
+
+  const { equippedItems } = useProgress();
+
+  const activeTheme = equippedItems["themes"] || "theme-default";
+  const activeAnimation = equippedItems["animations"] || null;
+  const activePalette = equippedItems["palettes"] || null;
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("codex_theme");
@@ -70,6 +80,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Apply CSS classes / data attributes globally
   useEffect(() => {
     const root = document.documentElement;
     if (isLightMode) {
@@ -77,7 +88,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } else {
       root.classList.remove("theme-light");
     }
-  }, [isLightMode]);
+
+    root.setAttribute("data-theme", activeTheme);
+    if (activePalette) root.setAttribute("data-palette", activePalette);
+    else root.removeAttribute("data-palette");
+  }, [isLightMode, activeTheme, activePalette]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -103,6 +118,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         activeThemeId,
         setActiveThemeId,
         activeThemeName,
+        activeTheme,
+        activeAnimation,
+        activePalette
       }}
     >
       {children}

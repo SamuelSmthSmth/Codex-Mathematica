@@ -3,20 +3,17 @@
 /**
  * src/context/ProgressContext.tsx
  *
- * Tracks the user's gamified progress:
- *   - credits       → large-number currency earned by grading fragments
- *   - addCredits()  → award credits after a self-grade event
- *   - ownedItems    → set of shop item IDs the user has purchased
- *   - buyItem()     → spend credits and add to owned set
- *   - equippedItems → map of category → equipped item ID
- *   - equipItem()   → equip an owned item
+ * Offline-first, single save-file architecture (CrossCode-style).
+ * One JSON blob ("CodexSave") is the source of truth for all progress.
+ * It lives in localStorage under SAVE_KEY and is synced to Firestore
+ * as a single document at users/{uid}/saveFile.
  *
- * All state is persisted to localStorage. Firebase sync comes in Phase 4.
- *
- * Credit awards (from PLAN §4):
- *   - "correct"  → 100 credits
- *   - "close"    → 50 credits  (partial credit)
- *   - "wrong"    → 0 credits
+ * Schema:
+ *   credits           – total accumulated credits
+ *   ownedItems        – array of purchased shop item IDs
+ *   equippedItems     – map of category → equipped item ID
+ *   solvedPerVolume   – map of volume ID → total solved count (for achievements)
+ *   grimoire          – map of fragmentId → { grade, volume, chapter }
  */
 
 import {
@@ -25,6 +22,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 
@@ -40,28 +38,115 @@ export const CREDIT_AWARDS: Record<SelfGrade, number> = {
   wrong: 0,
 };
 
-export interface ProgressContextValue {
-  /** Current credit balance. */
+export interface GrimoireEntry {
+  grade: SelfGrade;
+  volume: string;
+  chapter: number;
+  savedAt: string; // ISO timestamp
+}
+
+export interface CodexSave {
+  version: 1;
+  savedAt: string;
   credits: number;
-  /** Award credits for a self-grade result. */
-  addCredits: (grade: SelfGrade) => void;
-  /** IDs of items the user has purchased. */
-  ownedItems: Set<string>;
-  /** Buy a shop item (deducts credits). Returns false if insufficient funds. */
-  buyItem: (itemId: string, price: number) => boolean;
-  /** Map of shopCategory → equipped item ID. */
+  ownedItems: string[];
   equippedItems: Record<string, string>;
-  /** Equip an owned item (must be in ownedItems). */
+  solvedPerVolume: Record<string, number>;
+  grimoire: Record<string, GrimoireEntry>; // key = String(fragmentId)
+}
+
+export interface ProgressContextValue {
+  // ── Economy ──────────────────────────────────────────────────────────────
+  credits: number;
+  addCredits: (grade: SelfGrade) => void;
+
+  // ── Shop ─────────────────────────────────────────────────────────────────
+  ownedItems: Set<string>;
+  buyItem: (itemId: string, price: number) => boolean;
+  equippedItems: Record<string, string>;
   equipItem: (category: string, itemId: string) => void;
+
+  // ── Achievements ─────────────────────────────────────────────────────────
+  solvedPerVolume: Record<string, number>;
+  recordSolve: (volumeId: string) => void;
+  isAchievementUnlocked: (achievementItemId: string) => boolean;
+
+  // ── Grimoire (local fragment grades) ─────────────────────────────────────
+  grimoire: Record<string, GrimoireEntry>;
+  saveGrimoireEntry: (
+    fragmentId: number,
+    grade: SelfGrade,
+    volume: string,
+    chapter: number
+  ) => void;
+  getGrimoireGrade: (fragmentId: number) => SelfGrade | null;
+
+  // ── Save file management ──────────────────────────────────────────────────
+  exportSave: () => string;
+  importSave: (json: string) => boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// localStorage keys
+// Save key + helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-const LS_CREDITS   = "codex_credits";
-const LS_OWNED     = "codex_owned_items";
-const LS_EQUIPPED  = "codex_equipped_items";
+const SAVE_KEY = "codex_save_v1";
+
+function buildDefaultSave(): CodexSave {
+  return {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    credits: 0,
+    ownedItems: [],
+    equippedItems: {},
+    solvedPerVolume: {},
+    grimoire: {},
+  };
+}
+
+function loadSave(): CodexSave {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return buildDefaultSave();
+    const parsed = JSON.parse(raw) as Partial<CodexSave>;
+    // Migrate from old multi-key schema if needed
+    if (!parsed.version) {
+      const migrated = buildDefaultSave();
+      try {
+        const oldCredits = localStorage.getItem("codex_credits");
+        if (oldCredits) migrated.credits = Number(oldCredits);
+        const oldOwned = localStorage.getItem("codex_owned_items");
+        if (oldOwned) migrated.ownedItems = JSON.parse(oldOwned);
+        const oldEquipped = localStorage.getItem("codex_equipped_items");
+        if (oldEquipped) migrated.equippedItems = JSON.parse(oldEquipped);
+        const oldSolved = localStorage.getItem("codex_solved_per_volume");
+        if (oldSolved) migrated.solvedPerVolume = JSON.parse(oldSolved);
+      } catch { /* ignore migration errors */ }
+      return migrated;
+    }
+    return { ...buildDefaultSave(), ...parsed };
+  } catch {
+    return buildDefaultSave();
+  }
+}
+
+function persistSave(save: CodexSave) {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...save, savedAt: new Date().toISOString() }));
+  } catch { /* storage full or unavailable */ }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Achievement predicates
+// ─────────────────────────────────────────────────────────────────────────────
+
+type AchievementPredicate = (save: CodexSave) => boolean;
+
+const ACHIEVEMENT_RULES: Record<string, AchievementPredicate> = {
+  "banner-limits-master": (s) => (s.solvedPerVolume["alpha"] ?? 0) >= 100,
+  "banner-integrator":    (s) => (s.solvedPerVolume["gamma"] ?? 0) >= 100,
+  "banner-whale":         (s) => s.ownedItems.length >= 5,
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Context
@@ -74,70 +159,159 @@ const ProgressContext = createContext<ProgressContextValue | null>(null);
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
-  const [credits, setCredits] = useState(0);
-  const [ownedItems, setOwnedItems] = useState<Set<string>>(new Set());
-  const [equippedItems, setEquippedItems] = useState<Record<string, string>>({});
+  const [save, setSave] = useState<CodexSave>(buildDefaultSave);
 
-  // ── Hydrate from localStorage ─────────────────────────────────────────────
+  // Derived convenience state
+  const ownedItems      = new Set(save.ownedItems);
+  const equippedItems   = save.equippedItems;
+  const credits         = save.credits;
+  const solvedPerVolume = save.solvedPerVolume;
+  const grimoire        = save.grimoire;
+
+  // ── Hydrate ───────────────────────────────────────────────────────────────
   useEffect(() => {
-    try {
-      const savedCredits = localStorage.getItem(LS_CREDITS);
-      if (savedCredits !== null) setCredits(Number(savedCredits));
-
-      const savedOwned = localStorage.getItem(LS_OWNED);
-      if (savedOwned) setOwnedItems(new Set(JSON.parse(savedOwned) as string[]));
-
-      const savedEquipped = localStorage.getItem(LS_EQUIPPED);
-      if (savedEquipped) setEquippedItems(JSON.parse(savedEquipped));
-    } catch {
-      // Silently ignore parse errors — start fresh
-    }
+    const loaded = loadSave();
+    setSave(loaded);
   }, []);
 
-  // ── Persist credits ───────────────────────────────────────────────────────
+  // ── Persist on every change ───────────────────────────────────────────────
+  // Use a ref to avoid persisting the initial default before hydration
+  const isHydrated = useRef(false);
   useEffect(() => {
-    localStorage.setItem(LS_CREDITS, String(credits));
-  }, [credits]);
+    if (!isHydrated.current) {
+      isHydrated.current = true;
+      return;
+    }
+    persistSave(save);
+  }, [save]);
 
-  // ── Persist owned items ───────────────────────────────────────────────────
-  useEffect(() => {
-    localStorage.setItem(LS_OWNED, JSON.stringify([...ownedItems]));
-  }, [ownedItems]);
-
-  // ── Persist equipped items ────────────────────────────────────────────────
-  useEffect(() => {
-    localStorage.setItem(LS_EQUIPPED, JSON.stringify(equippedItems));
-  }, [equippedItems]);
+  // ── Updater helper ────────────────────────────────────────────────────────
+  const updateSave = useCallback((updater: (prev: CodexSave) => CodexSave) => {
+    setSave(updater);
+  }, []);
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
   const addCredits = useCallback((grade: SelfGrade) => {
     const amount = CREDIT_AWARDS[grade];
     if (amount > 0) {
-      setCredits((prev) => prev + amount);
+      updateSave((prev) => ({ ...prev, credits: prev.credits + amount }));
     }
-  }, []);
+  }, [updateSave]);
 
   const buyItem = useCallback((itemId: string, price: number): boolean => {
     let success = false;
-    setCredits((prev) => {
-      if (prev < price) return prev;
+    updateSave((prev) => {
+      if (prev.credits < price || prev.ownedItems.includes(itemId)) return prev;
       success = true;
-      return prev - price;
+      return {
+        ...prev,
+        credits: prev.credits - price,
+        ownedItems: [...prev.ownedItems, itemId],
+      };
     });
-    if (success) {
-      setOwnedItems((prev) => new Set([...prev, itemId]));
-    }
     return success;
-  }, []);
+  }, [updateSave]);
 
   const equipItem = useCallback((category: string, itemId: string) => {
-    setEquippedItems((prev) => ({ ...prev, [category]: itemId }));
-  }, []);
+    updateSave((prev) => ({
+      ...prev,
+      equippedItems: { ...prev.equippedItems, [category]: itemId },
+    }));
+  }, [updateSave]);
+
+  const recordSolve = useCallback((volumeId: string) => {
+    updateSave((prev) => ({
+      ...prev,
+      solvedPerVolume: {
+        ...prev.solvedPerVolume,
+        [volumeId]: (prev.solvedPerVolume[volumeId] ?? 0) + 1,
+      },
+    }));
+  }, [updateSave]);
+
+  const isAchievementUnlocked = useCallback(
+    (achievementItemId: string): boolean => {
+      const predicate = ACHIEVEMENT_RULES[achievementItemId];
+      if (!predicate) return false;
+      return predicate(save);
+    },
+    [save]
+  );
+
+  const saveGrimoireEntry = useCallback(
+    (fragmentId: number, grade: SelfGrade, volume: string, chapter: number) => {
+      const key = String(fragmentId);
+      updateSave((prev) => ({
+        ...prev,
+        grimoire: {
+          ...prev.grimoire,
+          [key]: { grade, volume, chapter, savedAt: new Date().toISOString() },
+        },
+      }));
+    },
+    [updateSave]
+  );
+
+  const getGrimoireGrade = useCallback(
+    (fragmentId: number): SelfGrade | null => {
+      return grimoire[String(fragmentId)]?.grade ?? null;
+    },
+    [grimoire]
+  );
+
+  // ── Save file I/O ─────────────────────────────────────────────────────────
+
+  const exportSave = useCallback((): string => {
+    return JSON.stringify({ ...save, savedAt: new Date().toISOString() }, null, 2);
+  }, [save]);
+
+  const importSave = useCallback((json: string): boolean => {
+    try {
+      const parsed = JSON.parse(json) as Partial<CodexSave>;
+      if (parsed.version !== 1) return false;
+      const merged: CodexSave = {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        // Take the maximum credit balance (never lose progress)
+        credits: Math.max(save.credits, parsed.credits ?? 0),
+        // Union of owned items
+        ownedItems: [...new Set([...save.ownedItems, ...(parsed.ownedItems ?? [])])],
+        // Prefer imported equipped items
+        equippedItems: { ...save.equippedItems, ...(parsed.equippedItems ?? {}) },
+        // Take max solve counts per volume
+        solvedPerVolume: { ...save.solvedPerVolume },
+        // Union of grimoire entries (imported wins on conflicts)
+        grimoire: { ...save.grimoire, ...(parsed.grimoire ?? {}) },
+      };
+      for (const [vol, count] of Object.entries(parsed.solvedPerVolume ?? {})) {
+        merged.solvedPerVolume[vol] = Math.max(merged.solvedPerVolume[vol] ?? 0, count);
+      }
+      setSave(merged);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [save]);
 
   return (
     <ProgressContext.Provider
-      value={{ credits, addCredits, ownedItems, buyItem, equippedItems, equipItem }}
+      value={{
+        credits,
+        addCredits,
+        ownedItems,
+        buyItem,
+        equippedItems,
+        equipItem,
+        solvedPerVolume,
+        recordSolve,
+        isAchievementUnlocked,
+        grimoire,
+        saveGrimoireEntry,
+        getGrimoireGrade,
+        exportSave,
+        importSave,
+      }}
     >
       {children}
     </ProgressContext.Provider>

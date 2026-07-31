@@ -44,8 +44,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${imFell.variable}`}>
       <body className="antialiased h-full">
-        <ThemeProvider>
-          <ProgressProvider>
+        <ProgressProvider>
+          <ThemeProvider>
             <AuthProvider>
               <ThemeSync />
               <div className="print:hidden h-full">
@@ -54,8 +54,8 @@ export default function RootLayout({
               <PrintableManuscript />
               <Analytics />
             </AuthProvider>
-          </ProgressProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </ProgressProvider>
       </body>
     </html>
   );

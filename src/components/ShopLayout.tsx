@@ -38,11 +38,12 @@ const RANK_LABELS: Record<number, { label: string; color: string }> = {
 
 function ShopItemCard({ item }: { item: ShopItem }) {
   const { isLightMode } = useTheme();
-  const { credits, buyItem, ownedItems } = useProgress();
+  const { credits, buyItem, ownedItems, isAchievementUnlocked } = useProgress();
 
   const isOwned = ownedItems.has(item.id);
   const canAfford = credits >= item.price;
-  const isLocked = !!item.achievementLocked;
+  // Achievement-locked items become unlockable once their predicate is satisfied
+  const isLocked = !!item.achievementLocked && !isAchievementUnlocked(item.id);
   const rank = item.rank;
 
   const handleBuy = () => {
