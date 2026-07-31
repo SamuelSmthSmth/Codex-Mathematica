@@ -1,0 +1,97 @@
+{
+  "volume": "alpha",
+  "chapter": 1,
+  "theme": "Indeterminate Forms & L'Hôpital",
+  "fragments": [
+    {
+      "id": 21,
+      "original_id": "LIM_021",
+      "problem_latex": "\\lim_{x \\to 0} \\frac{e^x - e^{-x}}{\\sin x}",
+      "solution_latex": "2",
+      "difficulty": "Medium",
+      "difficulty_rank": 21,
+      "exploit_type": "LHopital"
+    },
+    {
+      "id": 22,
+      "original_id": "LIM_022",
+      "problem_latex": "\\lim_{x \\to 0^+} x^x",
+      "solution_latex": "1",
+      "difficulty": "Medium",
+      "difficulty_rank": 22,
+      "exploit_type": "Euler_Number"
+    },
+    {
+      "id": 23,
+      "original_id": "LIM_023",
+      "problem_latex": "\\lim_{x \\to \\infty} \\frac{x^3}{e^x}",
+      "solution_latex": "0",
+      "difficulty": "Medium",
+      "difficulty_rank": 23,
+      "exploit_type": "LHopital"
+    },
+    {
+      "id": 24,
+      "original_id": "LIM_024",
+      "problem_latex": "\\lim_{x \\to 0} \\frac{\\ln(1 + x)}{x}",
+      "solution_latex": "1",
+      "difficulty": "Easy",
+      "difficulty_rank": 24,
+      "exploit_type": "Standard_Limit"
+    },
+    {
+      "id": 25,
+      "original_id": "LIM_025",
+      "problem_latex": "\\lim_{x \\to 0} \\frac{a^x - 1}{x}",
+      "solution_latex": "\\ln a",
+      "difficulty": "Medium",
+      "difficulty_rank": 25,
+      "exploit_type": "Standard_Limit"
+    },
+    {
+      "id": 26,
+      "original_id": "LIM_026",
+      "problem_latex": "\\lim_{x \\to \\infty} \\left(x - x^2 \\ln\\!\\left(1 + \\tfrac{1}{x}\\right)\\right)",
+      "solution_latex": "\\dfrac{1}{2}",
+      "difficulty": "Hard",
+      "difficulty_rank": 26,
+      "exploit_type": "Taylor_Trap"
+    },
+    {
+      "id": 27,
+      "original_id": "LIM_027",
+      "problem_latex": "\\lim_{x \\to 0} \\frac{\\sin x - x\\cos x}{x^3}",
+      "solution_latex": "\\dfrac{1}{3}",
+      "difficulty": "Hard",
+      "difficulty_rank": 27,
+      "exploit_type": "Taylor_Trap"
+    },
+    {
+      "id": 28,
+      "original_id": "LIM_028",
+      "problem_latex": "\\lim_{x \\to 0^+} (\\sin x)^{\\tan x}",
+      "solution_latex": "1",
+      "difficulty": "Hard",
+      "difficulty_rank": 28,
+      "exploit_type": "Euler_Number"
+    },
+    {
+      "id": 29,
+      "original_id": "LIM_029",
+      "problem_latex": "\\lim_{x \\to 1} \\frac{x^x - x}{x - 1 - \\ln x}",
+      "solution_latex": "2",
+      "difficulty": "Hard",
+      "difficulty_rank": 29,
+      "exploit_type": "LHopital"
+    },
+    {
+      "id": 30,
+      "original_id": "LIM_030",
+      "problem_latex": "\\lim_{x \\to 0} \\left(\\frac{1}{x^2} - \\frac{1}{\\sin^2 x}\\right)",
+      "solution_latex": "-\\dfrac{1}{3}",
+      "difficulty": "Hard",
+      "difficulty_rank": 30,
+      "exploit_type": "Taylor_Trap"
+    }
+  ]
+}

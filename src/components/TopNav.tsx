@@ -11,7 +11,7 @@
  * The nav sits at z-50 to overlay all content.
  */
 
-import { ShoppingBag, X } from "lucide-react";
+import { ShoppingBag, X, User } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 
 interface TopNavProps {

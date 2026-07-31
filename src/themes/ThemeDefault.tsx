@@ -424,7 +424,7 @@ function LedgerRow({ fragment, volume, isActive, grade, onSelect }: { fragment: 
         <div className="flex items-center gap-4 px-3 py-3">
           <span className="flex-shrink-0 tabular-nums" style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.7rem", color: volume.accent, opacity: isHighlighted ? 1 : 0.6, width: "2.2rem", textAlign: "right", transition: "opacity 0.2s ease" }}>{pad3(fragment.id)}</span>
           <div className="flex-shrink-0" style={{ width: "1px", height: "22px", background: isActive ? `${volume.accent}50` : "rgba(255,255,255,0.07)", transition: "background 0.2s ease" }} />
-          <span className="flex-1 min-w-0 truncate" style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.75rem", color: isHighlighted ? (isLightMode ? "#78716c" : "rgba(220,200,160,0.95)") : (isLightMode ? "#a8a29e" : "rgba(180,160,120,0.65)"), transition: "color 0.2s ease" }}>{fragment.problem_raw}</span>
+          <span className="flex-1 min-w-0 truncate" style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.75rem", color: isHighlighted ? (isLightMode ? "#78716c" : "rgba(220,200,160,0.95)") : (isLightMode ? "#a8a29e" : "rgba(180,160,120,0.65)"), transition: "color 0.2s ease" }}>{fragment.problem_latex}</span>
           {indicator && (
             <span
               className="flex-shrink-0"
@@ -540,9 +540,7 @@ function ParchmentDesk({ volume, chapterIndex, fragment }: { volume: Volume; cha
                 </div>
                 <div className="px-6 py-8 text-center mb-6" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.18)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px rgba(200,146,42,0.04), inset 0 1px 0 rgba(200,146,42,0.06)" }}>
                   <MathRenderer className="[&_.katex]:text-3xl text-amber-100/85 [&_.katex-display]:my-0">{`$$${fragment.solution_latex}$$`}</MathRenderer>
-                  {fragment.solution_raw && (
-                    <p className="mt-3" style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.68rem", color: "rgba(150,130,90,0.45)", letterSpacing: "0.05em" }}>{fragment.solution_raw}</p>
-                  )}
+                    <p className="mt-3" style={{ fontFamily: "'Courier New', Courier, monospace", fontSize: "0.68rem", color: "rgba(150,130,90,0.45)", letterSpacing: "0.05em" }}>{fragment.solution_latex}</p>
                 </div>
 
                 {gradePhase === "revealed" && (
@@ -586,7 +584,7 @@ function ParchmentDesk({ volume, chapterIndex, fragment }: { volume: Volume; cha
         <div className="pointer-events-none absolute bottom-0 inset-x-0 h-20 z-0" style={{ background: isLightMode ? "linear-gradient(to top, rgba(255,255,255,0.8) 0%, transparent 100%)" : "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)" }} aria-hidden="true" />
       </article>
       <footer className="flex-shrink-0 text-center pb-8 animate-in fade-in duration-700 delay-300">
-        <p className="italic opacity-30 px-4 whitespace-normal break-words" style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: "#c8922a", letterSpacing: "0.05em" }}>&ldquo;{fragment.problem_raw}&rdquo;</p>
+        <p className="italic opacity-30 px-4 whitespace-normal break-words" style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem", color: "#c8922a", letterSpacing: "0.05em" }}>&ldquo;{fragment.problem_latex}&rdquo;</p>
       </footer>
     </div>
   );

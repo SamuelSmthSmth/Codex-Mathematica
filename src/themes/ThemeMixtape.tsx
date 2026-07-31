@@ -268,7 +268,7 @@ function MixtapeWorkspace({ volume, chapterIndex, activeFragment, onSelectFragme
                     {idx + 1}.
                   </div>
                   <div className={`flex-1 font-mono text-xs truncate ${isActive ? "text-stone-900 font-bold" : "text-stone-500"}`}>
-                    {frag.problem_raw}
+                    {frag.problem_latex}
                   </div>
                   {isConquered && <CheckCheck size={14} className="text-green-500" />}
                 </button>

@@ -525,7 +525,7 @@ export default function PrintableManuscript() {
                             }}>Problem</p>
                             <div style={{ fontSize: "10.5pt" }}>
                               <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                {fragmentData.problem_raw}
+                                {fragmentData.problem_latex}
                               </ReactMarkdown>
                             </div>
                           </div>
@@ -537,7 +537,7 @@ export default function PrintableManuscript() {
                             </p>
                             <div style={{ fontSize: "10pt", color: "#5a4a3a", fontStyle: "italic" }}>
                               <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                                {fragmentData.solution_raw}
+                                {fragmentData.solution_latex}
                               </ReactMarkdown>
                             </div>
                           </div>

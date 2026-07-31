@@ -70,9 +70,7 @@ export default function FragmentViewer({ fragment }: { fragment: Fragment }) {
   const handleSubmit = useCallback(() => {
     // Naïve check: trim whitespace and compare raw strings
     const trimmed = proof.trim().replace(/\s+/g, "");
-    const correct =
-      trimmed === fragment.solution_raw.replace(/\s+/g, "") ||
-      trimmed === fragment.solution_latex.replace(/\s+/g, "");
+    const correct = trimmed === fragment.solution_latex.replace(/\s+/g, "");
     setIsCorrect(correct);
     setSubmitted(true);
   }, [proof, fragment]);

@@ -1,28 +1,28 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Codex Mathematica — Data Module
-// All fragment problem banks, chapter definitions, and volume manifest.
+//
+// Architecture: each chapter is an individual JSON file living at:
+//   src/data/volumes/<volume-id>/chapter-NN.json
+//
+// To add a new chapter, just drop a new chapter-NN.json into the right folder.
+// No code changes required — the volume manifest below handles the rest.
 // ─────────────────────────────────────────────────────────────────────────────
-
-import alphaData from "./alpha.json";
-import deltaData from "./delta.json";
-import sigmaData from "./sigma.json";
-import gammaData from "./gamma.json";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface Fragment {
   id: number;
-  original_id: string; // The ID from july_dataset (e.g. "INT_0320")
+  /** Original dataset ID, e.g. "LIM_042" */
+  original_id: string;
   problem_latex: string;
   solution_latex: string;
-  problem_raw: string; // For the ledger display, we might want to just render latex directly in the future, but raw helps for search
-  solution_raw: string;
   difficulty_rank: number;
-  difficulty: string;
+  difficulty: "Easy" | "Medium" | "Hard";
   exploit_type: string;
 }
 
 export interface Chapter {
+  /** Display name shown in the Table of Contents */
   theme: string;
   fragments: Fragment[];
 }
@@ -41,13 +41,31 @@ export interface Volume {
   readonly chapters: Chapter[];
 }
 
-// ── Internal helpers ──────────────────────────────────────────────────────────
+// ── Chapter imports ───────────────────────────────────────────────────────────
+// Next.js / Webpack cannot do truly dynamic imports at build time, so we list
+// every chapter file here. To add a new chapter simply:
+//   1. Create the JSON in the right folder
+//   2. Import it below and push it into the relevant array
 
-// Extract the fragments from a JSON chapter and ensure it's strongly typed
-function parseChapter(jsonChapter: any): Chapter {
+// Alpha (Limits)
+import alphaC01 from "./volumes/alpha/chapter-01.json";
+import alphaC02 from "./volumes/alpha/chapter-02.json";
+
+// Delta (Derivatives)
+import deltaC01 from "./volumes/delta/chapter-01.json";
+
+// Sigma (Series)
+import sigmaC01 from "./volumes/sigma/chapter-01.json";
+
+// Gamma (Integrals)
+import gammaC01 from "./volumes/gamma/chapter-01.json";
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function parseChapter(raw: any): Chapter {
   return {
-    theme: jsonChapter.theme || "Nameless Chapter",
-    fragments: jsonChapter.fragments as Fragment[],
+    theme: raw.theme ?? "Nameless Chapter",
+    fragments: (raw.fragments ?? []) as Fragment[],
   };
 }
 
@@ -64,7 +82,7 @@ export const VOLUMES: Volume[] = [
     leather: "#2d1008",
     accent: "#c8922a",
     bookText: "#f4d260",
-    chapters: alphaData.chapters.map((ch: any) => parseChapter(ch)),
+    chapters: [alphaC01, alphaC02].map(parseChapter),
   },
   {
     id: "delta",
@@ -74,7 +92,7 @@ export const VOLUMES: Volume[] = [
     leather: "#0b1e0e",
     accent: "#4aaa6c",
     bookText: "#a8e6c0",
-    chapters: deltaData.chapters.map((ch: any) => parseChapter(ch)),
+    chapters: [deltaC01].map(parseChapter),
   },
   {
     id: "sigma",
@@ -84,7 +102,7 @@ export const VOLUMES: Volume[] = [
     leather: "#101628",
     accent: "#5b85d9",
     bookText: "#b3c9f2",
-    chapters: sigmaData.chapters.map((ch: any) => parseChapter(ch)),
+    chapters: [sigmaC01].map(parseChapter),
   },
   {
     id: "gamma",
@@ -94,6 +112,6 @@ export const VOLUMES: Volume[] = [
     leather: "#260e2a",
     accent: "#b15fcc",
     bookText: "#e2b8f0",
-    chapters: gammaData.chapters.map((ch: any) => parseChapter(ch)),
+    chapters: [gammaC01].map(parseChapter),
   },
 ];
