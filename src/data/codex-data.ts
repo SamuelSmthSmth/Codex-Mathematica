@@ -16,9 +16,6 @@ export interface Fragment {
   original_id: string;
   problem_latex: string;
   solution_latex: string;
-  difficulty_rank: number;
-  difficulty: "Easy" | "Medium" | "Hard";
-  exploit_type: string;
 }
 
 export interface Chapter {

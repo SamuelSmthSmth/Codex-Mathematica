@@ -1,280 +1,24 @@
-"use client";
+import re
 
-import { useState, useCallback, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkMath from "remark-math";
-import remarkBreaks from "remark-breaks";
-import rehypeKatex from "rehype-katex";
-import { useTheme } from "@/context/ThemeContext";
-import { useProgress, type SelfGrade } from "@/context/ProgressContext";
-import { useWorkspaceLogic } from "@/hooks/useWorkspaceLogic";
-import {
-  ArrowLeft,
-  ChevronRight,
-  ChevronLeft,
-  Feather,
-  CheckCheck,
-  RotateCcw,
-  BookMarked,
-  Minus,
-} from "lucide-react";
-import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
+with open("src/themes/ThemeDefault.tsx", "r") as f:
+    content = f.read()
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Utility
-// ─────────────────────────────────────────────────────────────────────────────
+# We'll split the file and rebuild it
+split_point = content.find("// ─────────────────────────────────────────────────────────────────────────────\n// VIEW 2")
 
-function toRoman(index: number): string {
-  let num = index + 1;
-  const val = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1];
-  const syb = ["M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"];
-  let roman = "";
-  let i = 0;
-  while (num > 0) {
-    while (num >= val[i]) {
-      roman += syb[i];
-      num -= val[i];
-    }
-    i++;
-  }
-  return roman;
-}
+head = content[:split_point]
 
-function lightenHex(hex: string, amt: number): string {
-  const clamp = (v: number) => Math.min(255, Math.max(0, v));
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgb(${clamp(r + amt)},${clamp(g + amt)},${clamp(b + amt)})`;
-}
-
-const pad3 = (n: number) => String(n).padStart(3, "0");
-
-// ─────────────────────────────────────────────────────────────────────────────
-// App-level state discriminated union
-// ─────────────────────────────────────────────────────────────────────────────
-
-type AppView =
+# Patch AppView
+app_view_regex = re.compile(r'type AppView =.*?;\n', re.DOTALL)
+new_app_view = """type AppView =
   | { screen: "shelf" }
   | { screen: "chapters"; volume: Volume }
   | { screen: "book-reader"; volume: Volume; chapterIndex: number; spreadIndex: number }
   | { screen: "chapter-end"; volume: Volume; chapterIndex: number };
+"""
+head = app_view_regex.sub(new_app_view, head, count=1)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Atoms
-// ─────────────────────────────────────────────────────────────────────────────
-
-function GoldRule({ color = "#c8922a" }: { color?: string }) {
-  return (
-    <div
-      className="w-full opacity-40"
-      style={{
-        height: "1px",
-        background: `linear-gradient(to right, transparent, ${color}cc, ${color}, ${color}cc, transparent)`,
-      }}
-      aria-hidden="true"
-    />
-  );
-}
-
-function MathRenderer({ children, className }: { children: string; className?: string }) {
-  const processedText = children.replace(/\$\$([\s\S]*?)\$\$/g, (_match, inner: string) => {
-    return `\n$$\n${inner.trim()}\n$$\n`;
-  });
-  return (
-    <div className={className}>
-      <ReactMarkdown remarkPlugins={[remarkMath, remarkBreaks]} rehypePlugins={[rehypeKatex]}>
-        {processedText}
-      </ReactMarkdown>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Shared dark background
-// ─────────────────────────────────────────────────────────────────────────────
-
-function SceneBackground({ volume, children }: { volume?: Volume; children: React.ReactNode }) {
-  const { isLightMode } = useTheme();
-  return (
-    <div
-      className={`codex-view min-h-screen flex flex-col items-center py-10 px-4 relative ${isLightMode ? "theme-light" : ""}`}
-      style={{
-        background: isLightMode
-          ? "#fcfaf7"
-          : volume
-          ? `radial-gradient(ellipse 80% 50% at 38% 12%, ${volume.leather}c0 0%, #090604 55%, #050302 100%)`
-          : "radial-gradient(ellipse 100% 70% at 50% 0%, #1c1008 0%, #0a0604 55%, #050302 100%)",
-      }}
-    >
-      {!isLightMode && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg, transparent 0px, transparent 9px, rgba(180,120,60,0.5) 9px, rgba(180,120,60,0.5) 10px)",
-          }}
-          aria-hidden="true"
-        />
-      )}
-      {children}
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// VIEW 1 — Library Shelf
-// ─────────────────────────────────────────────────────────────────────────────
-
-const SCHOLAR_QUOTES = [
-  { text: "Truth is ever to be found in simplicity, and not in the multiplicity and confusion of things.", author: "Isaac Newton" },
-  { text: "For since the fabric of the universe is most perfect and the work of a most wise Creator, nothing at all takes place in the universe in which some rule of maximum or minimum does not appear.", author: "Leonhard Euler" },
-  { text: "If I have been able to see further, it was only because I stood on the shoulders of giants.", author: "Isaac Newton" },
-  { text: "Nature uses as little as possible of anything.", author: "Johannes Kepler" },
-  { text: "Mathematics is the queen of the sciences and number theory is the queen of mathematics.", author: "Carl Friedrich Gauss" },
-];
-
-function getDailyQuote() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now.getTime() - start.getTime();
-  const oneDay = 1000 * 60 * 60 * 24;
-  const dayOfYear = Math.floor(diff / oneDay);
-  return SCHOLAR_QUOTES[dayOfYear % SCHOLAR_QUOTES.length];
-}
-
-export function LibraryShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
-  const { isLightMode } = useTheme();
-  return (
-    <SceneBackground>
-      <div
-        className="pointer-events-none absolute top-0 inset-x-0 h-64"
-        style={{
-          background: "radial-gradient(ellipse 60% 100% at 50% 0%, rgba(180,110,20,0.18) 0%, transparent 80%)",
-        }}
-        aria-hidden="true"
-      />
-      <header className="z-10 text-center mb-20 select-none mt-8">
-        <p className="text-amber-700/50 mb-4 tracking-[0.55em] uppercase" style={{ fontSize: "0.62rem", fontFamily: "Georgia, serif" }}>
-          The Grand Archive
-        </p>
-        <h1
-          className="text-amber-100/85 font-light"
-          style={{
-            fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
-            fontSize: "clamp(2rem, 5vw, 3.5rem)",
-            letterSpacing: "0.08em",
-          }}
-        >
-          Codex Mathematica
-        </h1>
-        <div className="mt-5 mx-auto" style={{ maxWidth: "220px" }}>
-          <GoldRule />
-        </div>
-        <p className="mt-5 text-stone-500/70 italic" style={{ fontFamily: "Georgia, serif", fontSize: "0.83rem" }}>
-          Select a volume to begin your study
-        </p>
-      </header>
-      <div className="z-10 flex flex-col md:flex-row items-center md:items-end gap-6 sm:gap-8 lg:gap-10 px-2 pb-12 md:pb-0" role="list">
-        {VOLUMES.map((vol) => (
-          <BookSpine key={vol.id} volume={vol} onSelect={onSelect} />
-        ))}
-      </div>
-      <div className="z-10 mt-auto pt-16 pb-8 md:pb-12 text-center max-w-xl px-4">
-        <p className={`italic ${isLightMode ? "text-stone-500" : "text-stone-500/70"}`} style={{ fontFamily: "Georgia, serif", fontSize: "0.85rem", lineHeight: "1.6" }}>
-          "{getDailyQuote().text}"
-        </p>
-        <p className={`mt-3 uppercase tracking-[0.2em] ${isLightMode ? "text-stone-400" : "text-stone-600"}`} style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem" }}>
-          &mdash; {getDailyQuote().author}
-        </p>
-      </div>
-      {!isLightMode && (
-        <div
-          className="pointer-events-none absolute bottom-0 inset-x-0 z-0"
-          style={{
-            height: "56px",
-            background: "linear-gradient(to top, #0d0803 0%, #18100a 60%, transparent 100%)",
-            boxShadow: "0 -6px 40px rgba(0,0,0,0.8)",
-          }}
-          aria-hidden="true"
-        />
-      )}
-    </SceneBackground>
-  );
-}
-
-function BookSpine({ volume, onSelect }: { volume: Volume; onSelect: (v: Volume) => void }) {
-  const [hovered, setHovered] = useState(false);
-  const { isLightMode } = useTheme();
-  return (
-    <div role="listitem">
-      <button
-        onClick={() => onSelect(volume)}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onFocus={() => setHovered(true)}
-        onBlur={() => setHovered(false)}
-        className="relative block focus:outline-none"
-        style={{
-          transform: hovered ? "translateY(-24px) rotate(-1.5deg)" : "translateY(0) rotate(0deg)",
-          transition: "transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        }}
-      >
-        <div
-          className="relative rounded-sm md:rounded-[2px_5px_5px_2px] w-[260px] h-[85px] md:w-[clamp(70px,12vw,116px)] md:h-[clamp(185px,32vw,285px)]"
-          style={{
-            background: isLightMode 
-              ? `linear-gradient(160deg, #ffffff 0%, ${volume.leather}10 35%, #fcfaf7 100%)`
-              : `linear-gradient(160deg, ${lightenHex(volume.leather, 18)} 0%, ${volume.leather} 35%, ${lightenHex(volume.leather, 8)} 60%, ${lightenHex(volume.leather, -8)} 100%)`,
-            boxShadow: isLightMode
-              ? hovered ? `3px 8px 25px rgba(0,0,0,0.1), 0 0 15px ${volume.accent}15` : `1px 4px 15px rgba(0,0,0,0.05)`
-              : hovered ? `5px 16px 60px rgba(0,0,0,0.95), 0 0 35px ${volume.accent}28, inset -4px 0 10px rgba(0,0,0,0.55), inset 3px 0 7px rgba(255,255,255,0.05)`
-              : `3px 10px 35px rgba(0,0,0,0.85), inset -3px 0 8px rgba(0,0,0,0.45), inset 2px 0 5px rgba(255,255,255,0.03)`,
-            transition: "box-shadow 0.4s ease",
-          }}
-        >
-          <div
-            className="absolute top-0 bottom-0 left-0 w-3 md:w-[14px] rounded-l-sm md:rounded-l-[2px]"
-            style={{
-              background: isLightMode ? "linear-gradient(to right, rgba(0,0,0,0.15), rgba(0,0,0,0.02))" : "linear-gradient(to right, rgba(0,0,0,0.5), rgba(0,0,0,0.1))",
-              borderRight: `1px solid ${volume.accent}18`,
-            }}
-          />
-          {[18, "bottom", 18].map((pos, idx) =>
-            idx < 2 ? (
-              <div
-                key={idx}
-                className={`absolute left-[18px] right-[10px] h-px hidden md:block ${idx === 0 ? "top-[18px]" : "bottom-[18px]"}`}
-                style={{ background: `linear-gradient(to right, ${volume.accent}90, ${volume.accent}20)` }}
-              />
-            ) : null
-          )}
-          <div
-            className="absolute inset-0 flex items-center justify-center -translate-x-[40%] md:translate-x-0 md:-translate-y-[10px]"
-            style={{
-              fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
-              fontSize: "clamp(2rem, 5vw, 3.8rem)",
-              color: volume.accent,
-              opacity: hovered ? 1 : 0.75,
-              textShadow: `0 0 24px ${volume.accent}55`,
-              transition: "opacity 0.4s ease",
-            }}
-          >
-            {volume.symbol}
-          </div>
-          <div
-            className="absolute right-6 top-[22px] md:top-auto md:bottom-[26px] md:left-0 md:right-0 md:text-center text-right"
-            style={{ fontFamily: "Georgia, serif", fontSize: "clamp(0.48rem, 1vw, 0.66rem)", letterSpacing: "0.28em", textTransform: "uppercase", color: volume.bookText, opacity: 0.65 }}
-          >
-            {volume.name}
-          </div>
-        </div>
-      </button>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
+new_views = """// ─────────────────────────────────────────────────────────────────────────────
 // VIEW 2 — Table of Contents (ChapterTOC)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -383,9 +127,7 @@ function BookReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComple
     if (currentIndex < numSpreads - 1) {
       setAnimState({ type: 'next', fromIndex: currentIndex, toIndex: currentIndex + 1 });
       setCurrentIndex(currentIndex + 1);
-      setTimeout(() => {
-        setAnimState(null);
-      }, 350);
+      setTimeout(() => setAnimState(null), 600); // Wait for the 0.6s animation
     } else {
       onComplete();
     }
@@ -396,9 +138,7 @@ function BookReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComple
     if (currentIndex > 0) {
       setAnimState({ type: 'prev', fromIndex: currentIndex, toIndex: currentIndex - 1 });
       setCurrentIndex(currentIndex - 1);
-      setTimeout(() => {
-        setAnimState(null);
-      }, 350);
+      setTimeout(() => setAnimState(null), 600);
     } else {
       onBack();
     }
@@ -424,7 +164,7 @@ function BookReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComple
     
     if (isNext) {
       flipper = (
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 book-page-flipper right anim-flip-next z-20">
+        <div className="book-page-flipper right anim-flip-next z-20">
            <div className="book-page-face">
               {oldRightFrag ? <FragmentPage volume={volume} chapterIndex={chapterIndex} fragment={oldRightFrag} isLeftPage={false} /> : <BlankPage volume={volume} isLeftPage={false} />}
            </div>
@@ -435,7 +175,7 @@ function BookReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComple
       );
     } else {
       flipper = (
-        <div className="absolute left-0 top-0 bottom-0 w-1/2 book-page-flipper left anim-flip-prev z-20">
+        <div className="book-page-flipper left anim-flip-prev z-20">
            <div className="book-page-face">
               {oldLeftFrag ? <FragmentPage volume={volume} chapterIndex={chapterIndex} fragment={oldLeftFrag} isLeftPage={true} /> : <BlankPage volume={volume} isLeftPage={true} />}
            </div>
@@ -456,14 +196,14 @@ function BookReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComple
         </p>
       </nav>
 
-      <div className="w-full max-w-[1200px] flex-1 flex relative z-10 items-stretch justify-center py-4">
+      <div className="w-full max-w-[1200px] flex-1 flex relative z-10 items-center justify-center">
         {/* Large Outside Prev Arrow */}
-        <button onClick={handlePrev} className="self-center p-4 mr-4 flex-shrink-0 text-stone-500 hover:text-amber-200 hover:-translate-x-1 transition-all focus:outline-none disabled:opacity-30 disabled:hover:translate-x-0 disabled:hover:text-stone-500" disabled={!!animState && currentIndex === 0}>
+        <button onClick={handlePrev} className="p-4 mr-4 flex-shrink-0 text-stone-500 hover:text-amber-200 hover:-translate-x-1 transition-all focus:outline-none disabled:opacity-30 disabled:hover:translate-x-0 disabled:hover:text-stone-500" disabled={!!animState && currentIndex === 0}>
            <ChevronLeft size={48} strokeWidth={1} />
         </button>
 
         {/* The 3D Book Container */}
-        <div className={`w-full flex-1 relative book-spine max-w-5xl ${animState ? 'is-flipping' : ''}`}>
+        <div className="w-full h-full flex-1 relative book-spine max-w-5xl">
            {/* Static Left Page */}
            <div className="absolute left-0 top-0 bottom-0 w-1/2 pr-[1px]">
               {staticLeftFrag ? <FragmentPage volume={volume} chapterIndex={chapterIndex} fragment={staticLeftFrag} isLeftPage={true} /> : <BlankPage volume={volume} isLeftPage={true} />}
@@ -478,7 +218,7 @@ function BookReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComple
         </div>
 
         {/* Large Outside Next Arrow */}
-        <button onClick={handleNext} className="self-center p-4 ml-4 flex-shrink-0 text-stone-500 hover:text-amber-200 hover:translate-x-1 transition-all focus:outline-none disabled:opacity-30 disabled:hover:translate-x-0 disabled:hover:text-stone-500" disabled={!!animState && currentIndex === numSpreads - 1}>
+        <button onClick={handleNext} className="p-4 ml-4 flex-shrink-0 text-stone-500 hover:text-amber-200 hover:translate-x-1 transition-all focus:outline-none disabled:opacity-30 disabled:hover:translate-x-0 disabled:hover:text-stone-500" disabled={!!animState && currentIndex === numSpreads - 1}>
            <ChevronRight size={48} strokeWidth={1} />
         </button>
       </div>
@@ -589,9 +329,7 @@ function FragmentPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
           <section className="mt-10 mb-10 flex flex-col items-center" aria-label="Mathematical problem">
             <p className="uppercase tracking-[0.4em] mb-6 text-stone-500/80" style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem" }}>Problem</p>
             <div className={`w-full max-w-full py-12 px-6 text-center border rounded-sm transition-colors duration-300 ${isLightMode ? "bg-white border-stone-200" : "bg-black/30 border-stone-800/80"}`} style={{ boxShadow: isLightMode ? "0 4px 15px rgba(0,0,0,0.02)" : "inset 0 4px 20px rgba(0,0,0,0.2)" }}>
-              <MathRenderer className="[&_.katex]:text-2xl [&_.katex-display]:my-0 text-stone-200 overflow-x-auto overflow-y-hidden">{`$$
-${fragment.problem_latex}
-$$`}</MathRenderer>
+              <MathRenderer className="[&_.katex]:text-2xl [&_.katex-display]:my-0 text-stone-200 overflow-x-auto overflow-y-hidden">{`$$\n${fragment.problem_latex}\n$$`}</MathRenderer>
             </div>
           </section>
 
@@ -806,3 +544,9 @@ export default function ThemeDefault() {
 
   return null;
 }
+"""
+
+with open("src/themes/ThemeDefault.tsx", "w") as f:
+    f.write(head + new_views)
+
+print("Regenerated ThemeDefault.tsx")

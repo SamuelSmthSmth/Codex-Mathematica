@@ -121,8 +121,11 @@ function BottomDock({
 export default function Home() {
   const { scholar, loading, isGuestMode } = useAuth();
   const [activeArea, setActiveArea]         = useState<AppArea>("archive");
+  const [animDir, setAnimDir]               = useState<"forward" | "backward">("forward");
   const [isShopOpen,    setIsShopOpen]      = useState(false);
   const [isProfileOpen, setIsProfileOpen]   = useState(false);
+
+  const AREA_ORDER = { archive: 0, library: 1, shop: 2 };
 
   const handleOpenShop = () => {
     setIsShopOpen(true);
@@ -132,10 +135,16 @@ export default function Home() {
   const handleCloseShop = () => {
     setIsShopOpen(false);
     // Return to archive only if we were on the shop
-    if (activeArea === "shop") setActiveArea("archive");
+    if (activeArea === "shop") {
+      setAnimDir("backward");
+      setActiveArea("archive");
+    }
   };
 
   const handleSelectArea = (area: AppArea) => {
+    if (area !== activeArea) {
+      setAnimDir(AREA_ORDER[area] > AREA_ORDER[activeArea] ? "forward" : "backward");
+    }
     setActiveArea(area);
     if (area === "shop") setIsShopOpen(true);
     else setIsShopOpen(false);
@@ -160,22 +169,22 @@ export default function Home() {
       />
 
       {/* ── Area Views ── */}
-      <div className="h-full overflow-hidden pb-16">
+      <div className="h-full overflow-hidden pb-16 perspective-[2000px]">
         {/* Archive — always mounted so fonts pre-load */}
-        <div className={activeArea === "archive" ? "h-full overflow-y-auto" : "hidden"}>
+        <div className={activeArea === "archive" ? `h-full overflow-y-auto ${animDir === "forward" ? "anim-ink-bleed-forward" : "anim-ink-bleed-backward"}` : "hidden"}>
           <CodexWorkspace />
         </div>
 
         {/* Library */}
         {activeArea === "library" && (
-          <div className="h-full overflow-y-auto">
+          <div className={`h-full overflow-y-auto ${animDir === "forward" ? "anim-ink-bleed-forward" : "anim-ink-bleed-backward"}`}>
             <LibraryView />
           </div>
         )}
 
         {/* Shop */}
         {activeArea === "shop" && (
-          <div className="h-full overflow-y-auto">
+          <div className={`h-full overflow-y-auto ${animDir === "forward" ? "anim-ink-bleed-forward" : "anim-ink-bleed-backward"}`}>
             <ShopLayout />
           </div>
         )}

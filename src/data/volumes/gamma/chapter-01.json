@@ -7,145 +7,97 @@
       "id": 301,
       "original_id": "INT_001",
       "problem_latex": "\\int x^n \\, dx,\\quad n \\neq -1",
-      "solution_latex": "\\dfrac{x^{n+1}}{n+1} + C",
-      "difficulty": "Easy",
-      "difficulty_rank": 1,
-      "exploit_type": "Power_Rule"
+      "solution_latex": "\\dfrac{x^{n+1}}{n+1} + C"
     },
     {
       "id": 302,
       "original_id": "INT_002",
       "problem_latex": "\\int \\sin x \\, dx",
-      "solution_latex": "-\\cos x + C",
-      "difficulty": "Easy",
-      "difficulty_rank": 2,
-      "exploit_type": "Standard_Integral"
+      "solution_latex": "-\\cos x + C"
     },
     {
       "id": 303,
       "original_id": "INT_003",
       "problem_latex": "\\int e^x \\, dx",
-      "solution_latex": "e^x + C",
-      "difficulty": "Easy",
-      "difficulty_rank": 3,
-      "exploit_type": "Standard_Integral"
+      "solution_latex": "e^x + C"
     },
     {
       "id": 304,
       "original_id": "INT_004",
       "problem_latex": "\\int \\frac{1}{x} \\, dx",
-      "solution_latex": "\\ln |x| + C",
-      "difficulty": "Easy",
-      "difficulty_rank": 4,
-      "exploit_type": "Standard_Integral"
+      "solution_latex": "\\ln |x| + C"
     },
     {
       "id": 305,
       "original_id": "INT_005",
       "problem_latex": "\\int x e^x \\, dx",
-      "solution_latex": "(x-1)e^x + C",
-      "difficulty": "Medium",
-      "difficulty_rank": 5,
-      "exploit_type": "IBP"
+      "solution_latex": "(x-1)e^x + C"
     },
     {
       "id": 306,
       "original_id": "INT_006",
       "problem_latex": "\\int \\ln x \\, dx",
-      "solution_latex": "x\\ln x - x + C",
-      "difficulty": "Medium",
-      "difficulty_rank": 6,
-      "exploit_type": "IBP"
+      "solution_latex": "x\\ln x - x + C"
     },
     {
       "id": 307,
       "original_id": "INT_007",
       "problem_latex": "\\int \\frac{1}{1+x^2} \\, dx",
-      "solution_latex": "\\arctan x + C",
-      "difficulty": "Easy",
-      "difficulty_rank": 7,
-      "exploit_type": "Standard_Integral"
+      "solution_latex": "\\arctan x + C"
     },
     {
       "id": 308,
       "original_id": "INT_008",
       "problem_latex": "\\int \\sin^2 x \\, dx",
-      "solution_latex": "\\dfrac{x}{2} - \\dfrac{\\sin 2x}{4} + C",
-      "difficulty": "Medium",
-      "difficulty_rank": 8,
-      "exploit_type": "Trig_Identity"
+      "solution_latex": "\\dfrac{x}{2} - \\dfrac{\\sin 2x}{4} + C"
     },
     {
       "id": 309,
       "original_id": "INT_009",
       "problem_latex": "\\int \\frac{1}{\\sqrt{1-x^2}} \\, dx",
-      "solution_latex": "\\arcsin x + C",
-      "difficulty": "Easy",
-      "difficulty_rank": 9,
-      "exploit_type": "Standard_Integral"
+      "solution_latex": "\\arcsin x + C"
     },
     {
       "id": 310,
       "original_id": "INT_010",
       "problem_latex": "\\int_0^1 x^2 e^x \\, dx",
-      "solution_latex": "e - 2",
-      "difficulty": "Medium",
-      "difficulty_rank": 10,
-      "exploit_type": "IBP"
+      "solution_latex": "e - 2"
     },
     {
       "id": 311,
       "original_id": "INT_011",
       "problem_latex": "\\int \\frac{2x+3}{x^2+3x+2} \\, dx",
-      "solution_latex": "\\ln|x^2 + 3x + 2| + C",
-      "difficulty": "Medium",
-      "difficulty_rank": 11,
-      "exploit_type": "Substitution"
+      "solution_latex": "\\ln|x^2 + 3x + 2| + C"
     },
     {
       "id": 312,
       "original_id": "INT_012",
       "problem_latex": "\\int_0^{\\pi/2} \\sin^3 x \\, dx",
-      "solution_latex": "\\dfrac{2}{3}",
-      "difficulty": "Medium",
-      "difficulty_rank": 12,
-      "exploit_type": "Trig_Identity"
+      "solution_latex": "\\dfrac{2}{3}"
     },
     {
       "id": 313,
       "original_id": "INT_013",
       "problem_latex": "\\int \\frac{1}{x^2 - 1} \\, dx",
-      "solution_latex": "\\dfrac{1}{2}\\ln\\left|\\dfrac{x-1}{x+1}\\right| + C",
-      "difficulty": "Medium",
-      "difficulty_rank": 13,
-      "exploit_type": "Partial_Fractions"
+      "solution_latex": "\\dfrac{1}{2}\\ln\\left|\\dfrac{x-1}{x+1}\\right| + C"
     },
     {
       "id": 314,
       "original_id": "INT_014",
       "problem_latex": "\\int_0^\\infty e^{-x^2} dx",
-      "solution_latex": "\\dfrac{\\sqrt{\\pi}}{2}",
-      "difficulty": "Hard",
-      "difficulty_rank": 14,
-      "exploit_type": "Gaussian_Integral"
+      "solution_latex": "\\dfrac{\\sqrt{\\pi}}{2}"
     },
     {
       "id": 315,
       "original_id": "INT_015",
       "problem_latex": "\\int \\sec^3 x \\, dx",
-      "solution_latex": "\\dfrac{1}{2}\\sec x \\tan x + \\dfrac{1}{2}\\ln|\\sec x + \\tan x| + C",
-      "difficulty": "Hard",
-      "difficulty_rank": 15,
-      "exploit_type": "IBP"
+      "solution_latex": "\\dfrac{1}{2}\\sec x \\tan x + \\dfrac{1}{2}\\ln|\\sec x + \\tan x| + C"
     },
     {
       "id": 316,
       "original_id": "INT_016",
       "problem_latex": "\\int_0^1 \\frac{\\ln x}{1 - x} \\, dx",
-      "solution_latex": "-\\dfrac{\\pi^2}{6}",
-      "difficulty": "Hard",
-      "difficulty_rank": 16,
-      "exploit_type": "Special_Function"
+      "solution_latex": "-\\dfrac{\\pi^2}{6}"
     }
   ]
 }

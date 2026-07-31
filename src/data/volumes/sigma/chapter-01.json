@@ -7,109 +7,73 @@
       "id": 201,
       "original_id": "SUM_001",
       "problem_latex": "\\sum_{k=1}^{n} k",
-      "solution_latex": "\\dfrac{n(n+1)}{2}",
-      "difficulty": "Easy",
-      "difficulty_rank": 1,
-      "exploit_type": "Closed_Form"
+      "solution_latex": "\\dfrac{n(n+1)}{2}"
     },
     {
       "id": 202,
       "original_id": "SUM_002",
       "problem_latex": "\\sum_{k=1}^{n} k^2",
-      "solution_latex": "\\dfrac{n(n+1)(2n+1)}{6}",
-      "difficulty": "Easy",
-      "difficulty_rank": 2,
-      "exploit_type": "Closed_Form"
+      "solution_latex": "\\dfrac{n(n+1)(2n+1)}{6}"
     },
     {
       "id": 203,
       "original_id": "SUM_003",
       "problem_latex": "\\sum_{k=0}^{n} r^k,\\quad |r| < 1",
-      "solution_latex": "\\dfrac{1 - r^{n+1}}{1 - r}",
-      "difficulty": "Easy",
-      "difficulty_rank": 3,
-      "exploit_type": "Geometric_Series"
+      "solution_latex": "\\dfrac{1 - r^{n+1}}{1 - r}"
     },
     {
       "id": 204,
       "original_id": "SUM_004",
       "problem_latex": "\\sum_{k=0}^{\\infty} r^k,\\quad |r| < 1",
-      "solution_latex": "\\dfrac{1}{1-r}",
-      "difficulty": "Easy",
-      "difficulty_rank": 4,
-      "exploit_type": "Geometric_Series"
+      "solution_latex": "\\dfrac{1}{1-r}"
     },
     {
       "id": 205,
       "original_id": "SUM_005",
       "problem_latex": "\\sum_{k=1}^{\\infty} \\frac{1}{k(k+1)}",
-      "solution_latex": "1",
-      "difficulty": "Medium",
-      "difficulty_rank": 5,
-      "exploit_type": "Telescoping"
+      "solution_latex": "1"
     },
     {
       "id": 206,
       "original_id": "SUM_006",
       "problem_latex": "\\sum_{k=1}^{\\infty} \\frac{1}{k^2}",
-      "solution_latex": "\\dfrac{\\pi^2}{6}",
-      "difficulty": "Hard",
-      "difficulty_rank": 6,
-      "exploit_type": "Basel_Problem"
+      "solution_latex": "\\dfrac{\\pi^2}{6}"
     },
     {
       "id": 207,
       "original_id": "SUM_007",
       "problem_latex": "\\sum_{k=0}^{\\infty} \\frac{x^k}{k!}",
-      "solution_latex": "e^x",
-      "difficulty": "Medium",
-      "difficulty_rank": 7,
-      "exploit_type": "Power_Series"
+      "solution_latex": "e^x"
     },
     {
       "id": 208,
       "original_id": "SUM_008",
       "problem_latex": "\\sum_{k=1}^{n} k \\cdot r^{k-1}",
-      "solution_latex": "\\dfrac{1 - (n+1)r^n + n r^{n+1}}{(1-r)^2}",
-      "difficulty": "Hard",
-      "difficulty_rank": 8,
-      "exploit_type": "Differentiated_Series"
+      "solution_latex": "\\dfrac{1 - (n+1)r^n + n r^{n+1}}{(1-r)^2}"
     },
     {
       "id": 209,
       "original_id": "SUM_009",
       "problem_latex": "\\sum_{k=1}^{\\infty} \\frac{(-1)^{k+1}}{k}",
-      "solution_latex": "\\ln 2",
-      "difficulty": "Medium",
-      "difficulty_rank": 9,
-      "exploit_type": "Alternating_Series"
+      "solution_latex": "\\ln 2"
     },
     {
       "id": 210,
       "original_id": "SUM_010",
       "problem_latex": "\\sum_{k=1}^{\\infty} \\frac{1}{k(k+1)(k+2)}",
-      "solution_latex": "\\dfrac{1}{4}",
-      "difficulty": "Hard",
-      "difficulty_rank": 10,
-      "exploit_type": "Telescoping"
+      "solution_latex": "\\dfrac{1}{4}"
     },
     {
       "id": 211,
       "original_id": "SUM_011",
       "problem_latex": "\\sum_{k=0}^{\\infty} \\frac{(-1)^k}{2k+1}",
-      "solution_latex": "\\dfrac{\\pi}{4}",
-      "difficulty": "Medium",
-      "difficulty_rank": 11,
-      "exploit_type": "Leibniz_Formula"
+      "solution_latex": "\\dfrac{\\pi}{4}"
     },
     {
       "id": 212,
       "original_id": "SUM_012",
       "problem_latex": "\\sum_{k=1}^{n} \\frac{1}{k(k+1)} ",
-      "solution_latex": "\\dfrac{n}{n+1}",
-      "difficulty": "Easy",
-      "difficulty_rank": 12,
-      "exploit_type": "Telescoping"
+      "solution_latex": "\\dfrac{n}{n+1}"
     }
   ]
 }

@@ -7,136 +7,91 @@
       "id": 101,
       "original_id": "DIF_001",
       "problem_latex": "\\frac{d}{dx}\\left[x^n\\right]",
-      "solution_latex": "n x^{n-1}",
-      "difficulty": "Easy",
-      "difficulty_rank": 1,
-      "exploit_type": "Power_Rule"
+      "solution_latex": "n x^{n-1}"
     },
     {
       "id": 102,
       "original_id": "DIF_002",
       "problem_latex": "\\frac{d}{dx}\\left[\\sin x\\right]",
-      "solution_latex": "\\cos x",
-      "difficulty": "Easy",
-      "difficulty_rank": 2,
-      "exploit_type": "Standard_Derivative"
+      "solution_latex": "\\cos x"
     },
     {
       "id": 103,
       "original_id": "DIF_003",
       "problem_latex": "\\frac{d}{dx}\\left[e^x\\right]",
-      "solution_latex": "e^x",
-      "difficulty": "Easy",
-      "difficulty_rank": 3,
-      "exploit_type": "Standard_Derivative"
+      "solution_latex": "e^x"
     },
     {
       "id": 104,
       "original_id": "DIF_004",
       "problem_latex": "\\frac{d}{dx}\\left[\\ln x\\right]",
-      "solution_latex": "\\dfrac{1}{x}",
-      "difficulty": "Easy",
-      "difficulty_rank": 4,
-      "exploit_type": "Standard_Derivative"
+      "solution_latex": "\\dfrac{1}{x}"
     },
     {
       "id": 105,
       "original_id": "DIF_005",
       "problem_latex": "\\frac{d}{dx}\\left[x^2 \\sin x\\right]",
-      "solution_latex": "2x\\sin x + x^2 \\cos x",
-      "difficulty": "Easy",
-      "difficulty_rank": 5,
-      "exploit_type": "Product_Rule"
+      "solution_latex": "2x\\sin x + x^2 \\cos x"
     },
     {
       "id": 106,
       "original_id": "DIF_006",
       "problem_latex": "\\frac{d}{dx}\\left[\\frac{\\sin x}{x}\\right]",
-      "solution_latex": "\\dfrac{x\\cos x - \\sin x}{x^2}",
-      "difficulty": "Easy",
-      "difficulty_rank": 6,
-      "exploit_type": "Quotient_Rule"
+      "solution_latex": "\\dfrac{x\\cos x - \\sin x}{x^2}"
     },
     {
       "id": 107,
       "original_id": "DIF_007",
       "problem_latex": "\\frac{d}{dx}\\left[\\sin(x^2)\\right]",
-      "solution_latex": "2x\\cos(x^2)",
-      "difficulty": "Easy",
-      "difficulty_rank": 7,
-      "exploit_type": "Chain_Rule"
+      "solution_latex": "2x\\cos(x^2)"
     },
     {
       "id": 108,
       "original_id": "DIF_008",
       "problem_latex": "\\frac{d}{dx}\\left[x^x\\right]",
-      "solution_latex": "x^x(1 + \\ln x)",
-      "difficulty": "Medium",
-      "difficulty_rank": 8,
-      "exploit_type": "Log_Differentiation"
+      "solution_latex": "x^x(1 + \\ln x)"
     },
     {
       "id": 109,
       "original_id": "DIF_009",
       "problem_latex": "\\text{If } y^2 + xy = 6,\\text{ find }\\dfrac{dy}{dx}",
-      "solution_latex": "-\\dfrac{y}{2y + x}",
-      "difficulty": "Medium",
-      "difficulty_rank": 9,
-      "exploit_type": "Implicit_Diff"
+      "solution_latex": "-\\dfrac{y}{2y + x}"
     },
     {
       "id": 110,
       "original_id": "DIF_010",
       "problem_latex": "\\frac{d^2}{dx^2}\\left[e^{2x}\\sin x\\right]",
-      "solution_latex": "e^{2x}(3\\sin x + 4\\cos x)",
-      "difficulty": "Medium",
-      "difficulty_rank": 10,
-      "exploit_type": "Higher_Order"
+      "solution_latex": "e^{2x}(3\\sin x + 4\\cos x)"
     },
     {
       "id": 111,
       "original_id": "DIF_011",
       "problem_latex": "\\frac{d}{dx}\\left[\\arctan(x^2)\\right]",
-      "solution_latex": "\\dfrac{2x}{1 + x^4}",
-      "difficulty": "Medium",
-      "difficulty_rank": 11,
-      "exploit_type": "Chain_Rule"
+      "solution_latex": "\\dfrac{2x}{1 + x^4}"
     },
     {
       "id": 112,
       "original_id": "DIF_012",
       "problem_latex": "\\frac{d}{dx}\\left[\\ln(\\sin x)\\right]",
-      "solution_latex": "\\cot x",
-      "difficulty": "Easy",
-      "difficulty_rank": 12,
-      "exploit_type": "Chain_Rule"
+      "solution_latex": "\\cot x"
     },
     {
       "id": 113,
       "original_id": "DIF_013",
       "problem_latex": "\\frac{d}{dx}\\left[\\sqrt{x^2 + 1}\\right]",
-      "solution_latex": "\\dfrac{x}{\\sqrt{x^2+1}}",
-      "difficulty": "Easy",
-      "difficulty_rank": 13,
-      "exploit_type": "Chain_Rule"
+      "solution_latex": "\\dfrac{x}{\\sqrt{x^2+1}}"
     },
     {
       "id": 114,
       "original_id": "DIF_014",
       "problem_latex": "\\text{If } x = t^2,\\; y = t^3,\\text{ find }\\dfrac{dy}{dx}",
-      "solution_latex": "\\dfrac{3t}{2}",
-      "difficulty": "Medium",
-      "difficulty_rank": 14,
-      "exploit_type": "Parametric"
+      "solution_latex": "\\dfrac{3t}{2}"
     },
     {
       "id": 115,
       "original_id": "DIF_015",
       "problem_latex": "\\frac{d}{dx}\\left[(\\ln x)^x\\right]",
-      "solution_latex": "(\\ln x)^x\\!\\left(\\ln(\\ln x) + \\dfrac{1}{\\ln x}\\right)",
-      "difficulty": "Hard",
-      "difficulty_rank": 15,
-      "exploit_type": "Log_Differentiation"
+      "solution_latex": "(\\ln x)^x\\!\\left(\\ln(\\ln x) + \\dfrac{1}{\\ln x}\\right)"
     }
   ]
 }

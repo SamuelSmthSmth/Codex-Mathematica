@@ -47,21 +47,6 @@ body {
   padding: 0;
 }
 
-/* ── View transition ────────────────────────────────────────────── */
-@keyframes codex-fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.codex-view {
-  animation: codex-fade-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
 
 /* ── Inkwell archive unfurl ─────────────────────────────────────── */
 @keyframes inkwell-unfurl {
@@ -213,6 +198,53 @@ textarea::-webkit-scrollbar-thumb:hover {
   font-size: 0.82em;
 }
 
+/* ── True 3D Book Page Curl ───────────────────────────────────────── */
+.book-spine {
+  perspective: 2500px;
+  perspective-origin: center center;
+}
+
+.book-page-flipper {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.book-page-flipper.left {
+  transform-origin: right center;
+}
+
+.book-page-flipper.right {
+  transform-origin: left center;
+}
+
+.book-page-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.book-page-face.back {
+  transform: rotateY(180deg);
+}
+
+@keyframes turn-page-right-to-left {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(-180deg); }
+}
+
+@keyframes turn-page-left-to-right {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+
+.anim-flip-next {
+  animation: turn-page-right-to-left 0.35s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+}
+
+.anim-flip-prev {
+  animation: turn-page-left-to-right 0.35s cubic-bezier(0.645, 0.045, 0.355, 1.000) forwards;
+}
+
 /* ── Sunlit Scriptorium (Light Mode) ────────────────────────────── */
 .theme-light body {
   background: #f5ebd7 !important;
@@ -241,4 +273,54 @@ textarea::-webkit-scrollbar-thumb:hover {
 }
 .theme-light .math-box-label {
   color: #44403c !important; /* stone-700 */
+}
+
+
+
+
+/* Page transition animation: Ink Bleed */
+@keyframes ink-bleed-forward {
+  0% {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+.anim-ink-bleed-forward {
+  animation: ink-bleed-forward 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes ink-bleed-backward {
+  0% {
+    opacity: 0;
+    filter: blur(12px);
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+.anim-ink-bleed-backward {
+  animation: ink-bleed-backward 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+/* Blur effect during 3D page flip */
+.is-flipping article,
+.anim-flip-next .book-page-face article,
+.anim-flip-prev .book-page-face article {
+  animation: page-flip-blur 0.35s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+}
+
+@keyframes page-flip-blur {
+  0% { filter: blur(0px); }
+  50% { filter: blur(2px); }
+  100% { filter: blur(0px); }
 }
