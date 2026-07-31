@@ -12,10 +12,14 @@ import gammaData from "./gamma.json";
 
 export interface Fragment {
   id: number;
+  original_id: string; // The ID from july_dataset (e.g. "INT_0320")
   problem_latex: string;
   solution_latex: string;
-  problem_raw: string;
+  problem_raw: string; // For the ledger display, we might want to just render latex directly in the future, but raw helps for search
   solution_raw: string;
+  difficulty_rank: number;
+  difficulty: string;
+  exploit_type: string;
 }
 
 export interface Chapter {
@@ -40,9 +44,9 @@ export interface Volume {
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 // Extract the fragments from a JSON chapter and ensure it's strongly typed
-function parseChapter(jsonChapter: any, theme: string): Chapter {
+function parseChapter(jsonChapter: any): Chapter {
   return {
-    theme,
+    theme: jsonChapter.theme || "Nameless Chapter",
     fragments: jsonChapter.fragments as Fragment[],
   };
 }
@@ -50,30 +54,6 @@ function parseChapter(jsonChapter: any, theme: string): Chapter {
 // ═════════════════════════════════════════════════════════════════════════════
 // Volume manifest
 // ═════════════════════════════════════════════════════════════════════════════
-
-const ALPHA_THEMES = [
-  "Algebraic & Rational Limits",
-  "Trigonometric Limits",
-  "Indeterminate Forms & L'Hôpital",
-];
-
-const DELTA_THEMES = [
-  "Fundamental Rules",
-  "Product, Quotient & Chain Rules",
-  "Higher Order & Implicit Differentiation",
-];
-
-const SIGMA_THEMES = [
-  "Finite Series & Closed Forms",
-  "Infinite Series & Convergence",
-  "Power Series & Taylor Expansions",
-];
-
-const GAMMA_THEMES = [
-  "Basic Antiderivatives",
-  "Integration Techniques",
-  "Definite Forms & Special Integrals",
-];
 
 export const VOLUMES: Volume[] = [
   {
@@ -84,9 +64,7 @@ export const VOLUMES: Volume[] = [
     leather: "#2d1008",
     accent: "#c8922a",
     bookText: "#f4d260",
-    chapters: alphaData.chapters.map((ch: any, i: number) =>
-      parseChapter(ch, ALPHA_THEMES[i] || "Nameless Chapter")
-    ),
+    chapters: alphaData.chapters.map((ch: any) => parseChapter(ch)),
   },
   {
     id: "delta",
@@ -96,32 +74,26 @@ export const VOLUMES: Volume[] = [
     leather: "#0b1e0e",
     accent: "#4aaa6c",
     bookText: "#a8e6c0",
-    chapters: deltaData.chapters.map((ch: any, i: number) =>
-      parseChapter(ch, DELTA_THEMES[i] || "Nameless Chapter")
-    ),
+    chapters: deltaData.chapters.map((ch: any) => parseChapter(ch)),
   },
   {
     id: "sigma",
     symbol: "Σ",
     name: "Sigma",
-    subtitle: "The Volume of Summations",
-    leather: "#0e0e26",
-    accent: "#7a6ad8",
-    bookText: "#c8c0f8",
-    chapters: sigmaData.chapters.map((ch: any, i: number) =>
-      parseChapter(ch, SIGMA_THEMES[i] || "Nameless Chapter")
-    ),
+    subtitle: "The Volume of Series",
+    leather: "#101628",
+    accent: "#5b85d9",
+    bookText: "#b3c9f2",
+    chapters: sigmaData.chapters.map((ch: any) => parseChapter(ch)),
   },
   {
     id: "gamma",
     symbol: "Γ",
     name: "Gamma",
     subtitle: "The Volume of Integrals",
-    leather: "#18082a",
-    accent: "#9a6ac8",
-    bookText: "#d8b8f8",
-    chapters: gammaData.chapters.map((ch: any, i: number) =>
-      parseChapter(ch, GAMMA_THEMES[i] || "Nameless Chapter")
-    ),
+    leather: "#260e2a",
+    accent: "#b15fcc",
+    bookText: "#e2b8f0",
+    chapters: gammaData.chapters.map((ch: any) => parseChapter(ch)),
   },
 ];

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { useProgress } from "./ProgressContext";
 
 export interface PrintData {
   scholarName: string;
@@ -15,6 +16,9 @@ interface ThemeContextValue {
   setIsFocusMode: (val: boolean | ((prev: boolean) => boolean)) => void;
   printData: PrintData | null;
   setPrintData: (data: PrintData | null) => void;
+  activeTheme: string;
+  activeAnimation: string | null;
+  activePalette: string | null;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -24,8 +28,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isFocusMode, setIsFocusModeState] = useState(false);
   const [printData, setPrintData] = useState<PrintData | null>(null);
 
+  const { equippedItems } = useProgress();
+
+  const activeTheme = equippedItems["themes"] || "theme-default";
+  const activeAnimation = equippedItems["animations"] || null;
+  const activePalette = equippedItems["palettes"] || null;
+
   useEffect(() => {
-    // Optionally persist in localStorage here
     const savedTheme = localStorage.getItem("codex_theme");
     if (savedTheme === "light") setIsLightMode(true);
 
@@ -49,16 +58,34 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  // Apply CSS classes / data attributes globally
   useEffect(() => {
+    const root = document.documentElement;
     if (isLightMode) {
-      document.documentElement.classList.add("theme-light");
+      root.classList.add("theme-light");
     } else {
-      document.documentElement.classList.remove("theme-light");
+      root.classList.remove("theme-light");
     }
-  }, [isLightMode]);
+
+    root.setAttribute("data-theme", activeTheme);
+    if (activePalette) root.setAttribute("data-palette", activePalette);
+    else root.removeAttribute("data-palette");
+  }, [isLightMode, activeTheme, activePalette]);
 
   return (
-    <ThemeContext.Provider value={{ isLightMode, toggleTheme, isFocusMode, setIsFocusMode, printData, setPrintData }}>
+    <ThemeContext.Provider 
+      value={{ 
+        isLightMode, 
+        toggleTheme, 
+        isFocusMode, 
+        setIsFocusMode, 
+        printData, 
+        setPrintData,
+        activeTheme,
+        activeAnimation,
+        activePalette
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

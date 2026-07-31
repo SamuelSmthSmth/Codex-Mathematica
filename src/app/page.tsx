@@ -120,8 +120,9 @@ function BottomDock({
 
 export default function Home() {
   const { scholar, loading, isGuestMode } = useAuth();
-  const [activeArea, setActiveArea]       = useState<AppArea>("archive");
-  const [isShopOpen,   setIsShopOpen]     = useState(false);
+  const [activeArea, setActiveArea]         = useState<AppArea>("archive");
+  const [isShopOpen,    setIsShopOpen]      = useState(false);
+  const [isProfileOpen, setIsProfileOpen]   = useState(false);
 
   const handleOpenShop = () => {
     setIsShopOpen(true);
@@ -148,10 +149,10 @@ export default function Home() {
       {/* ── Top Navigation ── */}
       <TopNav
         isShopOpen={isShopOpen}
-        isProfileOpen={false}
+        isProfileOpen={isProfileOpen}
         onOpenShop={handleOpenShop}
         onCloseShop={handleCloseShop}
-        onOpenProfile={() => {}}
+        onOpenProfile={() => setIsProfileOpen(true)}
         avatarUrl={scholar?.photoURL ?? null}
         avatarInitial={avatarInitial}
         activeArea={activeArea}
@@ -160,7 +161,7 @@ export default function Home() {
       {/* ── Area Views ── */}
       <div className="h-full overflow-hidden pb-16">
         {/* Archive — always mounted so fonts pre-load */}
-        <div className={activeArea === "archive" ? "h-full" : "hidden"}>
+        <div className={activeArea === "archive" ? "h-full overflow-y-auto" : "hidden"}>
           <CodexWorkspace />
         </div>
 
@@ -180,7 +181,7 @@ export default function Home() {
       </div>
 
       {/* ── Profile Panel ── */}
-      <ProfilePanel />
+      <ProfilePanel isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 
       {/* ── Auth Gate ── */}
       {!loading && !scholar && !isGuestMode && <ScholarGate />}

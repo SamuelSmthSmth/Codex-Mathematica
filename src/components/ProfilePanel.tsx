@@ -7,10 +7,14 @@ import { X, User, LogOut, Check, Sun, Moon, BookOpen, Clock, EyeOff, Eye, Downlo
 import { collection, getCountFromServer, getDocs, query, orderBy, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-export default function ProfilePanel() {
+interface ProfilePanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
   const { scholar, isGuestMode, signOut, updateScholarName } = useAuth();
   const { isLightMode, toggleTheme, isFocusMode, setIsFocusMode, setPrintData } = useTheme();
-  const [isOpen, setIsOpen] = useState(false);
   const [nameInput, setNameInput] = useState("");
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
@@ -163,37 +167,11 @@ export default function ProfilePanel() {
 
   return (
     <>
-      {/* ── Floating Trigger Button ── */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className="fixed top-6 right-6 z-40 w-12 h-12 rounded-full overflow-hidden flex items-center justify-center transition-transform hover:scale-105"
-        style={{
-          background: "#161009",
-          border: "1px solid rgba(200,146,42,0.3)",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.05)",
-        }}
-        aria-label="Open Profile"
-      >
-        {avatarUrl ? (
-          <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover opacity-90" />
-        ) : (
-          <span
-            style={{
-              fontFamily: "var(--font-playfair), serif",
-              fontSize: "1.3rem",
-              color: "rgba(200,146,42,0.8)",
-            }}
-          >
-            {initial}
-          </span>
-        )}
-      </button>
-
       {/* ── Backdrop ── */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity"
-          onClick={() => setIsOpen(false)}
+          onClick={onClose}
         />
       )}
 
@@ -214,7 +192,7 @@ export default function ProfilePanel() {
             Scholar Profile
           </h2>
           <button
-            onClick={() => setIsOpen(false)}
+            onClick={onClose}
             className={`transition-colors ${isLightMode ? "text-stone-400 hover:text-stone-700" : "text-stone-500 hover:text-amber-200"}`}
             aria-label="Close Profile"
           >
@@ -465,7 +443,7 @@ export default function ProfilePanel() {
         <div className="pt-6 border-t border-stone-800">
           <button
             onClick={() => {
-              setIsOpen(false);
+              onClose();
               signOut();
             }}
             className="w-full flex items-center justify-center gap-2 py-3 uppercase tracking-[0.15em] transition-colors duration-200 hover:bg-red-950/20 hover:text-red-400"

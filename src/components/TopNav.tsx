@@ -96,6 +96,12 @@ export default function TopNav({
             alt="Avatar"
             className="w-full h-full object-cover opacity-90"
           />
+        ) : avatarInitial === "?" ? (
+          <User
+            size={18}
+            strokeWidth={1.6}
+            style={{ color: isLightMode ? "#78716c" : "rgba(200,146,42,0.8)" }}
+          />
         ) : (
           <span
             style={{
