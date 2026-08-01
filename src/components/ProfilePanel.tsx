@@ -6,6 +6,8 @@ import { useTheme } from "@/context/ThemeContext";
 import { X, User, LogOut, Check, Sun, Moon, BookOpen, Clock, EyeOff, Eye, Download, Flame, FileText } from "lucide-react";
 import { collection, getCountFromServer, getDocs, query, orderBy, writeBatch } from "firebase/firestore";
 import { db, isConfigured } from "@/lib/firebase";
+import { useProgress } from "@/context/ProgressContext";
+import { SHOP_ITEMS } from "@/data/shop-items";
 
 interface ProfilePanelProps {
   isOpen: boolean;
@@ -20,6 +22,10 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
   const [conqueredCount, setConqueredCount] = useState<number | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [editedName, setEditedName] = useState("");
+  const { equippedItems } = useProgress();
+  
+  const activeBannerId = equippedItems["banners"];
+  const activeBanner = SHOP_ITEMS.find((item) => item.id === activeBannerId);
 
   useEffect(() => {
     if (!isConfigured || !scholar || isGuestMode || !isOpen) return;
@@ -171,14 +177,21 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
 
       {/* ── Slide-out Panel ── */}
       <div
-        className={`fixed right-0 top-0 h-full w-80 z-50 p-7 flex flex-col border-l transition-transform duration-300 ease-in-out ${
+        className={`fixed right-0 top-0 h-full w-80 z-50 flex flex-col border-l transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         } ${isLightMode ? "bg-[#fcfaf7] text-stone-900 border-stone-200" : "bg-[#0f0d0b] text-stone-300 border-stone-800"}`}
         style={{
           boxShadow: isOpen ? (isLightMode ? "-5px 0 25px rgba(0,0,0,0.05)" : "-10px 0 40px rgba(0,0,0,0.8)") : "none",
         }}
       >
-        <div className="flex items-center justify-between mb-10">
+        {activeBanner?.thumbnailUrl && (
+          <div 
+            className="w-full h-32 bg-cover bg-center border-b border-stone-800"
+            style={{ backgroundImage: `url(${activeBanner.thumbnailUrl})` }}
+          />
+        )}
+        <div className="p-7 flex-1 flex flex-col overflow-y-auto">
+          <div className="flex items-center justify-between mb-10">
           <h2
             className="text-amber-100/80 uppercase tracking-[0.2em]"
             style={{ fontFamily: "Georgia, serif", fontSize: "0.75rem" }}
@@ -485,6 +498,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
             <LogOut size={14} />
             Leave Library
           </button>
+          </div>
         </div>
       </div>
     </>

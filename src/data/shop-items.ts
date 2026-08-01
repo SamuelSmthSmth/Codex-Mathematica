@@ -161,6 +161,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 1000,
     achievementLocked: true,
     unlockRequirement: "Conquer 100 fragments in the Alpha (Limits) volume.",
+    thumbnailUrl: "/thumbnails/banner_limits_master.png",
   },
   {
     id: "banner-integrator",
@@ -170,6 +171,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 1000,
     achievementLocked: true,
     unlockRequirement: "Conquer 100 fragments in the Gamma (Integrals) volume.",
+    thumbnailUrl: "/thumbnails/banner_integrator.png",
   },
   {
     id: "banner-whale",
@@ -179,6 +181,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 200,
     achievementLocked: true,
     unlockRequirement: "Purchase any 5 items from the Store.",
+    thumbnailUrl: "/thumbnails/banner_whale.png",
   },
   {
     id: "banner-scholar",
@@ -186,6 +189,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: "A prestigious banner for dedicated students.",
     category: "banners",
     price: 500,
+    thumbnailUrl: "/thumbnails/banner_scholar.png",
   },
 
   // ── Archives (Expansion Packs) ────────────────────────────────────────────

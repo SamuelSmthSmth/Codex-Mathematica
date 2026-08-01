@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { VOLUMES, Volume, Chapter } from "../data/codex-data";
+import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
+import { useProgress } from "@/context/ProgressContext";
 import { useWorkspaceLogic } from "../hooks/useWorkspaceLogic";
-import { ChevronLeft, ChevronRight, X, Minus, Square, Folder, FileText, Monitor, Trash2, Book, Calculator, Globe, PaintBucket, BookOpen, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Minus, Square, Folder, FileText, Monitor, Trash2, Book, Calculator, Globe, PaintBucket, BookOpen, ShoppingBag, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -25,16 +26,55 @@ function MathRenderer({ children, className }: { children: string; className?: s
   );
 }
 
+function useDraggable() {
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Only drag on left click
+    if (e.button !== 0) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startOffset = offset;
+    
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      setOffset({
+        x: startOffset.x + (moveEvent.clientX - startX),
+        y: startOffset.y + (moveEvent.clientY - startY)
+      });
+    };
+    
+    const handlePointerUp = () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+    
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+  };
+  
+  return { offset, handlePointerDown };
+}
+
 // XP Window Component
 function XPWindow({ title, icon: Icon, onClose, children, style, className = "" }: any) {
+  const { offset, handlePointerDown } = useDraggable();
+
   return (
     <div 
       className={`absolute bg-[#ece9d8] border-[3px] border-[#0053e5] rounded-t-lg flex flex-col shadow-[2px_2px_10px_rgba(0,0,0,0.5)] ${className}`}
-      style={style}
+      style={{
+        ...style,
+        transform: style?.transform 
+          ? `${style.transform} translate(${offset.x}px, ${offset.y}px)` 
+          : `translate(${offset.x}px, ${offset.y}px)`
+      }}
     >
       {/* Title Bar */}
-      <div className="h-8 bg-[linear-gradient(to_bottom,#0058e6_0%,#3a93ff_8%,#288eff_40%,#127dff_88%,#036bba_100%)] flex items-center justify-between px-1 flex-shrink-0">
-        <div className="flex items-center gap-1 overflow-hidden ml-1">
+      <div 
+        onPointerDown={handlePointerDown}
+        className="h-8 bg-[linear-gradient(to_bottom,#0058e6_0%,#3a93ff_8%,#288eff_40%,#127dff_88%,#036bba_100%)] flex items-center justify-between px-1 flex-shrink-0 cursor-move"
+      >
+        <div className="flex items-center gap-1 overflow-hidden ml-1 pointer-events-none">
           {Icon && <Icon className="w-4 h-4 text-white drop-shadow" />}
           <span className="text-white font-bold text-[13px] truncate drop-shadow-[1px_1px_1px_rgba(0,0,0,0.8)] font-sans">{title}</span>
         </div>
@@ -52,21 +92,23 @@ function XPWindow({ title, icon: Icon, onClose, children, style, className = "" 
   );
 }
 
-type AppView = 
-  | { screen: "desktop" }
-  | { screen: "explorer"; volume: Volume }
-  | { screen: "notepad"; volume: Volume; chapterIndex: number };
 
 export default function ThemeWindowsXP({
   activeArea,
   onSelectArea,
+  onOpenProfile,
 }: {
   activeArea: AppArea;
   onSelectArea: (area: AppArea) => void;
+  onOpenProfile?: () => void;
 }) {
-  const [view, setView] = useState<AppView>({ screen: "desktop" });
+  const [explorerVolume, setExplorerVolume] = useState<Volume | null>(null);
+  const [notepadContext, setNotepadContext] = useState<{ volume: Volume, chapterIndex: number } | null>(null);
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const { setIsLightMode } = useTheme();
+  const { ownedItems } = useProgress();
+  const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
+  const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
 
   // Always force light mode in Windows XP to show the wallpaper properly
   useEffect(() => {
@@ -88,15 +130,16 @@ export default function ThemeWindowsXP({
         <DesktopIcon icon={PaintBucket} label="Paint" color="text-pink-400" fill="fill-pink-500" />
         <DesktopIcon icon={BookOpen} label="Library" color="text-green-300" fill="fill-green-600" onClick={() => onSelectArea("library")} />
         <DesktopIcon icon={ShoppingBag} label="Store" color="text-purple-300" fill="fill-purple-600" onClick={() => onSelectArea("shop")} />
+        <DesktopIcon icon={User} label="Profile" color="text-stone-200" fill="fill-blue-400" onClick={onOpenProfile} />
         
-        {VOLUMES.map((vol, i) => (
+        {visibleVolumes.map((vol, i) => (
           <DesktopIcon 
             key={i} 
             icon={Book} 
             label={vol.name} 
             color="text-yellow-200" 
             fill="fill-yellow-500"
-            onClick={() => setView({ screen: "explorer", volume: vol })}
+            onClick={() => setExplorerVolume(vol)}
           />
         ))}
       </div>
@@ -162,11 +205,11 @@ export default function ThemeWindowsXP({
       )}
 
       {/* File Explorer (Chapters) */}
-      {view.screen === "explorer" && (
+      {explorerVolume && (
         <XPWindow 
-          title={`C:\\Codex\\${view.volume.name}`} 
+          title={`C:\\Codex\\${explorerVolume.name}`} 
           icon={Folder} 
-          onClose={() => setView({ screen: "desktop" })}
+          onClose={() => setExplorerVolume(null)}
           style={{ top: "10%", left: "10%", width: "600px", height: "400px" }}
         >
           {/* File Explorer Toolbar */}
@@ -179,28 +222,28 @@ export default function ThemeWindowsXP({
             <span className="text-stone-500">Help</span>
           </div>
           <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-4 border-t-white border-t">
-            <button onClick={() => setView({ screen: "desktop" })} className="flex items-center gap-1 hover:brightness-90 opacity-50">
+            <button onClick={() => setExplorerVolume(null)} className="flex items-center gap-1 hover:brightness-90 opacity-50">
               <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center"><ChevronLeft className="w-4 h-4 text-white" /></div>
               Back
             </button>
             <div className="flex-1 flex items-center gap-2">
               <span className="text-stone-600 text-sm">Address</span>
-              <div className="flex-1 bg-white border border-stone-400 h-6 flex items-center px-2 text-sm">
-                C:\Codex\{view.volume.name}
+              <div className="flex-1 bg-white border border-stone-400 h-6 flex items-center px-2 text-sm text-black">
+                C:\Codex\{explorerVolume.name}
               </div>
             </div>
           </div>
           
           {/* Folder Content */}
           <div className="flex flex-wrap p-4 gap-6 bg-white h-full items-start content-start">
-            {view.volume.chapters.map((chap, cIdx) => (
+            {explorerVolume.chapters.map((chap, cIdx) => (
               <div 
                 key={cIdx} 
                 className="flex flex-col items-center gap-1 w-24 cursor-pointer hover:bg-blue-100 p-2 rounded border border-transparent hover:border-blue-200"
-                onDoubleClick={() => setView({ screen: "notepad", volume: view.volume, chapterIndex: cIdx })}
+                onDoubleClick={() => setNotepadContext({ volume: explorerVolume, chapterIndex: cIdx })}
               >
                 <Folder className="w-12 h-12 text-yellow-400 fill-yellow-200" />
-                <span className="text-xs text-center line-clamp-2">{chap.theme}</span>
+                <span className="text-black text-xs text-center line-clamp-2">{chap.theme}</span>
               </div>
             ))}
           </div>
@@ -208,11 +251,11 @@ export default function ThemeWindowsXP({
       )}
 
       {/* Notepad (Workspace) */}
-      {view.screen === "notepad" && (
+      {notepadContext && (
         <XPWorkspace 
-          volume={view.volume} 
-          chapterIndex={view.chapterIndex} 
-          onClose={() => setView({ screen: "explorer", volume: view.volume })} 
+          volume={notepadContext.volume} 
+          chapterIndex={notepadContext.chapterIndex} 
+          onClose={() => setNotepadContext(null)} 
         />
       )}
 
@@ -227,9 +270,10 @@ export default function ThemeWindowsXP({
           </div>
           <div className="flex-1 flex">
             <div className="flex-1 bg-white flex flex-col p-2 gap-1 border-r border-stone-200">
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><Globe className="w-8 h-8 text-blue-500" /><span className="text-sm font-bold">Internet Explorer</span></div>
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><Folder className="w-8 h-8 text-yellow-500" /><span className="text-sm font-bold">My Documents</span></div>
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><PaintBucket className="w-8 h-8 text-pink-500" /><span className="text-sm font-bold">Paint</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><Globe className="w-8 h-8 text-blue-500" /><span className="text-sm font-bold text-black">Internet Explorer</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><Folder className="w-8 h-8 text-yellow-500" /><span className="text-sm font-bold text-black">My Documents</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><PaintBucket className="w-8 h-8 text-pink-500" /><span className="text-sm font-bold text-black">Paint</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded" onClick={onOpenProfile}><User className="w-8 h-8 text-blue-400" /><span className="text-sm font-bold text-black">User Profile</span></div>
             </div>
             <div className="w-1/3 bg-[#d3e5fa] p-2 flex flex-col gap-2 border-l border-white shadow-inner">
                <div className="text-xs font-bold text-[#00136b] hover:underline cursor-pointer">My Computer</div>

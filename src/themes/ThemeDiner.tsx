@@ -82,6 +82,10 @@ function DinerBackground({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function DinerMenuShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
+  const { ownedItems } = useProgress();
+  const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
+  const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
+
   return (
     <DinerBackground>
       <header className="z-10 text-center mb-16 mt-8 p-6 bg-black/60 backdrop-blur-md rounded-xl border-y-4 border-red-500 shadow-2xl">
@@ -100,8 +104,8 @@ function DinerMenuShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
         </h1>
       </header>
 
-      <div className="z-10 flex flex-wrap justify-center gap-12 px-4 max-w-6xl">
-        {VOLUMES.map((vol) => (
+      <div className="z-10 mt-12 w-full max-w-6xl mx-auto flex flex-wrap justify-center gap-10 px-4">
+        {visibleVolumes.map((vol) => (
           <DinerMenu key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
       </div>

@@ -79,6 +79,10 @@ function MixtapeBackground({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CDShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
+  const { ownedItems } = useProgress();
+  const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
+  const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
+
   return (
     <MixtapeBackground>
       <header className="z-10 text-center mb-16 mt-8">
@@ -94,7 +98,7 @@ function CDShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
       </header>
 
       <div className="z-10 flex flex-wrap justify-center gap-10 px-4 max-w-5xl">
-        {VOLUMES.map((vol) => (
+        {visibleVolumes.map((vol) => (
           <CDCase key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
       </div>

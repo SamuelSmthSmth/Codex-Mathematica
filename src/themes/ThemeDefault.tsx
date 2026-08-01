@@ -233,6 +233,10 @@ function getDailyQuote() {
 
 export function LibraryShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
   const { isLightMode } = useTheme();
+  const { ownedItems } = useProgress();
+  const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
+  const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
+
   return (
     <SceneBackground>
       <div
@@ -263,8 +267,8 @@ export function LibraryShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
           Select a volume to begin your study
         </p>
       </header>
-      <div className="z-10 flex flex-col md:flex-row items-center md:items-end gap-6 sm:gap-8 lg:gap-10 px-2 pb-12 md:pb-0" role="list">
-        {VOLUMES.map((vol) => (
+      <div className="z-10 flex flex-col md:flex-row items-center justify-center md:items-end flex-wrap gap-6 sm:gap-8 lg:gap-10 px-2 pb-12 md:pb-0" role="list">
+        {visibleVolumes.map((vol) => (
           <BookSpine key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
       </div>
@@ -643,6 +647,7 @@ function FragmentPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
       case "anim-typewriter": return "reveal-typewriter";
       case "anim-cipher":     return "reveal-cipher";
       case "anim-receipt":    return "reveal-receipt";
+      case "anim-ink-flow":   return "reveal-ink-flow";
       default:                return "";
     }
   })();

@@ -91,7 +91,7 @@ export default function Home() {
       {/* ── Area Views ── */}
       {/* ── Theme Root (Renders Archive, Library, or Shop) ── */}
       <div className="h-full overflow-hidden perspective-[2000px]">
-        <ThemeRoot activeArea={activeArea} onSelectArea={handleSelectArea} />
+        <ThemeRoot activeArea={activeArea} onSelectArea={handleSelectArea} onOpenProfile={() => setIsProfileOpen(true)} />
       </div>
 
       {/* ── Profile Panel ── */}
