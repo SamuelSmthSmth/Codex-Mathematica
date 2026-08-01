@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { VOLUMES, Volume, Chapter } from "../data/codex-data";
 import { useWorkspaceLogic } from "../hooks/useWorkspaceLogic";
-import { ChevronLeft, ChevronRight, X, Minus, Square, Folder, FileText, Monitor, Trash2, Book, Calculator, Globe, PaintBucket } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Minus, Square, Folder, FileText, Monitor, Trash2, Book, Calculator, Globe, PaintBucket, BookOpen, ShoppingBag } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { useTheme } from "../context/ThemeContext";
+import { AppArea } from "@/components/ThemeRoot";
+import LibraryView from "@/components/LibraryView";
+import ShopLayout from "@/components/ShopLayout";
 
 // Simple MathRenderer wrapper
 function MathRenderer({ children, className }: { children: string; className?: string }) {
@@ -54,7 +57,13 @@ type AppView =
   | { screen: "explorer"; volume: Volume }
   | { screen: "notepad"; volume: Volume; chapterIndex: number };
 
-export default function ThemeWindowsXP() {
+export default function ThemeWindowsXP({
+  activeArea,
+  onSelectArea,
+}: {
+  activeArea: AppArea;
+  onSelectArea: (area: AppArea) => void;
+}) {
   const [view, setView] = useState<AppView>({ screen: "desktop" });
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
   const { setIsLightMode } = useTheme();
@@ -77,6 +86,8 @@ export default function ThemeWindowsXP() {
         <DesktopIcon icon={Trash2} label="Recycle Bin" color="text-stone-300" fill="fill-stone-100" />
         <DesktopIcon icon={Calculator} label="Calculator" color="text-stone-400" fill="fill-stone-300" />
         <DesktopIcon icon={PaintBucket} label="Paint" color="text-pink-400" fill="fill-pink-500" />
+        <DesktopIcon icon={BookOpen} label="Library" color="text-green-300" fill="fill-green-600" onClick={() => onSelectArea("library")} />
+        <DesktopIcon icon={ShoppingBag} label="Store" color="text-purple-300" fill="fill-purple-600" onClick={() => onSelectArea("shop")} />
         
         {VOLUMES.map((vol, i) => (
           <DesktopIcon 
@@ -89,6 +100,66 @@ export default function ThemeWindowsXP() {
           />
         ))}
       </div>
+
+      {/* Library Window */}
+      {activeArea === "library" && (
+        <XPWindow 
+          title="Library - Internet Explorer" 
+          icon={Globe} 
+          onClose={() => onSelectArea("archive")}
+          style={{ top: "5%", left: "5%", width: "90%", height: "85%", zIndex: 10 }}
+        >
+          <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-2 text-sm">
+            <span className="text-stone-500">File</span>
+            <span className="text-stone-500">Edit</span>
+            <span className="text-stone-500">View</span>
+            <span className="text-stone-500">Favorites</span>
+            <span className="text-stone-500">Tools</span>
+            <span className="text-stone-500">Help</span>
+          </div>
+          <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-4 border-t-white border-t">
+            <div className="flex-1 flex items-center gap-2">
+              <span className="text-stone-600 text-sm">Address</span>
+              <div className="flex-1 bg-white border border-stone-400 h-6 flex items-center px-2 text-sm">
+                http://localhost/library
+              </div>
+            </div>
+          </div>
+          <div className="h-[calc(100%-5rem)] overflow-y-auto bg-white">
+            <LibraryView />
+          </div>
+        </XPWindow>
+      )}
+
+      {/* Shop Window */}
+      {activeArea === "shop" && (
+        <XPWindow 
+          title="Storefront - Internet Explorer" 
+          icon={Globe} 
+          onClose={() => onSelectArea("archive")}
+          style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: 10 }}
+        >
+          <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-2 text-sm">
+            <span className="text-stone-500">File</span>
+            <span className="text-stone-500">Edit</span>
+            <span className="text-stone-500">View</span>
+            <span className="text-stone-500">Favorites</span>
+            <span className="text-stone-500">Tools</span>
+            <span className="text-stone-500">Help</span>
+          </div>
+          <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-4 border-t-white border-t">
+            <div className="flex-1 flex items-center gap-2">
+              <span className="text-stone-600 text-sm">Address</span>
+              <div className="flex-1 bg-white border border-stone-400 h-6 flex items-center px-2 text-sm">
+                http://localhost/store
+              </div>
+            </div>
+          </div>
+          <div className="h-[calc(100%-5rem)] overflow-y-auto bg-white">
+            <ShopLayout />
+          </div>
+        </XPWindow>
+      )}
 
       {/* File Explorer (Chapters) */}
       {view.screen === "explorer" && (

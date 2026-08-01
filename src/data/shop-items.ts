@@ -24,6 +24,8 @@ export interface ShopItem {
   unlockRequirement?: string;
   /** For "archives" category: the rank tier (1 = Prestige, 2 = Standard, 3 = Grind). */
   rank?: 1 | 2 | 3;
+  /** Image URL for a thumbnail preview in the store */
+  thumbnailUrl?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,6 +58,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: "The classic, elegant look of the Codex Mathematica.",
     category: "themes",
     price: 0,
+    thumbnailUrl: "/thumbnails/theme_default.png",
   },
   {
     id: "theme-student-mixtape",
@@ -63,6 +66,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: "Transform the Archive into a 2010s student desk with CD cases and neon accents.",
     category: "themes",
     price: 2500,
+    thumbnailUrl: "/thumbnails/theme_mixtape.png",
   },
   {
     id: "theme-diner",
@@ -70,6 +74,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: "A late-night diner aesthetic. Problems served on plates; answers print on waiter receipts.",
     category: "themes",
     price: 2500,
+    thumbnailUrl: "/thumbnails/theme_diner.png",
   },
   {
     id: "theme-windows-xp",
@@ -77,6 +82,7 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: "Relive the golden age of computing. Volumes become desktop icons; the workspace is Notepad.exe.",
     category: "themes",
     price: 2000,
+    thumbnailUrl: "/thumbnails/theme_windows_xp.png",
   },
   {
     id: "theme-plain-crimson",

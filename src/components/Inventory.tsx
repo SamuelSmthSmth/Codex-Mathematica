@@ -89,16 +89,20 @@ export default function Inventory({ activeCategory }: InventoryProps) {
           >
             {/* Preview placeholder */}
             <div
-              className="w-full flex items-center justify-center"
+              className="w-full flex items-center justify-center overflow-hidden relative"
               style={{
                 height: "80px",
                 background: isLightMode ? "#f5f0e8" : "rgba(200,146,42,0.04)",
                 borderBottom: "1px solid rgba(200,146,42,0.08)",
               }}
             >
-              <span style={{ fontSize: "1.8rem" }}>
-                {SHOP_CATEGORIES.find((c) => c.id === item.category)?.icon}
-              </span>
+              {item.thumbnailUrl ? (
+                <img src={item.thumbnailUrl} alt={item.name} className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-300" />
+              ) : (
+                <span style={{ fontSize: "1.8rem" }}>
+                  {SHOP_CATEGORIES.find((c) => c.id === item.category)?.icon}
+                </span>
+              )}
             </div>
 
             <div className="p-3">

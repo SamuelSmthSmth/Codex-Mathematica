@@ -63,16 +63,20 @@ function ShopItemCard({ item }: { item: ShopItem }) {
     >
       {/* Preview area */}
       <div
-        className="relative flex items-center justify-center"
+        className="relative flex items-center justify-center overflow-hidden"
         style={{
           height: "90px",
           background: isLightMode ? "#f5f0e8" : "rgba(200,146,42,0.04)",
           borderBottom: "1px solid rgba(200,146,42,0.08)",
         }}
       >
-        <span style={{ fontSize: "2rem" }}>
-          {SHOP_CATEGORIES.find((c) => c.id === item.category)?.icon}
-        </span>
+        {item.thumbnailUrl ? (
+          <img src={item.thumbnailUrl} alt={item.name} className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-300" />
+        ) : (
+          <span style={{ fontSize: "2rem" }}>
+            {SHOP_CATEGORIES.find((c) => c.id === item.category)?.icon}
+          </span>
+        )}
 
         {/* Rank badge */}
         {rank && (

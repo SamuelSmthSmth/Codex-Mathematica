@@ -18,9 +18,15 @@ import {
   RotateCcw,
   Minus,
   Coffee,
-  Ticket
+  Ticket,
+  BookOpen,
+  ShoppingBag,
+  Archive,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
+import { AppArea } from "@/components/ThemeRoot";
+import LibraryView from "@/components/LibraryView";
+import ShopLayout from "@/components/ShopLayout";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
@@ -392,10 +398,50 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Diner Nav
+// ─────────────────────────────────────────────────────────────────────────────
+function DinerNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void }) {
+  return (
+    <div className="absolute top-4 right-8 z-50 flex gap-4">
+      <button 
+        onClick={() => onSelectArea("archive")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
+          activeArea === "archive" ? "bg-red-600 border-red-800 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)]" : "bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
+        }`}
+      >
+        <Archive size={16} /> Menu
+      </button>
+      <button 
+        onClick={() => onSelectArea("library")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
+          activeArea === "library" ? "bg-red-600 border-red-800 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)]" : "bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
+        }`}
+      >
+        <BookOpen size={16} /> Jukebox
+      </button>
+      <button 
+        onClick={() => onSelectArea("shop")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
+          activeArea === "shop" ? "bg-red-600 border-red-800 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)]" : "bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
+        }`}
+      >
+        <ShoppingBag size={16} /> Register
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Component exported for the theme engine
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ThemeDiner() {
+export default function ThemeDiner({
+  activeArea,
+  onSelectArea,
+}: {
+  activeArea: AppArea;
+  onSelectArea: (area: AppArea) => void;
+}) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
   const { setIsLightMode } = useTheme();
 
@@ -403,28 +449,53 @@ export default function ThemeDiner() {
     setIsLightMode(false);
   }, [setIsLightMode]);
 
-  if (view.screen === "shelf") {
-    return <DinerMenuShelf onSelect={(vol) => setView({ screen: "chapters", volume: vol })} />;
-  }
+  let content = null;
 
-  if (view.screen === "chapters") {
-    return (
-      <DinerCourseList
-        volume={view.volume}
-        onBack={() => setView({ screen: "shelf" })}
-        onSelectChapter={(chIndex, fragIndex) =>
-          setView({ screen: "split-ledger", volume: view.volume, chapterIndex: chIndex, initialSpreadIndex: fragIndex })
-        }
-      />
+  if (activeArea === "library") {
+    content = (
+      <div className="w-full h-full p-8 max-w-6xl mx-auto">
+        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden h-full border-4 border-stone-300">
+          <LibraryView />
+        </div>
+      </div>
     );
+  } else if (activeArea === "shop") {
+    content = (
+      <div className="w-full h-full p-8 max-w-6xl mx-auto">
+        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden h-full border-4 border-stone-300">
+          <ShopLayout />
+        </div>
+      </div>
+    );
+  } else {
+    if (view.screen === "shelf") {
+      content = <DinerMenuShelf onSelect={(vol) => setView({ screen: "chapters", volume: vol })} />;
+    } else if (view.screen === "chapters") {
+      content = (
+        <DinerCourseList
+          volume={view.volume}
+          onBack={() => setView({ screen: "shelf" })}
+          onSelectChapter={(chIndex, fragIndex) =>
+            setView({ screen: "split-ledger", volume: view.volume, chapterIndex: chIndex, initialSpreadIndex: fragIndex })
+          }
+        />
+      );
+    } else {
+      content = (
+        <DinerSpread
+          volume={view.volume}
+          chapterIndex={view.chapterIndex}
+          initialSpreadIndex={view.initialSpreadIndex}
+          onBack={() => setView({ screen: "chapters", volume: view.volume })}
+        />
+      );
+    }
   }
 
   return (
-    <DinerSpread
-      volume={view.volume}
-      chapterIndex={view.chapterIndex}
-      initialSpreadIndex={view.initialSpreadIndex}
-      onBack={() => setView({ screen: "chapters", volume: view.volume })}
-    />
+    <>
+      <DinerNav activeArea={activeArea} onSelectArea={onSelectArea} />
+      {content}
+    </>
   );
 }

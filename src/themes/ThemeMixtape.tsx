@@ -18,9 +18,15 @@ import {
   RotateCcw,
   Minus,
   Play,
-  Pause
+  Pause,
+  BookOpen,
+  ShoppingBag,
+  Archive,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
+import { AppArea } from "@/components/ThemeRoot";
+import LibraryView from "@/components/LibraryView";
+import ShopLayout from "@/components/ShopLayout";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
@@ -474,10 +480,50 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Mixtape Nav
+// ─────────────────────────────────────────────────────────────────────────────
+function MixtapeNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void }) {
+  return (
+    <div className="absolute top-4 right-8 z-50 flex gap-4">
+      <button 
+        onClick={() => onSelectArea("archive")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
+          activeArea === "archive" ? "bg-fuchsia-500 border-black text-white" : "bg-white border-black text-black hover:bg-stone-100"
+        }`}
+      >
+        <Archive size={16} /> Homework
+      </button>
+      <button 
+        onClick={() => onSelectArea("library")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
+          activeArea === "library" ? "bg-fuchsia-500 border-black text-white" : "bg-white border-black text-black hover:bg-stone-100"
+        }`}
+      >
+        <BookOpen size={16} /> Library
+      </button>
+      <button 
+        onClick={() => onSelectArea("shop")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
+          activeArea === "shop" ? "bg-fuchsia-500 border-black text-white" : "bg-white border-black text-black hover:bg-stone-100"
+        }`}
+      >
+        <ShoppingBag size={16} /> Mall
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Export
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ThemeMixtape() {
+export default function ThemeMixtape({
+  activeArea,
+  onSelectArea,
+}: {
+  activeArea: AppArea;
+  onSelectArea: (area: AppArea) => void;
+}) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
   const { setIsLightMode } = useTheme();
 
@@ -485,18 +531,59 @@ export default function ThemeMixtape() {
     setIsLightMode(true);
   }, [setIsLightMode]);
 
-  if (view.screen === "shelf") return <CDShelf onSelect={(v) => setView({ screen: "chapters", volume: v })} />;
-  if (view.screen === "chapters") return <TracklistView volume={view.volume} onSelectChapter={(idx) => setView({ screen: "split-ledger", volume: view.volume, chapterIndex: idx, initialSpreadIndex: 0 })} onClose={() => setView({ screen: "shelf" })} />;
-  
+  let content = null;
+
+  if (activeArea === "library") {
+    content = (
+      <div className="w-full h-full p-8 max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-2xl overflow-hidden h-full border-4 border-fuchsia-500">
+          <LibraryView />
+        </div>
+      </div>
+    );
+  } else if (activeArea === "shop") {
+    content = (
+      <div className="w-full h-full p-8 max-w-6xl mx-auto">
+        <div className="bg-white rounded-lg shadow-2xl overflow-hidden h-full border-4 border-fuchsia-500">
+          <ShopLayout />
+        </div>
+      </div>
+    );
+  } else {
+    if (view.screen === "shelf") {
+      content = <CDShelf onSelect={(v) => setView({ screen: "chapters", volume: v })} />;
+    } else if (view.screen === "chapters") {
+      content = <TracklistView volume={view.volume} onSelectChapter={(idx) => setView({ screen: "split-ledger", volume: view.volume, chapterIndex: idx, initialSpreadIndex: 0 })} onClose={() => setView({ screen: "shelf" })} />;
+    } else {
+      content = (
+        <MixtapeBackground>
+          <BinderReader
+            volume={view.volume}
+            chapterIndex={view.chapterIndex}
+            initialSpreadIndex={view.initialSpreadIndex}
+            onBack={() => setView({ screen: "chapters", volume: view.volume })}
+            onComplete={() => setView({ screen: "chapters", volume: view.volume })}
+          />
+        </MixtapeBackground>
+      );
+    }
+  }
+
+  // The outer background for the library/shop should also be the mixtape background
+  if (activeArea !== "archive") {
+    return (
+      <MixtapeBackground>
+        <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
+        {content}
+      </MixtapeBackground>
+    );
+  }
+
+  // For archive, some views like CDShelf have their own background wrapper (or they render full screen)
   return (
-    <MixtapeBackground>
-      <BinderReader
-        volume={view.volume}
-        chapterIndex={view.chapterIndex}
-        initialSpreadIndex={view.initialSpreadIndex}
-        onBack={() => setView({ screen: "chapters", volume: view.volume })}
-        onComplete={() => setView({ screen: "chapters", volume: view.volume })}
-      />
-    </MixtapeBackground>
+    <>
+      <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
+      {content}
+    </>
   );
 }

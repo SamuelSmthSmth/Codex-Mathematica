@@ -17,8 +17,96 @@ import {
   RotateCcw,
   BookMarked,
   Minus,
+  Archive,
+  BookOpen,
+  ShoppingBag,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
+import LibraryView from "@/components/LibraryView";
+import ShopLayout from "@/components/ShopLayout";
+import { AppArea } from "@/components/ThemeRoot";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bottom Dock
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface DockItem {
+  area: AppArea;
+  label: string;
+  Icon: React.ElementType;
+}
+
+const DOCK_ITEMS: DockItem[] = [
+  { area: "archive", label: "Archive",  Icon: Archive   },
+  { area: "library", label: "Library",  Icon: BookOpen  },
+  { area: "shop",    label: "Store",    Icon: ShoppingBag },
+];
+
+function BottomDock({
+  active,
+  onSelect,
+}: {
+  active: AppArea;
+  onSelect: (area: AppArea) => void;
+}) {
+  const { isLightMode } = useTheme();
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-0 px-2 py-2 pb-safe"
+      style={{
+        background: isLightMode
+          ? "rgba(252,250,247,0.92)"
+          : "rgba(10,7,5,0.88)",
+        backdropFilter: "blur(12px)",
+        borderTop: isLightMode
+          ? "1px solid rgba(200,146,42,0.12)"
+          : "1px solid rgba(200,146,42,0.1)",
+      }}
+      aria-label="Primary navigation"
+    >
+      {DOCK_ITEMS.map(({ area, label, Icon }) => {
+        const isActive = active === area;
+        return (
+          <button
+            key={area}
+            id={`dock-${area}`}
+            onClick={() => onSelect(area)}
+            className="flex flex-col items-center gap-1 px-8 py-2 transition-all duration-200"
+            style={{
+              color: isActive
+                ? "rgba(200,146,42,0.95)"
+                : isLightMode
+                ? "rgba(100,90,75,0.6)"
+                : "rgba(130,118,98,0.5)",
+            }}
+            aria-label={`Go to ${label}`}
+            aria-current={isActive ? "page" : undefined}
+          >
+            <Icon
+              size={isActive ? 19 : 17}
+              strokeWidth={isActive ? 1.8 : 1.4}
+              className="transition-all duration-200"
+            />
+            <span
+              className="uppercase tracking-widest"
+              style={{ fontFamily: "Georgia, serif", fontSize: "0.5rem" }}
+            >
+              {label}
+            </span>
+            {isActive && (
+              <div
+                className="absolute bottom-1 w-1 h-1 rounded-full"
+                style={{ background: "rgba(200,146,42,0.8)" }}
+                aria-hidden="true"
+              />
+            )}
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
@@ -763,7 +851,13 @@ function BackButton({ onClick, label }: { onClick: () => void; label: string }) 
 // Export Theme Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ThemeDefault() {
+export default function ThemeDefault({
+  activeArea,
+  onSelectArea,
+}: {
+  activeArea: AppArea;
+  onSelectArea: (area: AppArea) => void;
+}) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
 
   const openVolume = useCallback((volume: Volume) => {
@@ -778,31 +872,44 @@ export default function ThemeDefault() {
   const goToChapters = useCallback((volume: Volume) => setView({ screen: "chapters", volume }), []);
   const goToChapterEnd = useCallback((volume: Volume, chapterIndex: number) => setView({ screen: "chapter-end", volume, chapterIndex }), []);
 
-  if (view.screen === "shelf") return <LibraryShelf onSelect={openVolume} />;
-  if (view.screen === "chapters") return <ChapterTOC volume={view.volume} onSelectChapter={(idx) => openChapter(view.volume, idx)} onClose={goToShelf} />;
-  
-  if (view.screen === "book-reader") {
-    return (
-      <BookReader 
-        volume={view.volume} 
-        chapterIndex={view.chapterIndex} 
-        initialSpreadIndex={view.spreadIndex}
-        onBack={() => goToChapters(view.volume)}
-        onComplete={() => goToChapterEnd(view.volume, view.chapterIndex)}
-      />
-    );
+  let content = null;
+
+  if (activeArea === "library") {
+    content = <LibraryView />;
+  } else if (activeArea === "shop") {
+    content = <ShopLayout />;
+  } else {
+    // archive
+    if (view.screen === "shelf") content = <LibraryShelf onSelect={openVolume} />;
+    else if (view.screen === "chapters") content = <ChapterTOC volume={view.volume} onSelectChapter={(idx) => openChapter(view.volume, idx)} onClose={goToShelf} />;
+    else if (view.screen === "book-reader") {
+      content = (
+        <BookReader 
+          volume={view.volume} 
+          chapterIndex={view.chapterIndex} 
+          initialSpreadIndex={view.spreadIndex}
+          onBack={() => goToChapters(view.volume)}
+          onComplete={() => goToChapterEnd(view.volume, view.chapterIndex)}
+        />
+      );
+    } else if (view.screen === "chapter-end") {
+      content = (
+        <ChapterEndCard 
+          volume={view.volume} 
+          chapterIndex={view.chapterIndex} 
+          onBack={() => goToChapters(view.volume)}
+          onNext={() => openChapter(view.volume, view.chapterIndex + 1)}
+        />
+      );
+    }
   }
 
-  if (view.screen === "chapter-end") {
-    return (
-      <ChapterEndCard 
-        volume={view.volume} 
-        chapterIndex={view.chapterIndex} 
-        onBack={() => goToChapters(view.volume)}
-        onNext={() => openChapter(view.volume, view.chapterIndex + 1)}
-      />
-    );
-  }
-
-  return null;
+  return (
+    <>
+      <div className="h-full overflow-y-auto pb-16">
+        {content}
+      </div>
+      <BottomDock active={activeArea} onSelect={onSelectArea} />
+    </>
+  );
 }
