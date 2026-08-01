@@ -51,6 +51,13 @@ export const SHOP_CATEGORIES: CategoryMeta[] = [
 export const SHOP_ITEMS: ShopItem[] = [
   // ── Themes ────────────────────────────────────────────────────────────────
   {
+    id: "theme-default",
+    name: "The Default Theme",
+    description: "The classic, elegant look of the Codex Mathematica.",
+    category: "themes",
+    price: 0,
+  },
+  {
     id: "theme-student-mixtape",
     name: "Student Mixtape",
     description: "Transform the Archive into a 2010s student desk with CD cases and neon accents.",

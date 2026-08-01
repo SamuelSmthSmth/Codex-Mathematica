@@ -1,12 +1,10 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import remarkBreaks from "remark-breaks";
 import rehypeKatex from "rehype-katex";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useProgress, type SelfGrade } from "@/context/ProgressContext";
@@ -14,6 +12,7 @@ import { useWorkspaceLogic } from "@/hooks/useWorkspaceLogic";
 import {
   ArrowLeft,
   ChevronRight,
+  ChevronLeft,
   Disc3,
   CheckCheck,
   RotateCcw,
@@ -32,7 +31,7 @@ const pad3 = (n: number) => String(n).padStart(3, "0");
 type AppView =
   | { screen: "shelf" }
   | { screen: "chapters"; volume: Volume }
-  | { screen: "split-ledger"; volume: Volume; chapterIndex: number; fragment: Fragment | null };
+  | { screen: "split-ledger"; volume: Volume; chapterIndex: number; initialSpreadIndex: number };
 
 function MathRenderer({ children, className }: { children: string; className?: string }) {
   const processedText = children.replace(/\$\$([\s\S]*?)\$\$/g, (_match, inner: string) => {
@@ -78,7 +77,7 @@ function CDShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
     <MixtapeBackground>
       <header className="z-10 text-center mb-16 mt-8">
         <p className="text-pink-500 mb-2 tracking-[0.3em] uppercase font-bold text-xs font-mono drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">
-          // THE MIXTAPE VAULT //
+          {"// THE MIXTAPE VAULT //"}
         </p>
         <h1
           className="text-stone-800 font-black italic tracking-tighter"
@@ -194,7 +193,7 @@ function TracklistView({ volume, onSelectChapter, onClose }: { volume: Volume; o
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// VIEW 3 — Workspace
+// VIEW 3 — Workspace (BinderReader)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GRADE_OPTIONS: { grade: SelfGrade; label: string; icon: React.ReactNode; style: React.CSSProperties }[] = [
@@ -203,118 +202,28 @@ const GRADE_OPTIONS: { grade: SelfGrade; label: string; icon: React.ReactNode; s
   { grade: "wrong", label: "F", icon: <RotateCcw size={16} strokeWidth={2.5} />, style: { background: "#f87171", color: "#7f1d1d", border: "2px solid #ef4444" } },
 ];
 
-function MixtapeWorkspace({ volume, chapterIndex, activeFragment, onSelectFragment, onBack }: { volume: Volume; chapterIndex: number; activeFragment: Fragment | null; onSelectFragment: (frag: Fragment) => void; onBack: () => void }) {
-  const chapter = volume.chapters[chapterIndex];
-  const [conqueredIds, setConqueredIds] = useState<Set<number>>(new Set());
-  const [cachedChapterData, setCachedChapterData] = useState<Record<string, any>>({});
-  const { isGuestMode } = useAuth();
+function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: Volume; chapterIndex: number; fragment: Fragment; isLeftPage: boolean; }) {
+  const { gradePhase, setGradePhase, chosenGrade, handleGrade, handleRetry } = useWorkspaceLogic({ volume, chapterIndex, fragment });
 
-  const fetchGrimoire = () => {
-    if (isGuestMode) return;
-    const user = auth.currentUser;
-    if (!user) return;
-    const grimoireRef = collection(db, "users", user.uid, "grimoire");
-    const q = query(grimoireRef, where("volume", "==", volume.id), where("chapter", "==", chapterIndex));
-    getDocs(q).then((snap) => {
-      const ids = new Set<number>();
-      const cache: Record<string, any> = {};
-      snap.forEach((d) => {
-        const data = d.data();
-        ids.add(data.fragment_id as number);
-        cache[data.fragment_id] = data;
-      });
-      setConqueredIds(ids);
-      setCachedChapterData(cache);
-    }).catch(() => {});
-  };
-
-  useEffect(() => {
-    fetchGrimoire();
-    const handleUpdate = () => fetchGrimoire();
-    window.addEventListener("grimoire-updated", handleUpdate);
-    return () => window.removeEventListener("grimoire-updated", handleUpdate);
-  }, [volume.id, chapterIndex, isGuestMode]);
-
+  const radius = isLeftPage ? "8px 0px 0px 8px" : "0px 8px 8px 0px";
+  
   return (
-    <MixtapeBackground>
-      <nav className="w-full max-w-5xl z-10 mb-6 flex justify-between items-center">
-        <button onClick={onBack} className="font-mono text-sm text-pink-600 hover:text-pink-500 hover:-translate-x-1 transition-all flex items-center gap-2 font-bold">
-          <ArrowLeft size={16} /> BACK TO SETLIST
-        </button>
-      </nav>
-
-      <div className="w-full max-w-5xl flex gap-6 flex-col md:flex-row z-10 h-[calc(100vh-8rem)]">
-        
-        {/* LEFT COLUMN: Sidebar Setlist */}
-        <aside className="w-full md:w-[30%] bg-white rounded shadow border border-stone-200 overflow-hidden flex flex-col">
-          <div className="bg-stone-800 text-white p-4 flex items-center gap-3">
-            <Disc3 className="animate-[spin_4s_linear_infinite]" size={24} color="#ec4899" />
-            <div>
-              <div className="font-mono text-xs text-pink-400">NOW PLAYING</div>
-              <div className="font-bold text-sm truncate">{chapter.theme}</div>
-            </div>
-          </div>
-          <div className="overflow-y-auto flex-1">
-            {chapter.fragments.map((frag, idx) => {
-              const isActive = activeFragment?.id === frag.id;
-              const isConquered = conqueredIds.has(frag.id);
-              return (
-                <button
-                  key={frag.id}
-                  onClick={() => onSelectFragment(frag)}
-                  className={`w-full text-left px-4 py-3 border-b border-stone-100 flex items-center gap-3 transition-colors ${isActive ? "bg-pink-50" : "hover:bg-stone-50"}`}
-                >
-                  <div className={`font-mono text-xs font-bold w-6 text-right ${isActive ? "text-pink-500" : "text-stone-400"}`}>
-                    {idx + 1}.
-                  </div>
-                  <div className={`flex-1 font-mono text-xs truncate ${isActive ? "text-stone-900 font-bold" : "text-stone-500"}`}>
-                    {frag.problem_latex}
-                  </div>
-                  {isConquered && <CheckCheck size={14} className="text-green-500" />}
-                </button>
-              );
-            })}
-          </div>
-        </aside>
-
-        {/* RIGHT COLUMN: Active Track (Notebook Paper) */}
-        <main className="flex-1 bg-white shadow-xl rounded border border-stone-200 relative overflow-y-auto">
-          {activeFragment ? (
-            <NotebookDesk 
-              volume={volume} 
-              chapterIndex={chapterIndex} 
-              fragment={activeFragment}
-              cachedData={cachedChapterData[activeFragment.id]}
-              onCacheUpdate={(fragId, data) => setCachedChapterData(prev => ({ ...prev, [fragId]: data }))}
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center text-stone-400 font-mono text-sm bg-stone-50">
-              [ SELECT A TRACK TO PLAY ]
-            </div>
-          )}
-        </main>
-      </div>
-    </MixtapeBackground>
-  );
-}
-
-function NotebookDesk({ volume, chapterIndex, fragment, cachedData, onCacheUpdate }: { volume: Volume; chapterIndex: number; fragment: Fragment; cachedData?: any; onCacheUpdate: (fragId: number, data: any) => void; }) {
-  const { gradePhase, setGradePhase, chosenGrade, isAlreadyConquered, handleGrade, handleRetry } = useWorkspaceLogic({ volume, chapterIndex, fragment, cachedData, onCacheUpdate });
-
-  return (
-    <div className="relative min-h-full pb-10">
-      {/* Notebook styling */}
-      <div className="absolute top-0 bottom-0 left-12 w-px bg-red-400/60 z-0 pointer-events-none" />
+    <article className="w-full h-full relative flex flex-col overflow-hidden transition-all duration-500 bg-white" style={{ borderRadius: radius, boxShadow: isLeftPage ? "inset -10px 0 20px rgba(0,0,0,0.05)" : "inset 10px 0 20px rgba(0,0,0,0.05)" }}>
+      {/* Notebook Paper Lines */}
       <div className="absolute inset-0 bg-[linear-gradient(transparent_27px,#60a5fa_28px)] bg-[length:100%_28px] opacity-30 z-0 pointer-events-none" />
-      
-      <div className="relative z-10 px-16 pt-10">
+      <div className={`absolute top-0 bottom-0 ${isLeftPage ? 'right-12' : 'left-12'} w-px bg-red-400/60 z-0 pointer-events-none`} />
+
+      <div className="relative z-10 flex-1 overflow-y-auto px-10 md:px-14 py-12" style={{ scrollbarWidth: "none" }}>
+        
         <h3 className="font-mono font-bold text-stone-800 text-lg mb-6 underline decoration-pink-500 decoration-2 underline-offset-4">
           Track {pad3(fragment.id)}
         </h3>
 
         {/* Problem */}
         <div className="bg-stone-50/80 p-6 rounded border border-stone-200 shadow-inner mb-8">
-          <MathRenderer className="[&_.katex]:text-xl text-stone-800">{`$$${fragment.problem_latex}$$`}</MathRenderer>
+          <MathRenderer className="text-stone-800 math-lg">
+            {`$$${fragment.problem_latex}$$`}
+          </MathRenderer>
         </div>
 
         {/* Controls */}
@@ -331,17 +240,21 @@ function NotebookDesk({ volume, chapterIndex, fragment, cachedData, onCacheUpdat
         {/* Revealed */}
         {(gradePhase === "revealed" || gradePhase === "graded") && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-            <h4 className="font-mono font-bold text-pink-600 text-sm mb-4">/// SOLUTION</h4>
+            <h4 className="font-mono font-bold text-pink-600 text-sm mb-4">{"/// SOLUTION"}</h4>
             
             {/* LED Screen aesthetic for answer */}
-            <div className="bg-stone-900 border-4 border-stone-700 p-6 rounded-lg shadow-inner mb-8 font-mono">
-              <MathRenderer className="[&_.katex]:text-2xl text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">{`$$${fragment.solution_latex}$$`}</MathRenderer>
+            <div className="bg-stone-900 border-4 border-stone-700 p-6 rounded-lg shadow-inner mb-8 font-mono relative overflow-hidden">
+               {/* LED scanline */}
+               <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none" />
+               <MathRenderer className="text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)] relative z-10">
+                 {`$$${fragment.solution_latex}$$`}
+               </MathRenderer>
             </div>
 
             {/* Grading */}
             {gradePhase === "revealed" && (
               <div className="bg-yellow-50 border border-yellow-200 p-6 rounded shadow-sm">
-                <p className="font-mono font-bold text-stone-700 mb-4">TEACHER'S GRADE:</p>
+                <p className="font-mono font-bold text-stone-700 mb-4">TEACHER&apos;S GRADE:</p>
                 <div className="flex gap-4">
                   {GRADE_OPTIONS.map(({ grade, label, style }) => (
                     <button
@@ -383,6 +296,179 @@ function NotebookDesk({ volume, chapterIndex, fragment, cachedData, onCacheUpdat
           </div>
         )}
       </div>
+    </article>
+  );
+}
+
+function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComplete }: { volume: Volume; chapterIndex: number; initialSpreadIndex: number; onBack: () => void; onComplete: () => void; }) {
+  const chapter = volume.chapters[chapterIndex];
+  const numSpreads = Math.ceil(chapter.fragments.length / 2);
+  const [currentIndex, setCurrentIndex] = useState(initialSpreadIndex);
+  
+  // Flat flip animation state
+  const [animState, setAnimState] = useState<{ type: 'next' | 'prev', fromIndex: number, toIndex: number } | null>(null);
+
+  const handleNext = () => {
+    if (animState) return;
+    if (currentIndex < numSpreads - 1) {
+      setAnimState({ type: 'next', fromIndex: currentIndex, toIndex: currentIndex + 1 });
+      setCurrentIndex(currentIndex + 1);
+      setTimeout(() => setAnimState(null), 350);
+    } else {
+      onComplete();
+    }
+  };
+
+  const handlePrev = () => {
+    if (animState) return;
+    if (currentIndex > 0) {
+      setAnimState({ type: 'prev', fromIndex: currentIndex, toIndex: currentIndex - 1 });
+      setCurrentIndex(currentIndex - 1);
+      setTimeout(() => setAnimState(null), 350);
+    } else {
+      onBack();
+    }
+  };
+
+  // Calculate fragments for static pages
+  const currentLeftFrag = chapter.fragments[currentIndex * 2];
+  const currentRightFrag = chapter.fragments[currentIndex * 2 + 1];
+
+  let staticLeftFrag = currentLeftFrag;
+  let staticRightFrag = currentRightFrag;
+  let flipper = null;
+
+  if (animState) {
+    const isNext = animState.type === 'next';
+    const oldLeftFrag = chapter.fragments[animState.fromIndex * 2];
+    const oldRightFrag = chapter.fragments[animState.fromIndex * 2 + 1];
+
+    if (isNext) {
+      staticLeftFrag = oldLeftFrag;
+      staticRightFrag = currentRightFrag;
+      flipper = (
+        <div className="absolute inset-0 origin-left flex transition-transform duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+             style={{ transform: "rotateY(-90deg) scaleX(0)" }}
+             ref={el => {
+               if (el) {
+                 requestAnimationFrame(() => {
+                   el.style.transform = "rotateY(-180deg) scaleX(1)";
+                 });
+               }
+             }}
+        >
+          {/* Flipper front (shows old right frag swinging over) */}
+          <div className="absolute inset-0 backface-hidden flex">
+            {oldRightFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={oldRightFrag} isLeftPage={false} /> : <div className="w-full h-full bg-white rounded-r-lg shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-l border-stone-200" />}
+          </div>
+          {/* Flipper back (shows new left frag swinging in) */}
+          <div className="absolute inset-0 backface-hidden flex" style={{ transform: "rotateY(180deg)" }}>
+            {currentLeftFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={currentLeftFrag} isLeftPage={true} /> : <div className="w-full h-full bg-white rounded-l-lg shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-r border-stone-200" />}
+          </div>
+        </div>
+      );
+    } else {
+      staticLeftFrag = currentLeftFrag;
+      staticRightFrag = oldRightFrag;
+      flipper = (
+        <div className="absolute inset-0 origin-right flex transition-transform duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
+             style={{ transform: "rotateY(90deg) scaleX(0)", left: "-100%" }}
+             ref={el => {
+               if (el) {
+                 requestAnimationFrame(() => {
+                   el.style.transform = "rotateY(180deg) scaleX(1)";
+                 });
+               }
+             }}
+        >
+          <div className="absolute inset-0 backface-hidden flex">
+            {oldLeftFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={oldLeftFrag} isLeftPage={true} /> : <div className="w-full h-full bg-white rounded-l-lg shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-r border-stone-200" />}
+          </div>
+          <div className="absolute inset-0 backface-hidden flex" style={{ transform: "rotateY(180deg)" }}>
+            {currentRightFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={currentRightFrag} isLeftPage={false} /> : <div className="w-full h-full bg-white rounded-r-lg shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-l border-stone-200" />}
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Draw spiral rings in CSS
+  const binderRings = Array.from({ length: 24 }).map((_, i) => (
+    <div key={i} className="w-10 h-3 rounded-full bg-gradient-to-b from-gray-300 via-gray-100 to-gray-400 shadow-md border border-gray-400 absolute left-1/2 -translate-x-1/2 z-30" style={{ top: `${4 + i * 4}%` }} />
+  ));
+
+  return (
+    <div className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center min-h-0 h-full py-4 perspective-[2000px]">
+      
+      {/* Top CD Player */}
+      <div className="mb-6 flex flex-col items-center z-10 drop-shadow-xl">
+        <div className="w-40 h-40 bg-stone-800 rounded-full border-4 border-stone-900 shadow-2xl relative flex items-center justify-center overflow-hidden">
+           {/* Center pin */}
+           <div className="absolute w-6 h-6 bg-stone-900 rounded-full border-2 border-stone-700 z-20" />
+           {/* Spinning disc */}
+           <div className={`absolute inset-1 rounded-full bg-gradient-to-tr from-stone-400 via-white to-stone-400 z-10 flex items-center justify-center ${animState ? '' : 'animate-[spin_4s_linear_infinite]'}`} style={{ backgroundImage: 'conic-gradient(from 0deg, #d6d3d1, #f5f5f4, #d6d3d1, #a8a29e, #d6d3d1)' }}>
+              <div className="w-12 h-12 rounded-full bg-transparent border-4 border-white/40" />
+              <div className="absolute inset-0 bg-[repeating-radial-gradient(circle_at_center,transparent,transparent_2px,rgba(0,0,0,0.03)_3px)]" />
+           </div>
+        </div>
+        <div className="bg-stone-900 text-pink-500 font-mono text-xs px-4 py-1 mt-[-10px] z-20 rounded-full border border-stone-700 shadow-lg flex items-center gap-2">
+          {animState ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" className="animate-pulse" />}
+          TRACK {pad3(currentLeftFrag?.id || currentRightFrag?.id || 0)}
+        </div>
+      </div>
+
+      <div className="relative w-full flex-1 flex transition-transform duration-500 ease-out preserve-3d" style={{ opacity: 1 }}>
+        
+        {/* Nav Arrows */}
+        <button
+          onClick={handlePrev}
+          disabled={!!animState && animState.type !== 'prev'}
+          className={`absolute left-0 -ml-16 md:-ml-20 top-1/2 -translate-y-1/2 z-40 bg-stone-800 text-white p-4 rounded-full shadow-lg border-2 border-stone-700 hover:bg-stone-700 active:scale-95 transition-all ${currentIndex === 0 ? "opacity-50 hover:bg-stone-800" : ""}`}
+        >
+          <ChevronLeft size={24} strokeWidth={3} />
+        </button>
+
+        <button
+          onClick={handleNext}
+          disabled={!!animState && animState.type !== 'next'}
+          className={`absolute right-0 -mr-16 md:-mr-20 top-1/2 -translate-y-1/2 z-40 bg-stone-800 text-white p-4 rounded-full shadow-lg border-2 border-stone-700 hover:bg-stone-700 active:scale-95 transition-all ${(currentIndex === numSpreads - 1 && !animState) ? "bg-pink-600 border-pink-500 hover:bg-pink-500" : ""}`}
+        >
+          {(currentIndex === numSpreads - 1 && !animState) ? <CheckCheck size={24} strokeWidth={3} /> : <ChevronRight size={24} strokeWidth={3} />}
+        </button>
+
+        {/* Notebook Spread */}
+        <div className="w-full flex shadow-2xl relative bg-stone-300 rounded-lg p-1 border border-stone-400">
+           {/* Center shadow/crease */}
+           <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-8 bg-gradient-to-r from-transparent via-black/20 to-transparent z-20 pointer-events-none" />
+           {/* Binder Rings */}
+           {binderRings}
+
+           {/* Left Page Container */}
+           <div className="flex-1 relative z-10 perspective-[2000px]">
+             {staticLeftFrag ? (
+                <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={staticLeftFrag} isLeftPage={true} />
+             ) : (
+                <div className="w-full h-full bg-white rounded-l-lg shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-r border-stone-200" />
+             )}
+           </div>
+
+           {/* Right Page Container */}
+           <div className="flex-1 relative z-10 perspective-[2000px]">
+             {staticRightFrag ? (
+                <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={staticRightFrag} isLeftPage={false} />
+             ) : (
+                <div className="w-full h-full bg-white rounded-r-lg shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-l border-stone-200" />
+             )}
+             
+             {/* Flipper overlays right page */}
+             {flipper && (
+                <div className="absolute inset-0 z-30 pointer-events-none">
+                  {flipper}
+                </div>
+             )}
+           </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -393,16 +479,24 @@ function NotebookDesk({ volume, chapterIndex, fragment, cachedData, onCacheUpdat
 
 export default function ThemeMixtape() {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
+  const { setIsLightMode } = useTheme();
+
+  useEffect(() => {
+    setIsLightMode(true);
+  }, [setIsLightMode]);
 
   if (view.screen === "shelf") return <CDShelf onSelect={(v) => setView({ screen: "chapters", volume: v })} />;
-  if (view.screen === "chapters") return <TracklistView volume={view.volume} onSelectChapter={(idx) => setView({ screen: "split-ledger", volume: view.volume, chapterIndex: idx, fragment: null })} onClose={() => setView({ screen: "shelf" })} />;
+  if (view.screen === "chapters") return <TracklistView volume={view.volume} onSelectChapter={(idx) => setView({ screen: "split-ledger", volume: view.volume, chapterIndex: idx, initialSpreadIndex: 0 })} onClose={() => setView({ screen: "shelf" })} />;
+  
   return (
-    <MixtapeWorkspace
-      volume={view.volume}
-      chapterIndex={view.chapterIndex}
-      activeFragment={view.fragment}
-      onSelectFragment={(frag) => setView({ screen: "split-ledger", volume: view.volume, chapterIndex: view.chapterIndex, fragment: frag })}
-      onBack={() => setView({ screen: "chapters", volume: view.volume })}
-    />
+    <MixtapeBackground>
+      <BinderReader
+        volume={view.volume}
+        chapterIndex={view.chapterIndex}
+        initialSpreadIndex={view.initialSpreadIndex}
+        onBack={() => setView({ screen: "chapters", volume: view.volume })}
+        onComplete={() => setView({ screen: "chapters", volume: view.volume })}
+      />
+    </MixtapeBackground>
   );
 }

@@ -199,6 +199,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }
   }, [updateSave]);
 
+  useEffect(() => {
+    // @ts-ignore
+    window.cheatCredits = (amount = 10000) => {
+      updateSave((prev) => ({ ...prev, credits: prev.credits + amount }));
+      console.log(`Added ${amount} credits!`);
+    };
+  }, [updateSave]);
+
   const buyItem = useCallback((itemId: string, price: number): boolean => {
     let success = false;
     updateSave((prev) => {

@@ -16,6 +16,7 @@ export interface PrintData {
 
 interface ThemeContextValue {
   isLightMode: boolean;
+  setIsLightMode: (val: boolean) => void;
   toggleTheme: () => void;
   isFocusMode: boolean;
   setIsFocusMode: (val: boolean | ((prev: boolean) => boolean)) => void;
@@ -110,6 +111,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     <ThemeContext.Provider
       value={{
         isLightMode,
+        setIsLightMode,
         toggleTheme,
         isFocusMode,
         setIsFocusMode,
