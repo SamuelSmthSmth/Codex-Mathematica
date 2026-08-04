@@ -79,10 +79,6 @@ function MixtapeBackground({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function CDShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
-  const { ownedItems } = useProgress();
-  const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
-  const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
-
   return (
     <MixtapeBackground>
       <header className="z-10 text-center mb-16 mt-8">
@@ -98,7 +94,7 @@ function CDShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
       </header>
 
       <div className="z-10 flex flex-wrap justify-center gap-10 px-4 max-w-5xl">
-        {visibleVolumes.map((vol) => (
+        {VOLUMES.map((vol) => (
           <CDCase key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
       </div>
@@ -152,6 +148,7 @@ function CDCase({ volume, onSelect }: { volume: Volume; onSelect: (v: Volume) =>
 // ─────────────────────────────────────────────────────────────────────────────
 
 function TracklistView({ volume, onSelectChapter, onClose }: { volume: Volume; onSelectChapter: (idx: number) => void; onClose: () => void }) {
+  const { ownedItems } = useProgress();
   return (
     <MixtapeBackground>
       <nav className="w-full max-w-2xl z-10 mb-8 flex justify-between items-center">
@@ -179,23 +176,31 @@ function TracklistView({ volume, onSelectChapter, onClose }: { volume: Volume; o
         <div className="relative pb-10">
           <div className="absolute inset-0 bg-[linear-gradient(transparent_27px,#60a5fa_28px)] bg-[length:100%_28px] opacity-30 pointer-events-none" />
           
-          {volume.chapters.map((chapter, idx) => (
-            <button
-              key={idx}
-              onClick={() => onSelectChapter(idx)}
-              className="w-full text-left relative z-10 hover:bg-yellow-100/50 transition-colors h-[56px] flex items-center px-4 group"
-            >
-              <div className="w-12 text-right pr-4 font-mono font-bold text-stone-400 group-hover:text-stone-600">
-                {idx + 1}.
-              </div>
-              <div className="flex-1 font-sans text-stone-700 font-semibold truncate group-hover:text-stone-900">
-                {chapter.theme}
-              </div>
-              <div className="font-mono text-xs text-stone-400 pr-4">
-                [{chapter.fragments.length} trks]
-              </div>
-            </button>
-          ))}
+          {volume.chapters.map((chapter, idx) => {
+            if (chapter.packId && !ownedItems.has(chapter.packId)) return null;
+            return (
+              <button
+                key={idx}
+                onClick={() => onSelectChapter(idx)}
+                className="w-full text-left relative z-10 hover:bg-yellow-100/50 transition-colors h-[56px] flex items-center px-4 group"
+              >
+                <div className="w-12 text-right pr-4 font-mono font-bold text-stone-400 group-hover:text-stone-600 flex flex-col items-end">
+                  <span>{idx + 1}.</span>
+                </div>
+                <div className="flex-1 font-sans text-stone-700 font-semibold truncate group-hover:text-stone-900 flex items-center gap-2">
+                  {chapter.theme}
+                  {chapter.packId && (
+                    <span className="px-1.5 py-0.5 rounded text-[0.55rem] font-bold tracking-widest bg-fuchsia-500/20 text-fuchsia-700 border border-fuchsia-500/30">
+                      EXPANSION
+                    </span>
+                  )}
+                </div>
+                <div className="font-mono text-xs text-stone-400 pr-4">
+                  [{chapter.fragments.length} trks]
+                </div>
+              </button>
+            );
+          })}
         </div>
       </main>
     </MixtapeBackground>
@@ -231,7 +236,7 @@ function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
 
         {/* Problem */}
         <div className="bg-stone-50/80 p-6 rounded border border-stone-200 shadow-inner mb-8">
-          <MathRenderer className="text-stone-800 math-lg">
+          <MathRenderer className="text-stone-800 [&_.katex]:text-stone-800 [&_.katex]:text-4xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden">
             {`$$${fragment.problem_latex}$$`}
           </MathRenderer>
         </div>
@@ -256,7 +261,7 @@ function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
             <div className="bg-stone-900 border-4 border-stone-700 p-6 rounded-lg shadow-inner mb-8 font-mono relative overflow-hidden">
                {/* LED scanline */}
                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none" />
-               <MathRenderer className="text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)] relative z-10">
+               <MathRenderer className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] relative z-10 [&_.katex]:text-white [&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden">
                  {`$$${fragment.solution_latex}$$`}
                </MathRenderer>
             </div>
@@ -490,6 +495,14 @@ function MixtapeNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelec
   return (
     <div className="absolute top-4 right-8 z-50 flex gap-4">
       <button 
+        onClick={() => onSelectArea("shop")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
+          activeArea === "shop" ? "bg-fuchsia-500 border-black text-white" : "bg-white border-black text-black hover:bg-stone-100"
+        }`}
+      >
+        <ShoppingBag size={16} /> Mall
+      </button>
+      <button 
         onClick={() => onSelectArea("archive")}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
           activeArea === "archive" ? "bg-fuchsia-500 border-black text-white" : "bg-white border-black text-black hover:bg-stone-100"
@@ -504,14 +517,6 @@ function MixtapeNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelec
         }`}
       >
         <BookOpen size={16} /> Library
-      </button>
-      <button 
-        onClick={() => onSelectArea("shop")}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
-          activeArea === "shop" ? "bg-fuchsia-500 border-black text-white" : "bg-white border-black text-black hover:bg-stone-100"
-        }`}
-      >
-        <ShoppingBag size={16} /> Mall
       </button>
     </div>
   );
@@ -578,7 +583,9 @@ export default function ThemeMixtape({
     return (
       <MixtapeBackground>
         <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
-        {content}
+        <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full">
+          {content}
+        </div>
       </MixtapeBackground>
     );
   }
@@ -587,7 +594,9 @@ export default function ThemeMixtape({
   return (
     <>
       <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
-      {content}
+      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full">
+        {content}
+      </div>
     </>
   );
 }

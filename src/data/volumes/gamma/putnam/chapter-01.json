@@ -1,0 +1,67 @@
+{
+  "volume": "gamma",
+  "chapter": 0,
+  "theme": "Putnam Integration Challenges",
+  "fragments": [
+    {
+      "id": 10045,
+      "original_id": "PUT1_001",
+      "problem_latex": "\\int_0^{\\pi/2} \\frac{\\sqrt{\\sin x}}{\\sqrt{\\sin x} + \\sqrt{\\cos x}} \\, dx",
+      "solution_latex": "\\frac{\\pi}{4}"
+    },
+    {
+      "id": 10046,
+      "original_id": "PUT1_002",
+      "problem_latex": "\\int_0^{\\infty} \\frac{1}{1+x^2} \\frac{1}{1+x^{\\pi}} \\, dx",
+      "solution_latex": "\\frac{\\pi}{4}"
+    },
+    {
+      "id": 10047,
+      "original_id": "PUT1_003",
+      "problem_latex": "\\int_0^1 \\frac{\\ln(1+x)}{1+x^2} \\, dx",
+      "solution_latex": "\\frac{\\pi}{8} \\ln 2"
+    },
+    {
+      "id": 10048,
+      "original_id": "PUT1_004",
+      "problem_latex": "\\int_2^4 \\frac{\\sqrt{\\ln(9-x)}}{\\sqrt{\\ln(9-x)} + \\sqrt{\\ln(x+3)}} \\, dx",
+      "solution_latex": "1"
+    },
+    {
+      "id": 10049,
+      "original_id": "PUT1_005",
+      "problem_latex": "\\int_0^{\\pi} \\frac{x \\sin x}{1+\\cos^2 x} \\, dx",
+      "solution_latex": "\\frac{\\pi^2}{4}"
+    },
+    {
+      "id": 10050,
+      "original_id": "PUT1_006",
+      "problem_latex": "\\int_{-\\infty}^{\\infty} e^{-x^2} \\cos(2tx) \\, dx",
+      "solution_latex": "\\sqrt{\\pi} e^{-t^2}"
+    },
+    {
+      "id": 10051,
+      "original_id": "PUT1_007",
+      "problem_latex": "\\int_0^1 \\int_0^1 \\frac{1}{1-xy} \\, dx \\, dy",
+      "solution_latex": "\\frac{\\pi^2}{6}"
+    },
+    {
+      "id": 10052,
+      "original_id": "PUT1_008",
+      "problem_latex": "\\int_0^{\\pi/2} \\ln(1+\\tan x) \\, dx",
+      "solution_latex": "\\frac{\\pi}{8} \\ln 2"
+    },
+    {
+      "id": 10053,
+      "original_id": "PUT1_009",
+      "problem_latex": "\\int_0^1 \\frac{\\arctan x}{x} \\, dx",
+      "solution_latex": "G"
+    },
+    {
+      "id": 10054,
+      "original_id": "PUT1_010",
+      "problem_latex": "\\int_0^1 x^{-x} \\, dx",
+      "solution_latex": "\\sum_{n=1}^{\\infty} n^{-n}"
+    }
+  ]
+}

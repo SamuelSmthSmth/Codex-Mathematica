@@ -37,19 +37,22 @@ interface DockItem {
 }
 
 const DOCK_ITEMS: DockItem[] = [
-  { area: "archive", label: "Archive",  Icon: Archive   },
-  { area: "library", label: "Library",  Icon: BookOpen  },
-  { area: "shop",    label: "Store",    Icon: ShoppingBag },
+  { area: "shop",    label: "Store",   Icon: ShoppingBag },
+  { area: "archive", label: "Archive", Icon: Archive      },
+  { area: "library", label: "Library", Icon: BookOpen     },
 ];
 
 function BottomDock({
   active,
   onSelect,
+  onOpenProfile,
 }: {
   active: AppArea;
   onSelect: (area: AppArea) => void;
+  onOpenProfile?: () => void;
 }) {
   const { isLightMode } = useTheme();
+  const inactiveColor = isLightMode ? "rgba(100,90,75,0.6)" : "rgba(130,118,98,0.5)";
 
   return (
     <nav
@@ -76,9 +79,7 @@ function BottomDock({
             style={{
               color: isActive
                 ? "rgba(200,146,42,0.95)"
-                : isLightMode
-                ? "rgba(100,90,75,0.6)"
-                : "rgba(130,118,98,0.5)",
+                : inactiveColor,
             }}
             aria-label={`Go to ${label}`}
             aria-current={isActive ? "page" : undefined}
@@ -104,6 +105,19 @@ function BottomDock({
           </button>
         );
       })}
+      {/* Profile button */}
+      {onOpenProfile && (
+        <button
+          id="dock-profile"
+          onClick={onOpenProfile}
+          className="flex flex-col items-center gap-1 px-8 py-2 transition-all duration-200"
+          style={{ color: inactiveColor }}
+          aria-label="Open profile"
+        >
+          <Feather size={17} strokeWidth={1.4} className="transition-all duration-200" />
+          <span className="uppercase tracking-widest" style={{ fontFamily: "Georgia, serif", fontSize: "0.5rem" }}>Profile</span>
+        </button>
+      )}
     </nav>
   );
 }
@@ -372,6 +386,7 @@ function BookSpine({ volume, onSelect }: { volume: Volume; onSelect: (v: Volume)
 
 function ChapterTOC({ volume, onSelectChapter, onClose }: { volume: Volume; onSelectChapter: (idx: number) => void; onClose: () => void }) {
   const { isLightMode } = useTheme();
+  const { ownedItems } = useProgress();
   return (
     <SceneBackground volume={volume}>
       <nav className="w-full max-w-2xl z-10 mb-6"><BackButton onClick={onClose} label="Return to the Archive" /></nav>
@@ -405,9 +420,12 @@ function ChapterTOC({ volume, onSelectChapter, onClose }: { volume: Volume; onSe
           
           <main className="relative z-10 max-w-lg mx-auto">
             <div className="flex flex-col gap-2">
-              {volume.chapters.map((chapter, idx) => (
-                <ChapterTOCRow key={idx} chapter={chapter} index={idx} volume={volume} onSelect={() => onSelectChapter(idx)} />
-              ))}
+              {volume.chapters.map((chapter, idx) => {
+                if (chapter.packId && !ownedItems.has(chapter.packId)) return null;
+                return (
+                  <ChapterTOCRow key={idx} chapter={chapter} index={idx} volume={volume} onSelect={() => onSelectChapter(idx)} />
+                );
+              })}
             </div>
           </main>
         </div>
@@ -434,17 +452,35 @@ function ChapterTOCRow({ chapter, index, volume, onSelect }: { chapter: Chapter;
       />
       <div className="flex items-center justify-between py-4 px-6 relative z-10">
         <div className="flex flex-col">
-           <p className="uppercase tracking-widest transition-colors duration-300" style={{ fontFamily: "Georgia, serif", fontSize: "0.65rem", color: hovered ? volume.accent : (isLightMode ? "#78716c" : "rgba(200,180,140,0.6)") }}>CHAPTER {toRoman(index)}</p>
+           <div className="flex items-center gap-3">
+             <p className="uppercase tracking-widest transition-colors duration-300" style={{ fontFamily: "Georgia, serif", fontSize: "0.65rem", color: hovered ? volume.accent : (isLightMode ? "#78716c" : "rgba(200,180,140,0.6)") }}>CHAPTER {toRoman(index)}</p>
+             {chapter.packId && (
+               <span className="px-1.5 py-0.5 rounded text-[0.55rem] font-bold tracking-widest bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                 EXPANSION
+               </span>
+             )}
+           </div>
            <p className="mt-1 transition-all duration-300" style={{ fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif", fontSize: "1.25rem", color: hovered ? (isLightMode ? volume.accent : "#fff") : (isLightMode ? "#44403c" : "rgba(220,210,190,0.9)"), textShadow: hovered && !isLightMode ? `0 0 15px ${volume.accent}60` : 'none', transform: hovered ? 'translateX(4px)' : 'none' }}>{chapter.theme}</p>
         </div>
-        <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-           {chapter.fragments.map(frag => {
-             const grade = getGrimoireGrade(frag.id);
-             const indicator = grade ? GRADE_INDICATOR[grade] : { bg: isLightMode ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", shadow: "none" };
-             return (
-               <div key={frag.id} style={{ width: "6px", height: "6px", borderRadius: "50%", background: indicator.bg, boxShadow: hovered ? indicator.shadow : 'none' }} />
-             );
-           })}
+        <div className="flex flex-col items-end justify-center gap-2">
+          <div className="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+             {chapter.fragments.map(frag => {
+               const grade = getGrimoireGrade(frag.id);
+               const indicator = grade ? GRADE_INDICATOR[grade] : { bg: isLightMode ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)", shadow: "none" };
+               return (
+                 <div key={frag.id} style={{ width: "6px", height: "6px", borderRadius: "50%", background: indicator.bg, boxShadow: hovered ? indicator.shadow : 'none' }} />
+               );
+             })}
+          </div>
+          {(() => {
+            const completedCount = chapter.fragments.filter(f => getGrimoireGrade(f.id)).length;
+            const total = chapter.fragments.length;
+            return completedCount > 0 ? (
+              <span className="text-[0.65rem] font-mono tracking-widest" style={{ color: isLightMode ? "#a8a29e" : "#57534e" }}>
+                {completedCount}/{total} COMPLETE
+              </span>
+            ) : null;
+          })()}
         </div>
       </div>
       <div className="w-full h-px opacity-30 mt-1" style={{ background: hovered ? `linear-gradient(to right, transparent, ${volume.accent}, transparent)` : `linear-gradient(to right, ${volume.accent}40, transparent)` }} />
@@ -682,7 +718,7 @@ function FragmentPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
           <section className="mt-10 mb-10 flex flex-col items-center" aria-label="Mathematical problem">
             <p className="uppercase tracking-[0.4em] mb-6 text-stone-500/80" style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem" }}>Problem</p>
             <div className={`w-full max-w-full py-12 px-6 text-center border rounded-sm transition-colors duration-300 ${isLightMode ? "bg-white border-stone-200" : "bg-black/30 border-stone-800/80"}`} style={{ boxShadow: isLightMode ? "0 4px 15px rgba(0,0,0,0.02)" : "inset 0 4px 20px rgba(0,0,0,0.2)" }}>
-              <MathRenderer className="[&_.katex]:text-2xl [&_.katex-display]:my-0 text-stone-200 overflow-x-auto overflow-y-hidden">{`$$
+              <MathRenderer className={`[&_.katex]:text-4xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden ${isLightMode ? "[&_.katex]:text-stone-900 text-stone-900" : "[&_.katex]:text-stone-200 text-stone-200"}`}>{`$$
 ${fragment.problem_latex}
 $$`}</MathRenderer>
             </div>
@@ -712,7 +748,7 @@ $$`}</MathRenderer>
                   <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, rgba(200,146,42,0.25))" }} />
                 </div>
                 <div className="w-full py-10 px-6 text-center mb-8" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.18)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px rgba(200,146,42,0.04), inset 0 1px 0 rgba(200,146,42,0.06)" }}>
-                  <MathRenderer className="[&_.katex]:text-xl text-amber-100/85 [&_.katex-display]:my-0 overflow-x-auto overflow-y-hidden">{`$$${fragment.solution_latex}$$`}</MathRenderer>
+                  <MathRenderer className={`[&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden ${isLightMode ? "[&_.katex]:text-stone-900 text-stone-900" : "[&_.katex]:text-amber-100/85 text-amber-100/85"}`}>{`$$${fragment.solution_latex}$$`}</MathRenderer>
                 </div>
 
                 {gradePhase === "revealed" && (
@@ -859,9 +895,11 @@ function BackButton({ onClick, label }: { onClick: () => void; label: string }) 
 export default function ThemeDefault({
   activeArea,
   onSelectArea,
+  onOpenProfile,
 }: {
   activeArea: AppArea;
   onSelectArea: (area: AppArea) => void;
+  onOpenProfile?: () => void;
 }) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
 
@@ -912,9 +950,11 @@ export default function ThemeDefault({
   return (
     <>
       <div className="h-full overflow-y-auto pb-16">
-        {content}
+        <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 h-full">
+          {content}
+        </div>
       </div>
-      <BottomDock active={activeArea} onSelect={onSelectArea} />
+      <BottomDock active={activeArea} onSelect={onSelectArea} onOpenProfile={onOpenProfile} />
     </>
   );
 }

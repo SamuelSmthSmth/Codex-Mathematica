@@ -53,6 +53,7 @@ export interface CodexSave {
   equippedItems: Record<string, string>;
   solvedPerVolume: Record<string, number>;
   grimoire: Record<string, GrimoireEntry>; // key = String(fragmentId)
+  hasSeenTour?: boolean; // Added in v1
 }
 
 export interface ProgressContextValue {
@@ -84,6 +85,10 @@ export interface ProgressContextValue {
   // ── Save file management ──────────────────────────────────────────────────
   exportSave: () => string;
   importSave: (json: string) => boolean;
+
+  // ── Tour ──────────────────────────────────────────────────────────────────
+  hasSeenTour: boolean;
+  markTourSeen: () => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,10 +102,11 @@ function buildDefaultSave(): CodexSave {
     version: 1,
     savedAt: new Date().toISOString(),
     credits: 0,
-    ownedItems: [],
+    ownedItems: ["theme-default"],
     equippedItems: {},
     solvedPerVolume: {},
     grimoire: {},
+    hasSeenTour: false,
   };
 }
 
@@ -124,7 +130,12 @@ function loadSave(): CodexSave {
       } catch { /* ignore migration errors */ }
       return migrated;
     }
-    return { ...buildDefaultSave(), ...parsed };
+    const merged = { ...buildDefaultSave(), ...parsed };
+    // Always ensure theme-default is owned (retroactive migration)
+    if (!merged.ownedItems.includes("theme-default")) {
+      merged.ownedItems = ["theme-default", ...merged.ownedItems];
+    }
+    return merged;
   } catch {
     return buildDefaultSave();
   }
@@ -268,6 +279,12 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [grimoire]
   );
 
+  // ── Tour ──────────────────────────────────────────────────────────────────
+
+  const markTourSeen = useCallback(() => {
+    updateSave((prev) => ({ ...prev, hasSeenTour: true }));
+  }, [updateSave]);
+
   // ── Save file I/O ─────────────────────────────────────────────────────────
 
   const exportSave = useCallback((): string => {
@@ -319,6 +336,8 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         getGrimoireGrade,
         exportSave,
         importSave,
+        hasSeenTour: save?.hasSeenTour ?? false,
+        markTourSeen,
       }}
     >
       {children}

@@ -1,0 +1,67 @@
+{
+  "volume": "alpha",
+  "chapter": 2,
+  "theme": "L'Hôpital and Indeterminate Forms",
+  "fragments": [
+    {
+      "id": 10011,
+      "original_id": "LIM3_001",
+      "problem_latex": "\\lim_{x \\to 0} \\frac{\\sin x}{x}",
+      "solution_latex": "1"
+    },
+    {
+      "id": 10012,
+      "original_id": "LIM3_002",
+      "problem_latex": "\\lim_{x \\to 0} \\frac{1 - \\cos x}{x^2}",
+      "solution_latex": "\\frac{1}{2}"
+    },
+    {
+      "id": 10013,
+      "original_id": "LIM3_003",
+      "problem_latex": "\\lim_{x \\to \\infty} \\frac{e^x}{x^2}",
+      "solution_latex": "\\infty"
+    },
+    {
+      "id": 10014,
+      "original_id": "LIM3_004",
+      "problem_latex": "\\lim_{x \\to 0} x \\ln x",
+      "solution_latex": "0"
+    },
+    {
+      "id": 10015,
+      "original_id": "LIM3_005",
+      "problem_latex": "\\lim_{x \\to 0} (1+x)^{1/x}",
+      "solution_latex": "e"
+    },
+    {
+      "id": 10016,
+      "original_id": "LIM3_006",
+      "problem_latex": "\\lim_{x \\to 0^+} x^x",
+      "solution_latex": "1"
+    },
+    {
+      "id": 10017,
+      "original_id": "LIM3_007",
+      "problem_latex": "\\lim_{x \\to \\infty} x^{1/x}",
+      "solution_latex": "1"
+    },
+    {
+      "id": 10018,
+      "original_id": "LIM3_008",
+      "problem_latex": "\\lim_{x \\to 1} \\frac{\\ln x}{x-1}",
+      "solution_latex": "1"
+    },
+    {
+      "id": 10019,
+      "original_id": "LIM3_009",
+      "problem_latex": "\\lim_{x \\to \\pi/2} (x - \\frac{\\pi}{2}) \\tan x",
+      "solution_latex": "-1"
+    },
+    {
+      "id": 10020,
+      "original_id": "LIM3_010",
+      "problem_latex": "\\lim_{x \\to 0} \\left( \\frac{1}{x} - \\frac{1}{e^x-1} \\right)",
+      "solution_latex": "\\frac{1}{2}"
+    }
+  ]
+}

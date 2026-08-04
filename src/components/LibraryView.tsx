@@ -51,13 +51,13 @@ function HeroBanner({
         minHeight: "200px",
         background: isLightMode
           ? "linear-gradient(135deg, #fdf7ee 0%, #f5e8d0 100%)"
-          : "linear-gradient(135deg, #1c1208 0%, #0e0906 60%, #150e05 100%)",
+          : "linear-gradient(135deg, #1f2937 0%, #111827 60%, #030712 100%)",
         border: isLightMode
           ? "1px solid #e5e7eb"
-          : "1px solid rgba(200,146,42,0.2)",
+          : "1px solid #374151",
         boxShadow: isLightMode
           ? "0 4px 20px rgba(0,0,0,0.05)"
-          : "0 8px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(200,146,42,0.08)",
+          : "0 8px 40px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1)",
       }}
       aria-label="Technique of the Day"
     >
@@ -98,7 +98,7 @@ function HeroBanner({
             fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
             fontSize: "clamp(1.5rem, 4vw, 2.2rem)",
             letterSpacing: "0.05em",
-            color: isLightMode ? "#1c1917" : "rgba(240,225,190,0.92)",
+            color: isLightMode ? "#1c1917" : "#ffffff",
           }}
         >
           {technique.name}
@@ -109,7 +109,7 @@ function HeroBanner({
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "0.88rem",
-            color: isLightMode ? "#78716c" : "rgba(180,162,130,0.75)",
+            color: isLightMode ? "#78716c" : "#9ca3af",
           }}
         >
           {technique.tagline}
@@ -123,12 +123,12 @@ function HeroBanner({
             fontFamily: "Georgia, serif",
             fontSize: "0.78rem",
             letterSpacing: "0.12em",
-            color: isLightMode ? "#ffffff" : "#0a0704",
-            background: "rgba(200,146,42,0.9)",
-            border: "none",
+            color: isLightMode ? "#9a3412" : "#9ca3af",
+            background: isLightMode ? "rgba(234,88,12,0.08)" : "rgba(255,255,255,0.1)",
+            border: isLightMode ? "1px solid rgba(234,88,12,0.2)" : "1px solid rgba(255,255,255,0.2)",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(200,146,42,1)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.9)")}
+          onMouseEnter={(e) => (e.currentTarget.style.background = isLightMode ? "rgba(234,88,12,0.12)" : "rgba(255,255,255,0.15)")}
+          onMouseLeave={(e) => (e.currentTarget.style.background = isLightMode ? "rgba(234,88,12,0.08)" : "rgba(255,255,255,0.1)")}
         >
           <BookOpen size={14} strokeWidth={1.8} />
           Read Now
@@ -150,7 +150,7 @@ export default function LibraryView() {
 
   const bg = isLightMode
     ? "#fcfaf7"
-    : "radial-gradient(ellipse 100% 60% at 50% 0%, #1a1206 0%, #090603 55%, #050302 100%)";
+    : "radial-gradient(ellipse 100% 60% at 50% 0%, #1f2937 0%, #111827 55%, #030712 100%)";
 
   // ── Article view ──
   if (activeTechnique) {
@@ -180,7 +180,7 @@ export default function LibraryView() {
             style={{
               fontFamily: "Georgia, serif",
               fontSize: "0.6rem",
-              color: "rgba(200,146,42,0.5)",
+              color: isLightMode ? "rgba(200,146,42,0.5)" : "#9ca3af",
             }}
           >
             The Grand Archive
@@ -191,7 +191,7 @@ export default function LibraryView() {
               fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
               fontSize: "clamp(1.8rem, 5vw, 3rem)",
               letterSpacing: "0.07em",
-              color: isLightMode ? "#1c1917" : "rgba(235,220,185,0.9)",
+              color: isLightMode ? "#1c1917" : "#ffffff",
             }}
           >
             Technique Library
@@ -201,7 +201,7 @@ export default function LibraryView() {
             style={{
               fontFamily: "Georgia, serif",
               fontSize: "0.85rem",
-              color: isLightMode ? "#78716c" : "rgba(168,150,120,0.6)",
+              color: isLightMode ? "#78716c" : "#9ca3af",
             }}
           >
             Master the tools of the mathematician's craft.

@@ -8,8 +8,10 @@ export type ThemePackId =
   | "theme-student-mixtape"
   | "theme-diner"
   | "theme-windows-xp"
+  | "theme-modern-desktop"
   | "theme-plain-crimson"
-  | "theme-plain-neon";
+  | "theme-plain-neon"
+  | "theme-scribble";
 
 export interface ThemePack {
   id: ThemePackId;
@@ -45,6 +47,12 @@ export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
     rootClass: "theme-windows-xp",
     hasLayout: false,
   },
+  "theme-modern-desktop": {
+    id: "theme-modern-desktop",
+    name: "Modern Desktop",
+    rootClass: "theme-modern-desktop",
+    hasLayout: true,
+  },
   "theme-plain-crimson": {
     id: "theme-plain-crimson",
     name: "Plain — Deep Crimson",
@@ -57,14 +65,22 @@ export const THEME_PACKS: Record<ThemePackId, ThemePack> = {
     rootClass: "theme-plain-neon",
     hasLayout: false,
   },
+  "theme-scribble": {
+    id: "theme-scribble",
+    name: "Notebook Scribbles",
+    rootClass: "theme-scribble",
+    hasLayout: false,
+  },
 };
 
 const SHOP_ITEM_TO_THEME: Record<string, ThemePackId> = {
   "theme-student-mixtape": "theme-student-mixtape",
   "theme-diner": "theme-diner",
   "theme-windows-xp": "theme-windows-xp",
+  "theme-modern-desktop": "theme-modern-desktop",
   "theme-plain-crimson": "theme-plain-crimson",
   "theme-plain-neon": "theme-plain-neon",
+  "theme-scribble": "theme-scribble",
 };
 
 export function themeIdFromShopItem(shopItemId: string | undefined): ThemePackId {

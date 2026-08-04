@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
+import { VOLUMES, type Volume } from "@/data/codex-data";
 import { useProgress } from "@/context/ProgressContext";
 import { useWorkspaceLogic } from "../hooks/useWorkspaceLogic";
-import { ChevronLeft, ChevronRight, X, Minus, Square, Folder, FileText, Monitor, Trash2, Book, Calculator, Globe, PaintBucket, BookOpen, ShoppingBag, User } from "lucide-react";
+import { ChevronLeft, X, Minus, Square, Folder, FileText, Monitor, Trash2, Book, Calculator, Globe, PaintBucket, BookOpen, ShoppingBag, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -55,12 +55,12 @@ function useDraggable() {
   return { offset, handlePointerDown };
 }
 
-// XP Window Component
-function XPWindow({ title, icon: Icon, onClose, children, style, className = "" }: any) {
+function XPWindow({ title, icon: Icon, onClose, children, style, className = "", onPointerDown }: { title: string, icon: React.ElementType, onClose: () => void, children?: React.ReactNode, style?: React.CSSProperties, className?: string, onPointerDown?: () => void }) {
   const { offset, handlePointerDown } = useDraggable();
 
   return (
     <div 
+      onPointerDownCapture={onPointerDown}
       className={`absolute bg-[#ece9d8] border-[3px] border-[#0053e5] rounded-t-lg flex flex-col shadow-[2px_2px_10px_rgba(0,0,0,0.5)] ${className}`}
       style={{
         ...style,
@@ -105,10 +105,88 @@ export default function ThemeWindowsXP({
   const [explorerVolume, setExplorerVolume] = useState<Volume | null>(null);
   const [notepadContext, setNotepadContext] = useState<{ volume: Volume, chapterIndex: number } | null>(null);
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
+  const [isCalcOpen, setIsCalcOpen] = useState(false);
+  
+  // Calculator state
+  const [calcDisplay, setCalcDisplay] = useState('0');
+  const [calcOp, setCalcOp] = useState<string | null>(null);
+  const [calcPrev, setCalcPrev] = useState<number | null>(null);
+  const [calcNewNum, setCalcNewNum] = useState(true);
+
+  // Window Management
+  const [windowOrder, setWindowOrder] = useState<string[]>([]);
+  const bringToFront = (id: string) => {
+    setWindowOrder(prev => {
+      const next = prev.filter(x => x !== id);
+      return [...next, id];
+    });
+  };
+  const getZIndex = (id: string) => windowOrder.indexOf(id) + 10;
+
   const { setIsLightMode } = useTheme();
   const { ownedItems } = useProgress();
   const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
   const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
+
+  useEffect(() => { if (activeArea === 'library') bringToFront('library'); }, [activeArea]); // eslint-disable-line react-hooks/set-state-in-effect
+  useEffect(() => { if (activeArea === 'shop') bringToFront('shop'); }, [activeArea]); // eslint-disable-line react-hooks/set-state-in-effect
+  useEffect(() => { if (explorerVolume) bringToFront('explorer'); }, [explorerVolume]); // eslint-disable-line react-hooks/set-state-in-effect
+  useEffect(() => { if (notepadContext) bringToFront('notepad'); }, [notepadContext]); // eslint-disable-line react-hooks/set-state-in-effect
+  useEffect(() => { if (isCalcOpen) bringToFront('calculator'); }, [isCalcOpen]); // eslint-disable-line react-hooks/set-state-in-effect
+
+  // Derived open windows list for taskbar
+  const openWindows = useMemo(() => {
+    const wins = [];
+    if (activeArea === 'library') wins.push({ id: 'library', title: 'Library - Internet Explorer', icon: Globe });
+    if (activeArea === 'shop') wins.push({ id: 'shop', title: 'Storefront - Internet Explorer', icon: Globe });
+    if (explorerVolume) wins.push({ id: 'explorer', title: `C:\\Codex\\${explorerVolume.name}`, icon: Folder });
+    if (notepadContext) wins.push({ id: 'notepad', title: `Notepad`, icon: FileText });
+    if (isCalcOpen) wins.push({ id: 'calculator', title: 'Calculator', icon: Calculator });
+    return wins;
+  }, [activeArea, explorerVolume, notepadContext, isCalcOpen]);
+
+  const handleCalcButton = (btn: string) => {
+    if (btn === 'C') {
+      setCalcDisplay('0'); setCalcOp(null); setCalcPrev(null); setCalcNewNum(true);
+    } else if (['+', '-', '*', '/'].includes(btn)) {
+      if (calcOp && !calcNewNum) {
+        const prev = calcPrev ?? 0;
+        const curr = parseFloat(calcDisplay);
+        let res = 0;
+        if (calcOp === '+') res = prev + curr;
+        if (calcOp === '-') res = prev - curr;
+        if (calcOp === '*') res = prev * curr;
+        if (calcOp === '/') res = prev / curr;
+        setCalcDisplay(String(res));
+        setCalcPrev(res);
+      } else {
+        setCalcPrev(parseFloat(calcDisplay));
+      }
+      setCalcOp(btn);
+      setCalcNewNum(true);
+    } else if (btn === '=') {
+      if (calcOp && calcPrev !== null) {
+        const prev = calcPrev;
+        const curr = parseFloat(calcDisplay);
+        let res = 0;
+        if (calcOp === '+') res = prev + curr;
+        if (calcOp === '-') res = prev - curr;
+        if (calcOp === '*') res = prev * curr;
+        if (calcOp === '/') res = prev / curr;
+        setCalcDisplay(String(res));
+        setCalcPrev(res);
+        setCalcOp(null);
+        setCalcNewNum(true);
+      }
+    } else {
+      if (calcNewNum) {
+        setCalcDisplay(btn === '.' ? '0.' : btn);
+        setCalcNewNum(false);
+      } else {
+        setCalcDisplay(calcDisplay === '0' && btn !== '.' ? btn : calcDisplay + btn);
+      }
+    }
+  };
 
   // Always force light mode in Windows XP to show the wallpaper properly
   useEffect(() => {
@@ -122,13 +200,13 @@ export default function ThemeWindowsXP({
       
       {/* Desktop Icons */}
       <div className="absolute inset-0 p-4 flex flex-col gap-6 items-start flex-wrap content-start">
-        <DesktopIcon icon={Monitor} label="My Computer" color="text-blue-200" fill="fill-blue-500" />
-        <DesktopIcon icon={Folder} label="My Documents" color="text-yellow-200" fill="fill-yellow-500" />
-        <DesktopIcon icon={Globe} label="Internet Explorer" color="text-blue-400" fill="fill-blue-600" />
+        <DesktopIcon icon={Monitor} label="My Computer" color="text-blue-200" fill="fill-blue-500" onClick={() => onSelectArea("archive")} />
+        <DesktopIcon icon={Folder} label="My Documents" color="text-yellow-200" fill="fill-yellow-500" onClick={() => onSelectArea("archive")} />
+        <DesktopIcon icon={Globe} label="Internet Explorer" color="text-blue-400" fill="fill-blue-600" onClick={() => onSelectArea("library")} />
         <DesktopIcon icon={Trash2} label="Recycle Bin" color="text-stone-300" fill="fill-stone-100" />
-        <DesktopIcon icon={Calculator} label="Calculator" color="text-stone-400" fill="fill-stone-300" />
+        <DesktopIcon icon={Calculator} label="Calculator" color="text-stone-400" fill="fill-stone-300" onClick={() => setIsCalcOpen(true)} />
         <DesktopIcon icon={PaintBucket} label="Paint" color="text-pink-400" fill="fill-pink-500" />
-        <DesktopIcon icon={BookOpen} label="Library" color="text-green-300" fill="fill-green-600" onClick={() => onSelectArea("library")} />
+        <DesktopIcon icon={BookOpen} label="My Library" color="text-green-300" fill="fill-green-600" onClick={() => onSelectArea("library")} />
         <DesktopIcon icon={ShoppingBag} label="Store" color="text-purple-300" fill="fill-purple-600" onClick={() => onSelectArea("shop")} />
         <DesktopIcon icon={User} label="Profile" color="text-stone-200" fill="fill-blue-400" onClick={onOpenProfile} />
         
@@ -150,7 +228,8 @@ export default function ThemeWindowsXP({
           title="Library - Internet Explorer" 
           icon={Globe} 
           onClose={() => onSelectArea("archive")}
-          style={{ top: "5%", left: "5%", width: "90%", height: "85%", zIndex: 10 }}
+          onPointerDown={() => bringToFront('library')}
+          style={{ top: "5%", left: "5%", width: "90%", height: "85%", zIndex: getZIndex('library') }}
         >
           <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-2 text-sm">
             <span className="text-stone-500">File</span>
@@ -180,7 +259,8 @@ export default function ThemeWindowsXP({
           title="Storefront - Internet Explorer" 
           icon={Globe} 
           onClose={() => onSelectArea("archive")}
-          style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: 10 }}
+          onPointerDown={() => bringToFront('shop')}
+          style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: getZIndex('shop') }}
         >
           <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-2 text-sm">
             <span className="text-stone-500">File</span>
@@ -210,7 +290,8 @@ export default function ThemeWindowsXP({
           title={`C:\\Codex\\${explorerVolume.name}`} 
           icon={Folder} 
           onClose={() => setExplorerVolume(null)}
-          style={{ top: "10%", left: "10%", width: "600px", height: "400px" }}
+          onPointerDown={() => bringToFront('explorer')}
+          style={{ top: "10%", left: "10%", width: "600px", height: "400px", zIndex: getZIndex('explorer') }}
         >
           {/* File Explorer Toolbar */}
           <div className="h-10 bg-[#ece9d8] border-b border-stone-300 flex items-center px-2 gap-2 text-sm">
@@ -236,27 +317,60 @@ export default function ThemeWindowsXP({
           
           {/* Folder Content */}
           <div className="flex flex-wrap p-4 gap-6 bg-white h-[calc(100%-5rem)] overflow-y-auto items-start content-start">
-            {explorerVolume.chapters.map((chap, cIdx) => (
+            {explorerVolume.chapters.map((chap, cIdx) => {
+              if (chap.packId && !ownedItems.has(chap.packId)) return null;
+              return (
               <div 
                 key={cIdx} 
-                className="flex flex-col items-center gap-1 w-24 cursor-pointer hover:bg-blue-100 p-2 rounded border border-transparent hover:border-blue-200"
+                className="flex flex-col items-center gap-1 w-24 cursor-pointer hover:bg-blue-100 p-2 rounded border border-transparent hover:border-blue-200 relative"
                 onDoubleClick={() => setNotepadContext({ volume: explorerVolume, chapterIndex: cIdx })}
               >
                 <Folder className="w-12 h-12 text-yellow-400 fill-yellow-200" />
                 <span className="text-black text-xs text-center line-clamp-2">{chap.theme}</span>
+                {chap.packId && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[0.45rem] px-1 py-0.5 rounded shadow">EXP</span>
+                )}
               </div>
-            ))}
+            )})}
           </div>
         </XPWindow>
       )}
 
-      {/* Notepad (Workspace) */}
       {notepadContext && (
         <XPWorkspace 
           volume={notepadContext.volume} 
           chapterIndex={notepadContext.chapterIndex} 
           onClose={() => setNotepadContext(null)} 
+          onPointerDown={() => bringToFront('notepad')}
+          style={{ zIndex: getZIndex('notepad') }}
         />
+      )}
+
+      {/* Calculator Window */}
+      {isCalcOpen && (
+        <XPWindow
+          title="Calculator"
+          icon={Calculator}
+          onClose={() => setIsCalcOpen(false)}
+          onPointerDown={() => bringToFront('calculator')}
+          style={{ top: "20%", left: "20%", width: "250px", height: "auto", zIndex: getZIndex('calculator') }}
+        >
+          <div className="p-2 bg-[#ece9d8] flex flex-col gap-2">
+            <div className="bg-white border-2 border-stone-400 border-t-stone-500 border-l-stone-500 text-right p-1 text-black font-sans text-xl h-8 flex items-center justify-end overflow-hidden">
+              {calcDisplay}
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {['7','8','9','/','4','5','6','*','1','2','3','-','0','.','=','+'].map(btn => (
+                <button key={btn} onClick={() => handleCalcButton(btn)} className="bg-[#d4d0c8] border-2 border-white border-b-stone-500 border-r-stone-500 active:border-t-stone-500 active:border-l-stone-500 active:border-b-white active:border-r-white w-full h-8 text-black font-bold flex items-center justify-center shadow-sm">
+                  {btn}
+                </button>
+              ))}
+              <button onClick={() => handleCalcButton('C')} className="col-span-4 bg-[#d4d0c8] border-2 border-white border-b-stone-500 border-r-stone-500 active:border-t-stone-500 active:border-l-stone-500 active:border-b-white active:border-r-white h-8 text-red-700 font-bold flex items-center justify-center shadow-sm mt-1">
+                C
+              </button>
+            </div>
+          </div>
+        </XPWindow>
       )}
 
       {/* Start Menu Overlay */}
@@ -270,13 +384,13 @@ export default function ThemeWindowsXP({
           </div>
           <div className="flex-1 flex">
             <div className="flex-1 bg-white flex flex-col p-2 gap-1 border-r border-stone-200">
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><Globe className="w-8 h-8 text-blue-500" /><span className="text-sm font-bold text-black">Internet Explorer</span></div>
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><Folder className="w-8 h-8 text-yellow-500" /><span className="text-sm font-bold text-black">My Documents</span></div>
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded"><PaintBucket className="w-8 h-8 text-pink-500" /><span className="text-sm font-bold text-black">Paint</span></div>
-              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded" onClick={onOpenProfile}><User className="w-8 h-8 text-blue-400" /><span className="text-sm font-bold text-black">User Profile</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded" onClick={() => { onSelectArea('library'); setIsStartMenuOpen(false); }}><Globe className="w-8 h-8 text-blue-500" /><span className="text-sm font-bold text-black">Internet Explorer</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded" onClick={() => { onSelectArea('archive'); setIsStartMenuOpen(false); }}><Folder className="w-8 h-8 text-yellow-500" /><span className="text-sm font-bold text-black">My Documents</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded" onClick={() => { onSelectArea('shop'); setIsStartMenuOpen(false); }}><ShoppingBag className="w-8 h-8 text-purple-500" /><span className="text-sm font-bold text-black">Store</span></div>
+              <div className="p-2 hover:bg-blue-100 flex items-center gap-2 cursor-pointer rounded" onClick={() => { onOpenProfile?.(); setIsStartMenuOpen(false); }}><User className="w-8 h-8 text-blue-400" /><span className="text-sm font-bold text-black">User Profile</span></div>
             </div>
             <div className="w-1/3 bg-[#d3e5fa] p-2 flex flex-col gap-2 border-l border-white shadow-inner">
-               <div className="text-xs font-bold text-[#00136b] hover:underline cursor-pointer">My Computer</div>
+               <div className="text-xs font-bold text-[#00136b] hover:underline cursor-pointer" onClick={() => { onSelectArea('archive'); setIsStartMenuOpen(false); }}>My Computer</div>
                <div className="text-xs font-bold text-[#00136b] hover:underline cursor-pointer">Control Panel</div>
                <div className="text-xs font-bold text-[#00136b] hover:underline cursor-pointer">Search</div>
                <div className="text-xs font-bold text-[#00136b] hover:underline cursor-pointer">Run...</div>
@@ -303,7 +417,22 @@ export default function ThemeWindowsXP({
           </div>
           <span className="text-white font-bold text-lg italic drop-shadow-[1px_1px_1px_rgba(0,0,0,0.8)]">start</span>
         </button>
-        <div className="flex-1" />
+        <div className="flex-1 flex items-center h-full px-2 gap-1 overflow-x-auto">
+          {openWindows.map(win => (
+            <button 
+              key={win.id}
+              onClick={() => bringToFront(win.id)}
+              className={`h-[30px] min-w-[120px] max-w-[160px] px-2 flex items-center gap-1 rounded-sm border-2 ${
+                windowOrder[windowOrder.length - 1] === win.id 
+                  ? 'bg-[#d4d0c8] border-t-stone-500 border-l-stone-500 border-b-white border-r-white active:bg-[#d4d0c8]' 
+                  : 'bg-[#ece9d8] border-t-white border-l-white border-b-stone-500 border-r-stone-500 hover:bg-[#f0ede1]'
+              } text-black`}
+            >
+              <win.icon className="w-4 h-4 flex-shrink-0" />
+              <span className="text-xs truncate">{win.title}</span>
+            </button>
+          ))}
+        </div>
         <div className="h-full px-4 flex items-center bg-[#0d87e1] border-l border-blue-400 shadow-[inset_1px_0_0_rgba(255,255,255,0.2)]">
           <span className="text-white text-xs">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
@@ -313,7 +442,7 @@ export default function ThemeWindowsXP({
 }
 
 // Workspace Component that runs inside Notepad
-function XPWorkspace({ volume, chapterIndex, onClose }: { volume: Volume, chapterIndex: number, onClose: () => void }) {
+function XPWorkspace({ volume, chapterIndex, onClose, onPointerDown, style }: { volume: Volume, chapterIndex: number, onClose: () => void, onPointerDown?: () => void, style?: React.CSSProperties }) {
   const allFragments = useMemo(() => volume.chapters.flatMap(c => c.fragments), [volume]);
   const startIndex = useMemo(() => {
     let count = 0;
@@ -338,8 +467,8 @@ function XPWorkspace({ volume, chapterIndex, onClose }: { volume: Volume, chapte
       title={`Notepad - ${fragment.id}.txt`} 
       icon={FileText} 
       onClose={onClose}
-      style={{ top: "5%", left: "50%", transform: "translateX(-50%)", width: "800px", height: "600px" }}
-      className="z-40"
+      onPointerDown={onPointerDown}
+      style={{ top: "5%", left: "50%", transform: "translateX(-50%)", width: "800px", height: "600px", ...style }}
     >
       <div className="h-full flex flex-col font-mono text-stone-900 bg-white">
         {/* Menu Bar */}
@@ -354,7 +483,7 @@ function XPWorkspace({ volume, chapterIndex, onClose }: { volume: Volume, chapte
         {/* Text Area */}
         <div className="flex-1 p-4 overflow-auto flex flex-col">
           <p className="text-stone-400 mb-4">{"// Problem Statement"}</p>
-          <div className="math-lg [&_.katex]:text-2xl mb-8">
+          <div className="math-lg text-black [&_.katex]:text-black [&_.katex]:text-2xl mb-8">
             <MathRenderer>{`$$${fragment.problem_latex}$$`}</MathRenderer>
           </div>
 
@@ -374,7 +503,7 @@ function XPWorkspace({ volume, chapterIndex, onClose }: { volume: Volume, chapte
             {(gradePhase === "revealed" || gradePhase === "graded") && (
               <div className="flex flex-col animate-in fade-in duration-300">
                 <span className="text-stone-400 mb-4">{"// Solution Generated:"}</span>
-                <div className="math-lg [&_.katex]:text-2xl text-blue-800 mb-4 flex items-center">
+                <div className="math-lg [&_.katex]:text-blue-800 [&_.katex]:text-2xl text-blue-800 mb-4 flex items-center">
                   <MathRenderer>{`$$${fragment.solution_latex}$$`}</MathRenderer>
                   <span className="inline-block w-2 h-6 bg-black ml-1 animate-pulse" /> {/* Blinking cursor */}
                 </div>
@@ -408,7 +537,7 @@ function XPWorkspace({ volume, chapterIndex, onClose }: { volume: Volume, chapte
 }
 
 // Desktop Icon Component
-function DesktopIcon({ icon: Icon, label, color, fill, onClick }: { icon: any, label: string, color: string, fill: string, onClick?: () => void }) {
+function DesktopIcon({ icon: Icon, label, color, fill, onClick }: { icon: React.ElementType, label: string, color: string, fill: string, onClick?: () => void }) {
   return (
     <div 
       className="flex flex-col items-center gap-1 w-24 cursor-pointer group"

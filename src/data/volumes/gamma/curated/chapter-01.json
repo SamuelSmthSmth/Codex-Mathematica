@@ -1,0 +1,79 @@
+{
+  "volume": "gamma",
+  "chapter": 0,
+  "theme": "University Exam Integrals",
+  "fragments": [
+    {
+      "id": 10021,
+      "original_id": "GC1_001",
+      "problem_latex": "\\int_0^1 \\frac{\\ln(1+x)}{1+x^2} \\, dx",
+      "solution_latex": "\\frac{\\pi}{8} \\ln 2"
+    },
+    {
+      "id": 10022,
+      "original_id": "GC1_002",
+      "problem_latex": "\\int_0^{\\infty} \\frac{\\sin x}{x} \\, dx",
+      "solution_latex": "\\frac{\\pi}{2}"
+    },
+    {
+      "id": 10023,
+      "original_id": "GC1_003",
+      "problem_latex": "\\int_0^{\\pi/2} \\ln(\\sin x) \\, dx",
+      "solution_latex": "-\\frac{\\pi}{2} \\ln 2"
+    },
+    {
+      "id": 10024,
+      "original_id": "GC1_004",
+      "problem_latex": "\\int_0^{\\infty} e^{-x^2} \\, dx",
+      "solution_latex": "\\frac{\\sqrt{\\pi}}{2}"
+    },
+    {
+      "id": 10025,
+      "original_id": "GC1_005",
+      "problem_latex": "\\int_0^1 x^m (1-x)^n \\, dx",
+      "solution_latex": "\\frac{\\Gamma(m+1)\\Gamma(n+1)}{\\Gamma(m+n+2)}"
+    },
+    {
+      "id": 10026,
+      "original_id": "GC1_006",
+      "problem_latex": "\\int_0^{\\infty} \\frac{x^3}{e^x - 1} \\, dx",
+      "solution_latex": "\\frac{\\pi^4}{15}"
+    },
+    {
+      "id": 10027,
+      "original_id": "GC1_007",
+      "problem_latex": "\\int_{-\\infty}^{\\infty} \\frac{\\cos x}{x^2+1} \\, dx",
+      "solution_latex": "\\frac{\\pi}{e}"
+    },
+    {
+      "id": 10028,
+      "original_id": "GC1_008",
+      "problem_latex": "\\int_0^{\\pi} x \\sin^2 x \\, dx",
+      "solution_latex": "\\frac{\\pi^2}{4}"
+    },
+    {
+      "id": 10029,
+      "original_id": "GC1_009",
+      "problem_latex": "\\int_0^{\\pi/2} \\sin^{2n} x \\, dx",
+      "solution_latex": "\\frac{(2n)!}{2^{2n}(n!)^2} \\frac{\\pi}{2}"
+    },
+    {
+      "id": 10030,
+      "original_id": "GC1_010",
+      "problem_latex": "\\int_0^{\\infty} \\frac{1}{1+x^n} \\, dx",
+      "solution_latex": "\\frac{\\pi}{n \\sin(\\pi/n)}"
+    },
+    {
+      "id": 10031,
+      "original_id": "GC1_011",
+      "problem_latex": "\\int_0^1 \\frac{1}{\\sqrt{1-x^4}} \\, dx",
+      "solution_latex": "\\frac{\\sqrt{\\pi}\\, \\Gamma(5/4)}{\\Gamma(3/4)}"
+    },
+    {
+      "id": 10032,
+      "original_id": "GC1_012",
+      "problem_latex": "\\int_0^{\\infty} \\frac{\\ln x}{1+x^2} \\, dx",
+      "solution_latex": "0"
+    }
+  ]
+}

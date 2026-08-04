@@ -49,10 +49,10 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
   const { isLightMode } = useTheme();
   const [answerRevealed, setAnswerRevealed] = useState(false);
 
-  const bg = isLightMode ? "#fcfaf7" : "#0a0706";
-  const textMuted = isLightMode ? "#78716c" : "rgba(168,162,158,0.6)";
-  const border = isLightMode ? "#e5e7eb" : "rgba(200,146,42,0.12)";
-  const accentColor = "rgba(200,146,42,0.9)";
+  const bg = isLightMode ? "#fcfaf7" : "#0a0a0a";
+  const textMuted = isLightMode ? "#78716c" : "#9ca3af";
+  const border = isLightMode ? "#e5e7eb" : "rgba(255,255,255,0.1)";
+  const accentColor = isLightMode ? "rgba(200,146,42,0.9)" : "#ffffff";
 
   return (
     <div
@@ -68,7 +68,7 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
             onClick={onBack}
             className="group flex items-center gap-2 transition-colors duration-200"
             style={{ fontFamily: "Georgia, serif", fontSize: "0.78rem", letterSpacing: "0.12em", color: textMuted }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = isLightMode ? "#292524" : "rgba(210,190,140,0.9)")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = isLightMode ? "#292524" : "#ffffff")}
             onMouseLeave={(e) => (e.currentTarget.style.color = textMuted)}
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform duration-200" strokeWidth={1.8} />
@@ -83,9 +83,9 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
             style={{
               fontFamily: "Georgia, serif",
               fontSize: "0.58rem",
-              color: accentColor,
-              background: isLightMode ? "rgba(200,146,42,0.08)" : "rgba(200,146,42,0.1)",
-              border: `1px solid rgba(200,146,42,0.2)`,
+              color: isLightMode ? accentColor : "#9ca3af",
+              background: isLightMode ? "rgba(200,146,42,0.08)" : "rgba(255,255,255,0.1)",
+              border: isLightMode ? `1px solid rgba(200,146,42,0.2)` : `1px solid rgba(255,255,255,0.2)`,
             }}
           >
             {technique.category}
@@ -97,7 +97,7 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
               fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
               fontSize: "clamp(1.8rem, 5vw, 2.8rem)",
               letterSpacing: "0.04em",
-              color: isLightMode ? "#1c1917" : "rgba(235,225,195,0.9)",
+              color: isLightMode ? "#1c1917" : "#ffffff",
             }}
           >
             {technique.name}

@@ -1,0 +1,67 @@
+{
+  "volume": "gamma",
+  "chapter": 0,
+  "theme": "STEP II Integration",
+  "fragments": [
+    {
+      "id": 10055,
+      "original_id": "STEP1_001",
+      "problem_latex": "I_n = \\int_0^{\\pi/2} \\sin^n x \\, dx",
+      "solution_latex": "I_n = \\frac{n-1}{n} I_{n-2}"
+    },
+    {
+      "id": 10056,
+      "original_id": "STEP1_002",
+      "problem_latex": "\\int_0^1 \\frac{x^n}{1+x} \\, dx",
+      "solution_latex": "\\ln 2 - \\sum_{k=1}^n \\frac{(-1)^{k-1}}{k}"
+    },
+    {
+      "id": 10057,
+      "original_id": "STEP1_003",
+      "problem_latex": "\\int_0^{\\pi} \\frac{x}{1+\\sin x} \\, dx",
+      "solution_latex": "\\pi"
+    },
+    {
+      "id": 10058,
+      "original_id": "STEP1_004",
+      "problem_latex": "\\int_0^{\\infty} \\frac{1}{(1+x^2)^n} \\, dx",
+      "solution_latex": "\\frac{\\pi}{2^{2n-1}} \\binom{2n-2}{n-1}"
+    },
+    {
+      "id": 10059,
+      "original_id": "STEP1_005",
+      "problem_latex": "\\int_0^1 x^m (1-x)^n \\, dx",
+      "solution_latex": "\\frac{m!n!}{(m+n+1)!}"
+    },
+    {
+      "id": 10060,
+      "original_id": "STEP1_006",
+      "problem_latex": "\\int_0^{\\pi/4} \\sec^4 x \\, dx",
+      "solution_latex": "\\frac{4}{3}"
+    },
+    {
+      "id": 10061,
+      "original_id": "STEP1_007",
+      "problem_latex": "\\int_0^{\\pi/2} \\frac{\\sin x}{\\sin x + \\cos x} \\, dx",
+      "solution_latex": "\\frac{\\pi}{4}"
+    },
+    {
+      "id": 10062,
+      "original_id": "STEP1_008",
+      "problem_latex": "\\int_0^1 \\frac{\\ln x}{x^2-1} \\, dx",
+      "solution_latex": "\\frac{\\pi^2}{8}"
+    },
+    {
+      "id": 10063,
+      "original_id": "STEP1_009",
+      "problem_latex": "\\int_0^a \\sqrt{a^2-x^2} \\, dx",
+      "solution_latex": "\\frac{\\pi a^2}{4}"
+    },
+    {
+      "id": 10064,
+      "original_id": "STEP1_010",
+      "problem_latex": "\\int e^{ax} \\cos(bx) \\, dx",
+      "solution_latex": "\\frac{e^{ax}(a\\cos bx + b\\sin bx)}{a^2+b^2} + C"
+    }
+  ]
+}

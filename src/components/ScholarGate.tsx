@@ -280,15 +280,15 @@ export default function ScholarGate() {
               marginBottom: "0.35rem",
             }}
           >
-            {mode === "signin" ? "Welcome back, Scholar." : "Inscribe yourself, Scholar."}
+            {mode === "signin" ? "Welcome back, Scholar." : "Join the Archive."}
           </h1>
           <p
             className="italic"
             style={{ fontFamily: "Georgia, serif", fontSize: "0.73rem", color: "rgba(140,120,85,0.55)", letterSpacing: "0.02em" }}
           >
             {mode === "signin"
-              ? "The Archive remembers those who have walked its halls."
-              : "A new name shall be added to the grand ledger."}
+              ? "Sign in to continue your studies."
+              : "Create an account to save your progress."}
           </p>
         </div>
 
@@ -426,16 +426,34 @@ export default function ScholarGate() {
         <button
           type="button"
           onClick={enterAsGuest}
-          className="mt-5 w-full py-2 uppercase transition-colors duration-200 hover:text-amber-300"
+          className="mt-5 w-full py-3 rounded-sm uppercase transition-all duration-200"
           style={{
             fontFamily: "Georgia, serif",
-            fontSize: "0.65rem",
-            letterSpacing: "0.15em",
-            color: "rgba(140,120,85,0.6)",
+            fontSize: "0.68rem",
+            letterSpacing: "0.12em",
+            color: "rgba(180,160,110,0.75)",
+            background: "rgba(200,146,42,0.05)",
+            border: "1px solid rgba(200,146,42,0.18)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "rgba(210,185,130,0.95)";
+            e.currentTarget.style.borderColor = "rgba(200,146,42,0.35)";
+            e.currentTarget.style.background = "rgba(200,146,42,0.1)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "rgba(180,160,110,0.75)";
+            e.currentTarget.style.borderColor = "rgba(200,146,42,0.18)";
+            e.currentTarget.style.background = "rgba(200,146,42,0.05)";
           }}
         >
-          Explore as Guest (Progress will not be saved)
+          Explore as Guest
         </button>
+        <p
+          className="mt-2 text-center"
+          style={{ fontFamily: "Georgia, serif", fontSize: "0.6rem", color: "rgba(140,120,85,0.35)", letterSpacing: "0.05em" }}
+        >
+          Progress will not be saved
+        </p>
 
         {/* Footer */}
         <p

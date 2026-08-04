@@ -16,13 +16,13 @@ interface ProfilePanelProps {
 
 export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
   const { scholar, isGuestMode, signOut, updateScholarName } = useAuth();
-  const { isLightMode, toggleTheme, isFocusMode, setIsFocusMode, setPrintData, activeThemeName } = useTheme();
+  const { isLightMode, toggleTheme, isFocusMode, setIsFocusMode, setPrintData, activeThemeName, activeThemeId } = useTheme();
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameSaved, setNameSaved] = useState(false);
   const [conqueredCount, setConqueredCount] = useState<number | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const { equippedItems } = useProgress();
+  const { equippedItems, equipItem } = useProgress();
   
   const activeBannerId = equippedItems["banners"];
   const activeBanner = SHOP_ITEMS.find((item) => item.id === activeBannerId);
@@ -329,6 +329,46 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
               )}
             </button>
           </div>
+
+          {activeThemeId === "default" && (
+            <div className="flex flex-col gap-2">
+              <label
+                style={{
+                  fontFamily: "Georgia, serif",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.2em",
+                  color: "rgba(200,146,42,0.5)",
+                  textTransform: "uppercase",
+                }}
+              >
+                Customise Accent
+              </label>
+              <div className="flex gap-3 mt-1">
+                {[
+                  { id: "palette-amber", color: "#c8922a", name: "Amber" },
+                  { id: "palette-crimson", color: "#9b1b30", name: "Crimson" },
+                  { id: "palette-glacier", color: "#6b8eb3", name: "Glacier" },
+                  { id: "palette-midnight", color: "#5e4b8a", name: "Midnight" },
+                  { id: "palette-neon-green", color: "#39ff14", name: "Neon Green" },
+                ].map((palette) => {
+                  const isActive = (equippedItems["palettes"] || "palette-amber") === palette.id;
+                  return (
+                    <button
+                      key={palette.id}
+                      onClick={() => equipItem("palettes", palette.id)}
+                      title={palette.name}
+                      className="w-8 h-8 rounded-full transition-transform hover:scale-110"
+                      style={{
+                        backgroundColor: palette.color,
+                        border: isActive ? `2px solid ${isLightMode ? "#000" : "#fff"}` : "2px solid transparent",
+                        boxShadow: isActive ? "0 0 10px rgba(0,0,0,0.5)" : "none",
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2">
             <label

@@ -1,0 +1,67 @@
+{
+  "volume": "gamma",
+  "chapter": 1,
+  "theme": "Techniques of Integration",
+  "fragments": [
+    {
+      "id": 10001,
+      "original_id": "INT2_001",
+      "problem_latex": "\\int x e^x \\, dx",
+      "solution_latex": "(x-1)e^x + C"
+    },
+    {
+      "id": 10002,
+      "original_id": "INT2_002",
+      "problem_latex": "\\int \\ln x \\, dx",
+      "solution_latex": "x \\ln x - x + C"
+    },
+    {
+      "id": 10003,
+      "original_id": "INT2_003",
+      "problem_latex": "\\int \\sin^2 x \\, dx",
+      "solution_latex": "\\frac{x}{2} - \\frac{\\sin(2x)}{4} + C"
+    },
+    {
+      "id": 10004,
+      "original_id": "INT2_004",
+      "problem_latex": "\\int \\frac{1}{x^2-1} \\, dx",
+      "solution_latex": "\\frac{1}{2} \\ln \\left| \\frac{x-1}{x+1} \\right| + C"
+    },
+    {
+      "id": 10005,
+      "original_id": "INT2_005",
+      "problem_latex": "\\int e^x \\sin x \\, dx",
+      "solution_latex": "\\frac{e^x}{2} (\\sin x - \\cos x) + C"
+    },
+    {
+      "id": 10006,
+      "original_id": "INT2_006",
+      "problem_latex": "\\int \\frac{x}{x^2+1} \\, dx",
+      "solution_latex": "\\frac{1}{2} \\ln(x^2+1) + C"
+    },
+    {
+      "id": 10007,
+      "original_id": "INT2_007",
+      "problem_latex": "\\int \\tan x \\, dx",
+      "solution_latex": "-\\ln|\\cos x| + C"
+    },
+    {
+      "id": 10008,
+      "original_id": "INT2_008",
+      "problem_latex": "\\int x \\cos(x^2) \\, dx",
+      "solution_latex": "\\frac{1}{2} \\sin(x^2) + C"
+    },
+    {
+      "id": 10009,
+      "original_id": "INT2_009",
+      "problem_latex": "\\int \\arcsin x \\, dx",
+      "solution_latex": "x \\arcsin x + \\sqrt{1-x^2} + C"
+    },
+    {
+      "id": 10010,
+      "original_id": "INT2_010",
+      "problem_latex": "\\int \\sec^3 x \\, dx",
+      "solution_latex": "\\frac{1}{2}(\\sec x \\tan x + \\ln|\\sec x + \\tan x|) + C"
+    }
+  ]
+}

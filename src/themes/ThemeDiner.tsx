@@ -82,10 +82,6 @@ function DinerBackground({ children }: { children: React.ReactNode }) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function DinerMenuShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
-  const { ownedItems } = useProgress();
-  const baseVolumes = ["alpha", "delta", "sigma", "gamma"];
-  const visibleVolumes = VOLUMES.filter(v => baseVolumes.includes(v.id) || ownedItems.has(v.id));
-
   return (
     <DinerBackground>
       <header className="z-10 text-center mb-16 mt-8 p-6 bg-black/60 backdrop-blur-md rounded-xl border-y-4 border-red-500 shadow-2xl">
@@ -105,7 +101,7 @@ function DinerMenuShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
       </header>
 
       <div className="z-10 mt-12 w-full max-w-6xl mx-auto flex flex-wrap justify-center gap-10 px-4">
-        {visibleVolumes.map((vol) => (
+        {VOLUMES.map((vol) => (
           <DinerMenu key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
       </div>
@@ -168,7 +164,7 @@ function DinerMenu({ volume, onSelect }: { volume: Volume; onSelect: (v: Volume)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function DinerCourseList({ volume, onBack, onSelectChapter }: { volume: Volume; onBack: () => void; onSelectChapter: (chIndex: number, fragIndex: number) => void }) {
-  const { getGrimoireGrade } = useProgress();
+  const { getGrimoireGrade, ownedItems } = useProgress();
 
   return (
     <DinerBackground>
@@ -194,10 +190,19 @@ function DinerCourseList({ volume, onBack, onSelectChapter }: { volume: Volume; 
             </div>
 
             <div className="space-y-12">
-              {volume.chapters.map((chapter, cIdx) => (
+              {volume.chapters.map((chapter, cIdx) => {
+                if (chapter.packId && !ownedItems.has(chapter.packId)) return null;
+                return (
                 <div key={`chapter-${cIdx}`} className="relative">
                   <h3 className="text-2xl font-serif font-bold text-red-800 mb-6 flex items-end">
-                    <span>{chapter.theme}</span>
+                    <span className="flex items-center gap-3">
+                      {chapter.theme}
+                      {chapter.packId && (
+                        <span className="px-1.5 py-0.5 rounded text-[0.6rem] font-sans font-bold tracking-widest bg-red-800/10 text-red-800 border border-red-800/30 self-center">
+                          EXPANSION
+                        </span>
+                      )}
+                    </span>
                     <div className="flex-1 border-b-2 border-dotted border-stone-400 mx-4 mb-2"></div>
                   </h3>
 
@@ -226,7 +231,8 @@ function DinerCourseList({ volume, onBack, onSelectChapter }: { volume: Volume; 
                     })}
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         </div>
@@ -305,7 +311,7 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
                   <div className="absolute inset-2 rounded-full border border-stone-300/30"></div>
                   <div className="absolute inset-4 rounded-full border border-red-900/10"></div>
                   
-                  <MathRenderer className="relative z-20 text-stone-900 math-lg [&_.katex]:text-4xl max-w-full overflow-hidden flex items-center justify-center">
+                  <MathRenderer className="relative z-20 text-stone-900 math-lg [&_.katex]:text-stone-900 [&_.katex]:text-4xl max-w-full overflow-hidden flex items-center justify-center">
                     {`$$${fragment.problem_latex}$$`}
                   </MathRenderer>
                 </div>
@@ -364,7 +370,7 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
                   {(gradePhase === "revealed" || gradePhase === "graded") && (
                     <div className="flex-1 flex flex-col animate-in slide-in-from-top-8 duration-500 ease-out">
                       <div className="flex-1 flex items-center justify-center font-serif text-stone-900 border-b-2 border-stone-300 border-dashed pb-6 mb-6">
-                         <MathRenderer className="math-lg [&_.katex]:text-5xl w-full text-center overflow-auto py-2">{`$$${fragment.solution_latex}$$`}</MathRenderer>
+                         <MathRenderer className="math-lg text-stone-900 [&_.katex]:text-stone-900 [&_.katex]:text-5xl w-full text-center overflow-auto py-2">{`$$${fragment.solution_latex}$$`}</MathRenderer>
                       </div>
 
                       {gradePhase === "revealed" && (
@@ -408,6 +414,14 @@ function DinerNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectA
   return (
     <div className="absolute top-4 right-8 z-50 flex gap-4">
       <button 
+        onClick={() => onSelectArea("shop")}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
+          activeArea === "shop" ? "bg-red-600 border-red-800 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)]" : "bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
+        }`}
+      >
+        <ShoppingBag size={16} /> Register
+      </button>
+      <button 
         onClick={() => onSelectArea("archive")}
         className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
           activeArea === "archive" ? "bg-red-600 border-red-800 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)]" : "bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
@@ -422,14 +436,6 @@ function DinerNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectA
         }`}
       >
         <BookOpen size={16} /> Jukebox
-      </button>
-      <button 
-        onClick={() => onSelectArea("shop")}
-        className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
-          activeArea === "shop" ? "bg-red-600 border-red-800 text-white shadow-[0_0_15px_rgba(220,38,38,0.8)]" : "bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
-        }`}
-      >
-        <ShoppingBag size={16} /> Register
       </button>
     </div>
   );
@@ -499,7 +505,9 @@ export default function ThemeDiner({
   return (
     <>
       <DinerNav activeArea={activeArea} onSelectArea={onSelectArea} />
-      {content}
+      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100%-4rem)] w-full">
+        {content}
+      </div>
     </>
   );
 }

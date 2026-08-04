@@ -1,65 +1,34 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // src/data/shop-items.ts
-// Stub shop items for the Storefront.
-// Real art assets and unlock logic will be wired in Phase 3.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ShopCategory =
-  | "themes"
-  | "animations"
-  | "palettes"
-  | "banners"
-  | "archives";
+export type ShopCategory = "themes" | "archives";
 
 export interface ShopItem {
   id: string;
   name: string;
   description: string;
   category: ShopCategory;
-  /** Price in Credits. Always a multiple of 50 per PLAN §5. */
   price: number;
-  /** If true, the item can only be purchased after a certain achievement. */
   achievementLocked?: boolean;
-  /** Human-readable description of the unlock requirement. */
   unlockRequirement?: string;
-  /** For "archives" category: the rank tier (1 = Prestige, 2 = Standard, 3 = Grind). */
   rank?: 1 | 2 | 3;
-  /** Image URL for a thumbnail preview in the store */
   thumbnailUrl?: string;
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Sidebar category metadata
-// ─────────────────────────────────────────────────────────────────────────────
 
 export interface CategoryMeta {
   id: ShopCategory;
   label: string;
-  icon: string; // emoji for skeleton; Phase 2 will replace with proper icons
+  icon: string;
 }
 
 export const SHOP_CATEGORIES: CategoryMeta[] = [
-  { id: "themes",     label: "Global Themes",     icon: "🎨" },
-  { id: "animations", label: "Animations",         icon: "✨" },
-  { id: "palettes",   label: "Palettes",           icon: "🎨" },
-  { id: "banners",    label: "Banners",            icon: "🏷️" },
-  { id: "archives",   label: "The Archives",       icon: "📦" },
+  { id: "themes",   label: "Global Themes", icon: "🎨" },
+  { id: "archives", label: "The Archives",  icon: "📦" },
 ];
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Stub items
-// ─────────────────────────────────────────────────────────────────────────────
 
 export const SHOP_ITEMS: ShopItem[] = [
   // ── Themes ────────────────────────────────────────────────────────────────
-  {
-    id: "theme-default",
-    name: "The Default Theme",
-    description: "The classic, elegant look of the Codex Mathematica.",
-    category: "themes",
-    price: 0,
-    thumbnailUrl: "/thumbnails/theme_default.png",
-  },
   {
     id: "theme-student-mixtape",
     name: "Student Mixtape",
@@ -85,6 +54,14 @@ export const SHOP_ITEMS: ShopItem[] = [
     thumbnailUrl: "/thumbnails/theme_windows_xp.png",
   },
   {
+    id: "theme-modern-desktop",
+    name: "Modern Desktop",
+    description: "A sleek, dark-mode modern OS experience. A terminal interface for solving problems.",
+    category: "themes",
+    price: 3500,
+    thumbnailUrl: "/thumbnails/theme_modern_desktop.png",
+  },
+  {
     id: "theme-plain-crimson",
     name: "Plain — Deep Crimson",
     description: "A minimalist theme with a deep crimson accent. Zero distractions.",
@@ -92,104 +69,19 @@ export const SHOP_ITEMS: ShopItem[] = [
     price: 500,
   },
   {
+    id: "theme-scribble",
+    name: "Notebook Scribbles",
+    description: "Handwritten student notebook aesthetic. Lined paper and sticky notes.",
+    category: "themes",
+    price: 2000,
+    thumbnailUrl: "/thumbnails/theme_scribble.png",
+  },
+  {
     id: "theme-plain-neon",
     name: "Plain — Neon Green",
     description: "A minimalist dark theme with a neon green accent. Hacker mode.",
     category: "themes",
     price: 500,
-  },
-
-  // ── Animations ────────────────────────────────────────────────────────────
-  {
-    id: "anim-ink-flow",
-    name: "Ink Flow Reveal",
-    description: "Answers unseal with a left-to-right ink flowing animation.",
-    category: "animations",
-    price: 300,
-  },
-  {
-    id: "anim-typewriter",
-    name: "Typewriter Reveal",
-    description: "Answers type out character-by-character with a blinking cursor.",
-    category: "animations",
-    price: 300,
-  },
-  {
-    id: "anim-receipt",
-    name: "Waiter's Receipt Print",
-    description: "Answers unroll from the top like a kitchen receipt.",
-    category: "animations",
-    price: 350,
-  },
-  {
-    id: "anim-cipher",
-    name: "Cipher Scramble",
-    description: "Characters scramble and lock into place, one by one.",
-    category: "animations",
-    price: 400,
-  },
-
-  // ── Palettes ──────────────────────────────────────────────────────────────
-  {
-    id: "palette-ember",
-    name: "Ember",
-    description: "A rich deep amber and rust colour palette.",
-    category: "palettes",
-    price: 150,
-  },
-  {
-    id: "palette-glacier",
-    name: "Glacier",
-    description: "Ice-blue and silver tones.",
-    category: "palettes",
-    price: 150,
-  },
-  {
-    id: "palette-midnight",
-    name: "Midnight",
-    description: "Deep navy and violet tones.",
-    category: "palettes",
-    price: 150,
-  },
-
-  // ── Banners ───────────────────────────────────────────────────────────────
-  {
-    id: "banner-limits-master",
-    name: "Limits Master",
-    description: "An exclusive banner for those who have conquered 100 Limits fragments.",
-    category: "banners",
-    price: 1000,
-    achievementLocked: true,
-    unlockRequirement: "Conquer 100 fragments in the Alpha (Limits) volume.",
-    thumbnailUrl: "/thumbnails/banner_limits_master.png",
-  },
-  {
-    id: "banner-integrator",
-    name: "The Integrator",
-    description: "For those who have sealed 100 Integral proofs.",
-    category: "banners",
-    price: 1000,
-    achievementLocked: true,
-    unlockRequirement: "Conquer 100 fragments in the Gamma (Integrals) volume.",
-    thumbnailUrl: "/thumbnails/banner_integrator.png",
-  },
-  {
-    id: "banner-whale",
-    name: "Whale",
-    description: "Awarded to serious collectors. Unlocked after purchasing 5 items.",
-    category: "banners",
-    price: 200,
-    achievementLocked: true,
-    unlockRequirement: "Purchase any 5 items from the Store.",
-    thumbnailUrl: "/thumbnails/banner_whale.png",
-  },
-  {
-    id: "banner-scholar",
-    name: "Grand Scholar",
-    description: "A prestigious banner for dedicated students.",
-    category: "banners",
-    price: 500,
-    thumbnailUrl: "/thumbnails/banner_scholar.png",
   },
 
   // ── Archives (Expansion Packs) ────────────────────────────────────────────

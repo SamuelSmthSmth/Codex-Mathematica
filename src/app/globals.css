@@ -29,22 +29,20 @@
 }
 
 /* ── Palettes ───────────────────────────────────────────────────────────── */
-:root[data-theme="theme-default"][data-palette="palette-ember"],
-:root[data-theme="theme-plain-crimson"][data-palette="palette-ember"],
-:root[data-theme="theme-plain-neon"][data-palette="palette-ember"] {
-  --codex-accent: #d95e26;
+:root[data-theme="theme-default"][data-palette="palette-crimson"] {
+  --codex-accent: #9b1b30;
 }
 
-:root[data-theme="theme-default"][data-palette="palette-glacier"],
-:root[data-theme="theme-plain-crimson"][data-palette="palette-glacier"],
-:root[data-theme="theme-plain-neon"][data-palette="palette-glacier"] {
+:root[data-theme="theme-default"][data-palette="palette-glacier"] {
   --codex-accent: #6b8eb3;
 }
 
-:root[data-theme="theme-default"][data-palette="palette-midnight"],
-:root[data-theme="theme-plain-crimson"][data-palette="palette-midnight"],
-:root[data-theme="theme-plain-neon"][data-palette="palette-midnight"] {
+:root[data-theme="theme-default"][data-palette="palette-midnight"] {
   --codex-accent: #5e4b8a;
+}
+
+:root[data-theme="theme-default"][data-palette="palette-neon-green"] {
+  --codex-accent: #39ff14;
 }
 
 @theme inline {

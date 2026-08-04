@@ -22,6 +22,8 @@ export interface Chapter {
   /** Display name shown in the Table of Contents */
   theme: string;
   fragments: Fragment[];
+  /** If present, the user must own this shop item ID to see this chapter */
+  packId?: string;
 }
 
 export interface Volume {
@@ -47,6 +49,8 @@ export interface Volume {
 // Alpha (Limits)
 import alphaC01 from "./volumes/alpha/chapter-01.json";
 import alphaC02 from "./volumes/alpha/chapter-02.json";
+import alphaC03 from "./volumes/alpha/chapter-03.json";
+import alphaCuratedC01 from "./volumes/alpha/curated/chapter-01.json";
 
 // Delta (Derivatives)
 import deltaC01 from "./volumes/delta/chapter-01.json";
@@ -56,13 +60,18 @@ import sigmaC01 from "./volumes/sigma/chapter-01.json";
 
 // Gamma (Integrals)
 import gammaC01 from "./volumes/gamma/chapter-01.json";
+import gammaC02 from "./volumes/gamma/chapter-02.json";
+import gammaCuratedC01 from "./volumes/gamma/curated/chapter-01.json";
+import gammaPutnamC01 from "./volumes/gamma/putnam/chapter-01.json";
+import gammaStepC01 from "./volumes/gamma/step/chapter-01.json";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function parseChapter(raw: any): Chapter {
+function parseChapter(raw: any, packId?: string): Chapter {
   return {
     theme: raw.theme ?? "Nameless Chapter",
     fragments: (raw.fragments ?? []) as Fragment[],
+    packId,
   };
 }
 
@@ -79,7 +88,12 @@ export const VOLUMES: Volume[] = [
     leather: "#2d1008",
     accent: "#c8922a",
     bookText: "#f4d260",
-    chapters: [alphaC01, alphaC02].map(parseChapter),
+    chapters: [
+      parseChapter(alphaC01),
+      parseChapter(alphaC02),
+      parseChapter(alphaC03, "archive-alpha-rank3-vol1"), // Note: using a generic rank3 ID if they buy the standard pack
+      parseChapter(alphaCuratedC01, "archive-alpha-rank2-vol1"),
+    ],
   },
   {
     id: "delta",
@@ -89,7 +103,7 @@ export const VOLUMES: Volume[] = [
     leather: "#0b1e0e",
     accent: "#4aaa6c",
     bookText: "#a8e6c0",
-    chapters: [deltaC01].map(parseChapter),
+    chapters: [parseChapter(deltaC01)],
   },
   {
     id: "sigma",
@@ -99,7 +113,7 @@ export const VOLUMES: Volume[] = [
     leather: "#101628",
     accent: "#5b85d9",
     bookText: "#b3c9f2",
-    chapters: [sigmaC01].map(parseChapter),
+    chapters: [parseChapter(sigmaC01)],
   },
   {
     id: "gamma",
@@ -109,56 +123,12 @@ export const VOLUMES: Volume[] = [
     leather: "#251b2a",
     accent: "#986ec7",
     bookText: "#d1b3f0",
-    chapters: [gammaC01].map(parseChapter),
-  },
-  {
-    id: "archive-gamma-rank3-vol1",
-    symbol: "Γ*",
-    name: "Gamma Extended",
-    subtitle: "Volume I",
-    leather: "#34223d",
-    accent: "#b683db",
-    bookText: "#e2c5f5",
-    chapters: [],
-  },
-  {
-    id: "archive-gamma-rank2-vol1",
-    symbol: "Γ†",
-    name: "Gamma Curated",
-    subtitle: "Volume I",
-    leather: "#2c1c36",
-    accent: "#8b5fc0",
-    bookText: "#cca6ed",
-    chapters: [],
-  },
-  {
-    id: "archive-alpha-rank2-vol1",
-    symbol: "α†",
-    name: "Alpha Curated",
-    subtitle: "Volume I",
-    leather: "#3d1810",
-    accent: "#e09f3e",
-    bookText: "#f9d489",
-    chapters: [],
-  },
-  {
-    id: "archive-gamma-rank1-putnam",
-    symbol: "P",
-    name: "Putnam Integrals",
-    subtitle: "The Final Challenge",
-    leather: "#1c1421",
-    accent: "#d4af37",
-    bookText: "#f0e4b1",
-    chapters: [],
-  },
-  {
-    id: "archive-gamma-rank1-step",
-    symbol: "S",
-    name: "STEP Masterclass",
-    subtitle: "Integration",
-    leather: "#211d24",
-    accent: "#cfc1d9",
-    bookText: "#eee9f2",
-    chapters: [],
+    chapters: [
+      parseChapter(gammaC01),
+      parseChapter(gammaC02, "archive-gamma-rank3-vol1"),
+      parseChapter(gammaCuratedC01, "archive-gamma-rank2-vol1"),
+      parseChapter(gammaPutnamC01, "archive-gamma-rank1-putnam"),
+      parseChapter(gammaStepC01, "archive-gamma-rank1-step"),
+    ],
   },
 ];

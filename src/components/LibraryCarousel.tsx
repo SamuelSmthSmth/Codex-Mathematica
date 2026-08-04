@@ -36,13 +36,13 @@ function TechniqueCard({
         minHeight: "160px",
         background: isLightMode
           ? "#ffffff"
-          : "linear-gradient(160deg, #13100c 0%, #0c0907 100%)",
+          : "linear-gradient(160deg, #1f2937 0%, #111827 100%)",
         border: isLightMode
           ? "1px solid #e5e7eb"
-          : "1px solid rgba(200,146,42,0.14)",
+          : "1px solid #374151",
         boxShadow: isLightMode
           ? "0 2px 8px rgba(0,0,0,0.05)"
-          : "0 4px 20px rgba(0,0,0,0.6)",
+          : "0 4px 20px rgba(0,0,0,0.8)",
       }}
       onClick={() => onSelect(technique)}
     >
@@ -53,9 +53,9 @@ function TechniqueCard({
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "0.52rem",
-            color: "rgba(200,146,42,0.8)",
-            background: "rgba(200,146,42,0.1)",
-            border: "1px solid rgba(200,146,42,0.15)",
+            color: isLightMode ? "rgba(200,146,42,0.8)" : "#9ca3af",
+            background: isLightMode ? "rgba(200,146,42,0.1)" : "rgba(255,255,255,0.1)",
+            border: isLightMode ? "1px solid rgba(200,146,42,0.15)" : "1px solid rgba(255,255,255,0.2)",
           }}
         >
           {technique.category}
@@ -67,7 +67,7 @@ function TechniqueCard({
             fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
             fontSize: "1.05rem",
             letterSpacing: "0.02em",
-            color: isLightMode ? "#1c1917" : "rgba(235,220,185,0.9)",
+            color: isLightMode ? "#1c1917" : "#ffffff",
           }}
         >
           {technique.name}
@@ -78,7 +78,7 @@ function TechniqueCard({
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "0.75rem",
-            color: isLightMode ? "#78716c" : "rgba(168,150,120,0.7)",
+            color: isLightMode ? "#78716c" : "#9ca3af",
             lineHeight: "1.5",
           }}
         >
@@ -140,7 +140,7 @@ export default function LibraryCarousel({ title, techniques, onSelect }: Library
             fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif",
             fontSize: "1.1rem",
             letterSpacing: "0.04em",
-            color: isLightMode ? "#1c1917" : "rgba(230,215,180,0.85)",
+            color: isLightMode ? "#1c1917" : "#ffffff",
           }}
         >
           {title}
