@@ -22,9 +22,9 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
-import LibraryView from "@/components/LibraryView";
-import ShopLayout from "@/components/ShopLayout";
-import { AppArea } from "@/components/ThemeRoot";
+import LibraryView from "@/components/LibraryViewDefault";
+import ShopLayout from "@/components/ShopLayoutDefault";
+import { AppArea, ThemeProps } from "@/components/ThemeRoot";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bottom Dock

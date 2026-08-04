@@ -8,9 +8,9 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { useTheme } from "../context/ThemeContext";
-import { AppArea } from "@/components/ThemeRoot";
-import LibraryView from "@/components/LibraryView";
-import ShopLayout from "@/components/ShopLayout";
+import { AppArea, ThemeProps } from "@/components/ThemeRoot";
+import LibraryViewWindowsXP from "@/components/LibraryViewWindowsXP";
+import ShopLayoutWindowsXP from "@/components/ShopLayoutWindowsXP";
 
 // Simple MathRenderer wrapper
 function MathRenderer({ children, className }: { children: string; className?: string }) {
@@ -137,7 +137,7 @@ export default function ThemeWindowsXP({
   // Derived open windows list for taskbar
   const openWindows = useMemo(() => {
     const wins = [];
-    if (activeArea === 'library') wins.push({ id: 'library', title: 'Library - Internet Explorer', icon: Globe });
+    if (activeArea === 'library') wins.push({ id: 'library', title: 'C:\\My Documents\\Library', icon: Folder });
     if (activeArea === 'shop') wins.push({ id: 'shop', title: 'Storefront - Internet Explorer', icon: Globe });
     if (explorerVolume) wins.push({ id: 'explorer', title: `C:\\Codex\\${explorerVolume.name}`, icon: Folder });
     if (notepadContext) wins.push({ id: 'notepad', title: `Notepad`, icon: FileText });
@@ -225,8 +225,8 @@ export default function ThemeWindowsXP({
       {/* Library Window */}
       {activeArea === "library" && (
         <XPWindow 
-          title="Library - Internet Explorer" 
-          icon={Globe} 
+          title="C:\My Documents\Library" 
+          icon={Folder} 
           onClose={() => onSelectArea("archive")}
           onPointerDown={() => bringToFront('library')}
           style={{ top: "5%", left: "5%", width: "90%", height: "85%", zIndex: getZIndex('library') }}
@@ -243,12 +243,12 @@ export default function ThemeWindowsXP({
             <div className="flex-1 flex items-center gap-2">
               <span className="text-stone-600 text-sm">Address</span>
               <div className="flex-1 bg-white border border-stone-400 h-6 flex items-center px-2 text-sm">
-                http://localhost/library
+                C:\\\\My Documents\\\\Library
               </div>
             </div>
           </div>
-          <div className="h-[calc(100%-5rem)] overflow-y-auto bg-white">
-            <LibraryView />
+          <div className="h-[calc(100%-5rem)] bg-white overflow-hidden">
+            <LibraryViewWindowsXP />
           </div>
         </XPWindow>
       )}
@@ -278,8 +278,8 @@ export default function ThemeWindowsXP({
               </div>
             </div>
           </div>
-          <div className="h-[calc(100%-5rem)] overflow-y-auto bg-white">
-            <ShopLayout />
+          <div className="h-[calc(100%-5rem)] bg-white overflow-hidden">
+            <ShopLayoutWindowsXP />
           </div>
         </XPWindow>
       )}

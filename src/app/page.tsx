@@ -18,7 +18,7 @@
 import { useState } from "react";
 
 import ScholarGate from "@/components/ScholarGate";
-import ProfilePanel from "@/components/ProfilePanel";
+import ProfilePanelDefault from "@/components/ProfilePanelDefault";
 import { useAuth } from "@/context/AuthContext";
 import { AppArea } from "@/components/ThemeRoot";
 import ThemeRoot from "@/components/ThemeRoot";
@@ -46,12 +46,15 @@ export default function Home() {
             <p className="mt-6 font-serif text-amber-800 tracking-widest uppercase text-sm animate-pulse">Loading Archive...</p>
           </div>
         ) : (
-          <ThemeRoot activeArea={activeArea} onSelectArea={handleSelectArea} onOpenProfile={() => setIsProfileOpen(true)} />
+          <ThemeRoot 
+            activeArea={activeArea} 
+            onSelectArea={handleSelectArea} 
+            isProfileOpen={isProfileOpen}
+            onCloseProfile={() => setIsProfileOpen(false)}
+            onOpenProfile={() => setIsProfileOpen(true)} 
+          />
         )}
       </div>
-
-      {/* ── Profile Panel ── */}
-      <ProfilePanel isOpen={isProfileOpen} onClose={() => setIsProfileOpen(false)} />
 
       {/* ── Auth Gate ── */}
       {!loading && !scholar && !isGuestMode && <ScholarGate />}

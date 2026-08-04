@@ -10,9 +10,9 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { useTheme } from "@/context/ThemeContext";
-import { AppArea } from "@/components/ThemeRoot";
-import LibraryView from "@/components/LibraryView";
-import ShopLayout from "@/components/ShopLayout";
+import { AppArea, ThemeProps } from "@/components/ThemeRoot";
+import LibraryViewModernDesktop from "@/components/LibraryViewModernDesktop";
+import ShopLayoutModernDesktop from "@/components/ShopLayoutModernDesktop";
 
 function MathRenderer({ children, className }: { children: string; className?: string }) {
   const processedText = children.replace(/\$\$([\s\S]*?)\$\$/g, (_match, inner: string) => {
@@ -355,7 +355,7 @@ export default function ThemeModernDesktop({
             style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: getZIndex("library") }}
           >
             <div className="h-full overflow-auto bg-[#111111]">
-              <LibraryView />
+              <LibraryViewModernDesktop />
             </div>
           </ModernWindow>
         )}
@@ -371,7 +371,7 @@ export default function ThemeModernDesktop({
             style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: getZIndex("shop") }}
           >
             <div className="h-full overflow-auto bg-[#111111]">
-              <ShopLayout />
+              <ShopLayoutModernDesktop />
             </div>
           </ModernWindow>
         )}

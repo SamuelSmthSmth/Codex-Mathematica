@@ -8,9 +8,9 @@ import rehypeKatex from "rehype-katex";
 import { useTheme } from "@/context/ThemeContext";
 import { useWorkspaceLogic } from "@/hooks/useWorkspaceLogic";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
-import { AppArea } from "@/components/ThemeRoot";
-import LibraryView from "@/components/LibraryView";
-import ShopLayout from "@/components/ShopLayout";
+import { AppArea, ThemeProps } from "@/components/ThemeRoot";
+import LibraryView from "@/components/LibraryViewScribble";
+import ShopLayout from "@/components/ShopLayoutScribble";
 import { useProgress, type SelfGrade } from "@/context/ProgressContext";
 import { ArrowLeft, ChevronLeft, ChevronRight, Play, CheckCheck, Minus, RotateCcw, ShoppingBag, Archive, BookOpen } from "lucide-react";
 

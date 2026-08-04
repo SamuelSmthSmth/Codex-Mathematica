@@ -24,9 +24,9 @@ import {
   Archive,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
-import { AppArea } from "@/components/ThemeRoot";
-import LibraryView from "@/components/LibraryView";
-import ShopLayout from "@/components/ShopLayout";
+import { AppArea, ThemeProps } from "@/components/ThemeRoot";
+import LibraryViewMixtape from "@/components/LibraryViewMixtape";
+import ShopLayoutMixtape from "@/components/ShopLayoutMixtape";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
@@ -543,21 +543,9 @@ export default function ThemeMixtape({
   let content = null;
 
   if (activeArea === "library") {
-    content = (
-      <div className="w-full h-full p-8 max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-2xl overflow-hidden h-full border-4 border-fuchsia-500">
-          <LibraryView />
-        </div>
-      </div>
-    );
+    content = <LibraryViewMixtape />;
   } else if (activeArea === "shop") {
-    content = (
-      <div className="w-full h-full p-8 max-w-6xl mx-auto">
-        <div className="bg-white rounded-lg shadow-2xl overflow-hidden h-full border-4 border-fuchsia-500">
-          <ShopLayout />
-        </div>
-      </div>
-    );
+    content = <ShopLayoutMixtape />;
   } else {
     if (view.screen === "shelf") {
       content = <CDShelf onSelect={(v) => setView({ screen: "chapters", volume: v })} />;

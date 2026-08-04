@@ -11,7 +11,6 @@
  * Clicking a card navigates to LibraryArticle (managed via internal state).
  */
 
-import { useState, useMemo } from "react";
 import { BookOpen, Sparkles } from "lucide-react";
 import { useTheme } from "@/context/ThemeContext";
 import { TECHNIQUE_ROWS } from "@/data/techniques";
@@ -19,17 +18,7 @@ import type { Technique } from "@/data/techniques";
 import LibraryCarousel from "./LibraryCarousel";
 import LibraryArticle from "./LibraryArticle";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-function getTechniqueOfTheDay(): Technique {
-  const allTechniques = TECHNIQUE_ROWS.flatMap((row) => row.techniques);
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const dayOfYear = Math.floor((now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  return allTechniques[dayOfYear % allTechniques.length];
-}
+import { useLibraryLogic } from "@/hooks/useLibraryLogic";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Hero Banner
@@ -142,11 +131,9 @@ function HeroBanner({
 // LibraryView
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function LibraryView() {
+export default function LibraryViewDefault() {
   const { isLightMode } = useTheme();
-  const [activeTechnique, setActiveTechnique] = useState<Technique | null>(null);
-
-  const todaysTechnique = useMemo(() => getTechniqueOfTheDay(), []);
+  const { activeTechnique, setActiveTechnique, todaysTechnique, techniqueRows } = useLibraryLogic();
 
   const bg = isLightMode
     ? "#fcfaf7"
@@ -215,7 +202,7 @@ export default function LibraryView() {
         />
 
         {/* Carousel rows */}
-        {TECHNIQUE_ROWS.map((row) => (
+        {techniqueRows.map((row) => (
           <LibraryCarousel
             key={row.id}
             title={row.title}

@@ -9,13 +9,9 @@
  */
 
 import { useTheme } from "@/context/ThemeContext";
-import { useProgress } from "@/context/ProgressContext";
-import {
-  SHOP_ITEMS,
-  SHOP_CATEGORIES,
-  type ShopItem,
-} from "@/data/shop-items";
+import { type ShopItem } from "@/data/shop-items";
 import { Coins, Lock, Check, Sparkles } from "lucide-react";
+import { useShopLogic } from "@/hooks/useShopLogic";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rank badge helper
@@ -33,25 +29,13 @@ const RANK_LABELS: Record<number, { label: string; color: string }> = {
 
 function ShopItemCard({ item }: { item: ShopItem }) {
   const { isLightMode } = useTheme();
-  const { credits, buyItem, ownedItems, equipItem, equippedItems, isAchievementUnlocked } = useProgress();
+  const { handleBuy, handleEquip, isItemOwned, isItemLocked, isItemEquipped, credits } = useShopLogic();
 
-  const isOwned    = ownedItems.has(item.id);
+  const isOwned    = isItemOwned(item.id);
   const canAfford  = credits >= item.price;
-  const isLocked   = !!item.achievementLocked && !isAchievementUnlocked(item.id);
-  const isEquipped = equippedItems[item.category] === item.id;
+  const isLocked   = isItemLocked(item.id, item.achievementLocked);
+  const isEquipped = isItemEquipped(item.category, item.id);
   const rank       = item.rank;
-
-  const handleBuy = () => {
-    if (isOwned || isLocked) return;
-    const bought = buyItem(item.id, item.price);
-    if (bought && item.category === "themes") {
-      equipItem(item.category, item.id);
-    }
-  };
-
-  const handleEquip = () => {
-    equipItem(item.category, item.id);
-  };
 
   return (
     <article
@@ -175,7 +159,7 @@ function ShopItemCard({ item }: { item: ShopItem }) {
             item.category === "themes" && !isEquipped ? (
               <button
                 id={`equip-${item.id}`}
-                onClick={handleEquip}
+                onClick={() => handleEquip(item)}
                 className="px-3 py-1 rounded-sm uppercase tracking-widest transition-all duration-200"
                 style={{
                   fontFamily: "Georgia, serif",
@@ -206,7 +190,7 @@ function ShopItemCard({ item }: { item: ShopItem }) {
           ) : (
             <button
               id={`buy-${item.id}`}
-              onClick={handleBuy}
+              onClick={() => handleBuy(item)}
               disabled={isLocked || !canAfford}
               className="px-3 py-1 rounded-sm uppercase tracking-widest transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
@@ -266,9 +250,9 @@ function SectionHeading({ label, count, isLightMode }: { label: string; count: n
 // ShopLayout — single scrollable page
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ShopLayout() {
+export default function ShopLayoutDefault() {
   const { isLightMode } = useTheme();
-  const { credits } = useProgress();
+  const { credits, shopCategories, shopItems } = useShopLogic();
 
   const bg = isLightMode ? "#fcfaf7" : "#0a0706";
   const headerBg = isLightMode ? "#f5f0e8" : "#0d0a07";
@@ -341,15 +325,15 @@ export default function ShopLayout() {
       {/* ── Content ── */}
       <main className="flex-1 overflow-y-auto px-8 py-6 pb-24" style={{ scrollbarWidth: "thin", scrollbarColor: "color-mix(in srgb, var(--codex-accent) 20%, transparent) transparent" }}>
         <div className="max-w-7xl mx-auto flex flex-col gap-8">
-          {SHOP_CATEGORIES.map((cat) => {
-            const items = SHOP_ITEMS.filter((i) => i.category === cat.id);
-            if (items.length === 0) return null;
+          {shopCategories.map((category) => {
+            const itemsInCategory = shopItems.filter((i) => i.category === category.id);
+            if (itemsInCategory.length === 0) return null;
 
             return (
-              <section key={cat.id}>
-                <SectionHeading label={cat.label} count={items.length} isLightMode={isLightMode} />
+              <section key={category.id}>
+                <SectionHeading label={category.label} count={itemsInCategory.length} isLightMode={isLightMode} />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                  {items.map((item) => (
+                  {itemsInCategory.map((item) => (
                     <ShopItemCard key={item.id} item={item} />
                   ))}
                 </div>

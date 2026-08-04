@@ -24,9 +24,9 @@ import {
   Archive,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
-import { AppArea } from "@/components/ThemeRoot";
-import LibraryView from "@/components/LibraryView";
-import ShopLayout from "@/components/ShopLayout";
+import { AppArea, ThemeProps } from "@/components/ThemeRoot";
+import LibraryView from "@/components/LibraryViewDiner";
+import ShopLayout from "@/components/ShopLayoutDiner";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
