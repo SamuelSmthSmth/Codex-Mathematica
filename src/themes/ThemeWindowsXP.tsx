@@ -235,7 +235,7 @@ export default function ThemeWindowsXP({
           </div>
           
           {/* Folder Content */}
-          <div className="flex flex-wrap p-4 gap-6 bg-white h-full items-start content-start">
+          <div className="flex flex-wrap p-4 gap-6 bg-white h-[calc(100%-5rem)] overflow-y-auto items-start content-start">
             {explorerVolume.chapters.map((chap, cIdx) => (
               <div 
                 key={cIdx} 

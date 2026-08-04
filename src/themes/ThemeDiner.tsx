@@ -57,7 +57,7 @@ function MathRenderer({ children, className }: { children: string; className?: s
 function DinerBackground({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="min-h-screen flex flex-col items-center py-10 px-4 relative overflow-hidden"
+      className="h-full flex flex-col items-center py-10 px-4 relative overflow-x-hidden overflow-y-auto"
       style={{
         background: "#fff", // base white
         backgroundImage: `
