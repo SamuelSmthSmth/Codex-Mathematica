@@ -63,8 +63,8 @@ function BottomDock({
           : "rgba(10,7,5,0.88)",
         backdropFilter: "blur(12px)",
         borderTop: isLightMode
-          ? "1px solid rgba(200,146,42,0.12)"
-          : "1px solid rgba(200,146,42,0.1)",
+          ? "1px solid color-mix(in srgb, var(--codex-accent) 12%, transparent)"
+          : "1px solid color-mix(in srgb, var(--codex-accent) 10%, transparent)",
       }}
       aria-label="Primary navigation"
     >
@@ -78,7 +78,7 @@ function BottomDock({
             className="flex flex-col items-center gap-1 px-8 py-2 transition-all duration-200"
             style={{
               color: isActive
-                ? "rgba(200,146,42,0.95)"
+                ? "color-mix(in srgb, var(--codex-accent) 95%, transparent)"
                 : inactiveColor,
             }}
             aria-label={`Go to ${label}`}
@@ -98,7 +98,7 @@ function BottomDock({
             {isActive && (
               <div
                 className="absolute bottom-1 w-1 h-1 rounded-full"
-                style={{ background: "rgba(200,146,42,0.8)" }}
+                style={{ background: "color-mix(in srgb, var(--codex-accent) 80%, transparent)" }}
                 aria-hidden="true"
               />
             )}
@@ -166,7 +166,7 @@ type AppView =
 // Atoms
 // ─────────────────────────────────────────────────────────────────────────────
 
-function GoldRule({ color = "#c8922a" }: { color?: string }) {
+function GoldRule({ color = "var(--codex-accent)" }: { color?: string }) {
   return (
     <div
       className="w-full opacity-40"
@@ -731,9 +731,9 @@ $$`}</MathRenderer>
                 <button
                   onClick={() => setGradePhase("revealed")}
                   className="group flex items-center gap-2.5 px-8 py-3 text-xs uppercase tracking-[0.22em] transition-all duration-200 active:scale-95"
-                  style={{ fontFamily: "Georgia, serif", background: isLightMode ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)", border: isLightMode ? "1px solid rgba(200,146,42,0.5)" : "1px solid rgba(200,146,42,0.3)", borderRadius: "2px", color: isLightMode ? "#966812" : "rgba(200,146,42,0.9)", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px rgba(200,146,42,0.08), inset 0 1px 0 rgba(255,220,100,0.06)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)"; e.currentTarget.style.borderColor = "rgba(200,146,42,0.6)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = isLightMode ? "#966812" : "rgba(200,146,42,0.9)"; e.currentTarget.style.borderColor = isLightMode ? "rgba(200,146,42,0.5)" : "rgba(200,146,42,0.3)"; }}
+                  style={{ fontFamily: "Georgia, serif", background: isLightMode ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)", border: isLightMode ? "1px solid color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "1px solid color-mix(in srgb, var(--codex-accent) 30%, transparent)", borderRadius: "2px", color: isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px color-mix(in srgb, var(--codex-accent) 8%, transparent), inset 0 1px 0 rgba(255,220,100,0.06)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)"; e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 60%, transparent)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)"; e.currentTarget.style.borderColor = isLightMode ? "color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "color-mix(in srgb, var(--codex-accent) 30%, transparent)"; }}
                 >
                   <BookMarked size={14} strokeWidth={1.8} /> Reveal Answer
                 </button>
@@ -743,11 +743,11 @@ $$`}</MathRenderer>
             {(gradePhase === "revealed" || gradePhase === "graded") && (
               <div className={`w-full overflow-hidden ${revealClass}`} style={revealStyle}>
                 <div className="flex items-center gap-3 mb-6 mt-4">
-                  <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, transparent, rgba(200,146,42,0.25))" }} />
-                  <p style={{ fontFamily: "Georgia, serif", fontSize: "0.5rem", letterSpacing: "0.32em", color: "rgba(200,146,42,0.6)", textTransform: "uppercase" }}>The Solution</p>
-                  <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, rgba(200,146,42,0.25))" }} />
+                  <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, transparent, color-mix(in srgb, var(--codex-accent) 25%, transparent))" }} />
+                  <p style={{ fontFamily: "Georgia, serif", fontSize: "0.5rem", letterSpacing: "0.32em", color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)", textTransform: "uppercase" }}>The Solution</p>
+                  <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, color-mix(in srgb, var(--codex-accent) 25%, transparent))" }} />
                 </div>
-                <div className="w-full py-10 px-6 text-center mb-8" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.18)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px rgba(200,146,42,0.04), inset 0 1px 0 rgba(200,146,42,0.06)" }}>
+                <div className="w-full py-10 px-6 text-center mb-8" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px color-mix(in srgb, var(--codex-accent) 4%, transparent), inset 0 1px 0 color-mix(in srgb, var(--codex-accent) 6%, transparent)" }}>
                   <MathRenderer className={`[&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden ${isLightMode ? "[&_.katex]:text-stone-900 text-stone-900" : "[&_.katex]:text-amber-100/85 text-amber-100/85"}`}>{`$$${fragment.solution_latex}$$`}</MathRenderer>
                 </div>
 
@@ -773,7 +773,7 @@ $$`}</MathRenderer>
                       </span>
                     </div>
                     {!isAlreadyConquered && CREDIT_MAP[chosenGrade] > 0 && (
-                      <p className="tracking-widest uppercase" style={{ fontFamily: "'Courier New', monospace", fontSize: "0.7rem", color: "rgba(200,146,42,0.8)" }}>+{CREDIT_MAP[chosenGrade].toLocaleString()} Credits</p>
+                      <p className="tracking-widest uppercase" style={{ fontFamily: "'Courier New', monospace", fontSize: "0.7rem", color: "color-mix(in srgb, var(--codex-accent) 80%, transparent)" }}>+{CREDIT_MAP[chosenGrade].toLocaleString()} Credits</p>
                     )}
                     <div className="flex items-center gap-3 mt-3">
                       {!isAlreadyConquered && (

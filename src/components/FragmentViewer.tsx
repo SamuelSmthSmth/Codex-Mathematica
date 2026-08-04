@@ -189,7 +189,7 @@ export default function FragmentViewer({ fragment }: { fragment: Fragment }) {
             className="w-full h-px mb-6 opacity-50"
             style={{
               background:
-                "linear-gradient(to right, transparent, #8b5c1e, #c8922a, #8b5c1e, transparent)",
+                "linear-gradient(to right, transparent, #8b5c1e, var(--codex-accent), #8b5c1e, transparent)",
             }}
           />
 
@@ -204,7 +204,7 @@ export default function FragmentViewer({ fragment }: { fragment: Fragment }) {
             <div
               className="
                 text-center py-5 px-4
-                bg-[#c8922a]/10 rounded-[2px]
+                bg-[var(--codex-accent)]/10 rounded-[2px]
                 border border-[#8b5c1e]/25
                 text-[#2a1a05]
                 [&_.katex]:text-2xl [&_.katex]:md:text-3xl
@@ -348,7 +348,7 @@ export default function FragmentViewer({ fragment }: { fragment: Fragment }) {
             className="w-full h-px mt-8 mb-6 opacity-40"
             style={{
               background:
-                "linear-gradient(to right, transparent, #8b5c1e, #c8922a, #8b5c1e, transparent)",
+                "linear-gradient(to right, transparent, #8b5c1e, var(--codex-accent), #8b5c1e, transparent)",
             }}
           />
 
@@ -378,7 +378,7 @@ export default function FragmentViewer({ fragment }: { fragment: Fragment }) {
                 bg-[#2a1a05] text-[#f4d878]
                 border border-[#5c3d11]/60
                 rounded-[2px]
-                hover:bg-[#3d2608] hover:border-[#c8922a]/60
+                hover:bg-[#3d2608] hover:border-[var(--codex-accent)]/60
                 disabled:opacity-40 disabled:cursor-not-allowed
                 transition-all duration-200
                 shadow-[inset_0_1px_0_rgba(255,220,100,0.1)]

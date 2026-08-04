@@ -52,7 +52,7 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
   const bg = isLightMode ? "#fcfaf7" : "#0a0a0a";
   const textMuted = isLightMode ? "#78716c" : "#9ca3af";
   const border = isLightMode ? "#e5e7eb" : "rgba(255,255,255,0.1)";
-  const accentColor = isLightMode ? "rgba(200,146,42,0.9)" : "#ffffff";
+  const accentColor = isLightMode ? "color-mix(in srgb, var(--codex-accent) 90%, transparent)" : "#ffffff";
 
   return (
     <div
@@ -84,8 +84,8 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
               fontFamily: "Georgia, serif",
               fontSize: "0.58rem",
               color: isLightMode ? accentColor : "#9ca3af",
-              background: isLightMode ? "rgba(200,146,42,0.08)" : "rgba(255,255,255,0.1)",
-              border: isLightMode ? `1px solid rgba(200,146,42,0.2)` : `1px solid rgba(255,255,255,0.2)`,
+              background: isLightMode ? "color-mix(in srgb, var(--codex-accent) 8%, transparent)" : "rgba(255,255,255,0.1)",
+              border: isLightMode ? `1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)` : `1px solid rgba(255,255,255,0.2)`,
             }}
           >
             {technique.category}
@@ -134,7 +134,7 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
           <section
             className="mt-14 p-6 rounded-sm"
             style={{
-              background: isLightMode ? "rgba(200,146,42,0.04)" : "rgba(200,146,42,0.05)",
+              background: isLightMode ? "color-mix(in srgb, var(--codex-accent) 4%, transparent)" : "color-mix(in srgb, var(--codex-accent) 5%, transparent)",
               border: `1px solid ${border}`,
             }}
           >
@@ -163,9 +163,9 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
                   letterSpacing: "0.1em",
                   color: accentColor,
                   background: "transparent",
-                  border: `1px solid rgba(200,146,42,0.3)`,
+                  border: `1px solid color-mix(in srgb, var(--codex-accent) 30%, transparent)`,
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.08)")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 8%, transparent)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
                 <Eye size={14} strokeWidth={1.6} />
@@ -177,7 +177,7 @@ export default function LibraryArticle({ technique, onBack }: LibraryArticleProp
                   className="p-4 rounded-sm"
                   style={{
                     background: isLightMode ? "#f9f5ee" : "#0d0a07",
-                    border: `1px solid rgba(200,146,42,0.2)`,
+                    border: `1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)`,
                   }}
                 >
                   <MathRenderer

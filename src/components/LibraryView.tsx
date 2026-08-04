@@ -67,7 +67,7 @@ function HeroBanner({
           className="pointer-events-none absolute inset-0 opacity-30"
           style={{
             background:
-              "radial-gradient(ellipse 70% 80% at 20% 50%, rgba(200,146,42,0.12) 0%, transparent 70%)",
+              "radial-gradient(ellipse 70% 80% at 20% 50%, color-mix(in srgb, var(--codex-accent) 12%, transparent) 0%, transparent 70%)",
           }}
           aria-hidden="true"
         />
@@ -78,14 +78,14 @@ function HeroBanner({
           <Sparkles
             size={13}
             strokeWidth={1.5}
-            style={{ color: "rgba(200,146,42,0.8)" }}
+            style={{ color: "color-mix(in srgb, var(--codex-accent) 80%, transparent)" }}
           />
           <span
             className="uppercase tracking-[0.35em]"
             style={{
               fontFamily: "Georgia, serif",
               fontSize: "0.58rem",
-              color: "rgba(200,146,42,0.7)",
+              color: "color-mix(in srgb, var(--codex-accent) 70%, transparent)",
             }}
           >
             Technique of the Day
@@ -180,7 +180,7 @@ export default function LibraryView() {
             style={{
               fontFamily: "Georgia, serif",
               fontSize: "0.6rem",
-              color: isLightMode ? "rgba(200,146,42,0.5)" : "#9ca3af",
+              color: isLightMode ? "color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "#9ca3af",
             }}
           >
             The Grand Archive

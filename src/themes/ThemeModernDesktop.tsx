@@ -276,7 +276,10 @@ export default function ThemeModernDesktop({
   }, []);
 
   return (
-    <div className="w-full h-full overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-black select-none relative font-sans text-slate-200">
+    <div className="w-full h-full overflow-hidden bg-black select-none relative font-sans text-slate-200">
+      <div className="absolute inset-0 bg-cover bg-center opacity-70" style={{ backgroundImage: "url('/images/modern_desktop_wallpaper.png')" }} />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/40 to-slate-950/90 pointer-events-none" />
+      
       {/* Top Menu Bar */}
       <div className="absolute top-0 left-0 right-0 h-7 bg-[#1a1a1a]/80 backdrop-blur-md border-b border-white/10 flex items-center justify-between px-4 z-50 text-xs">
         <div className="flex gap-4 items-center">

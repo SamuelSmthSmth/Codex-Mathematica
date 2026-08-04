@@ -28,10 +28,10 @@ import { useAuth } from "@/context/AuthContext";
 function GoogleIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
-      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="rgba(200,146,42,0.6)" />
+      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="color-mix(in srgb, var(--codex-accent) 60%, transparent)" />
       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="rgba(180,130,40,0.6)" />
       <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="rgba(160,115,35,0.6)" />
-      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="rgba(200,146,42,0.6)" />
+      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="color-mix(in srgb, var(--codex-accent) 60%, transparent)" />
     </svg>
   );
 }
@@ -58,18 +58,18 @@ function GoldDivider({ label }: { label?: string }) {
     return (
       <div
         className="w-full my-5"
-        style={{ height: "1px", background: "linear-gradient(to right, transparent, rgba(200,146,42,0.28), transparent)" }}
+        style={{ height: "1px", background: "linear-gradient(to right, transparent, color-mix(in srgb, var(--codex-accent) 28%, transparent), transparent)" }}
         aria-hidden="true"
       />
     );
   }
   return (
     <div className="w-full flex items-center gap-3 my-5" aria-hidden="true">
-      <div className="flex-1" style={{ height: "1px", background: "linear-gradient(to right, transparent, rgba(200,146,42,0.22))" }} />
+      <div className="flex-1" style={{ height: "1px", background: "linear-gradient(to right, transparent, color-mix(in srgb, var(--codex-accent) 22%, transparent))" }} />
       <span style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", letterSpacing: "0.2em", color: "rgba(160,135,90,0.5)", textTransform: "uppercase" }}>
         {label}
       </span>
-      <div className="flex-1" style={{ height: "1px", background: "linear-gradient(to left, transparent, rgba(200,146,42,0.22))" }} />
+      <div className="flex-1" style={{ height: "1px", background: "linear-gradient(to left, transparent, color-mix(in srgb, var(--codex-accent) 22%, transparent))" }} />
     </div>
   );
 }
@@ -98,7 +98,7 @@ function DarkInput({
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={id}
-        style={{ fontFamily: "Georgia, serif", fontSize: "0.56rem", letterSpacing: "0.25em", color: "rgba(200,146,42,0.48)", textTransform: "uppercase" }}
+        style={{ fontFamily: "Georgia, serif", fontSize: "0.56rem", letterSpacing: "0.25em", color: "color-mix(in srgb, var(--codex-accent) 48%, transparent)", textTransform: "uppercase" }}
       >
         {label}
       </label>
@@ -115,10 +115,10 @@ function DarkInput({
           fontFamily: "Georgia, serif",
           fontSize: "0.88rem",
           background: "#0a0806",
-          border: `1px solid ${focused ? "rgba(200,146,42,0.5)" : "rgba(200,146,42,0.18)"}`,
+          border: `1px solid ${focused ? "color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "color-mix(in srgb, var(--codex-accent) 18%, transparent)"}`,
           borderRadius: "2px",
           color: "rgba(220,205,170,0.9)",
-          caretColor: "#c8922a",
+          caretColor: "var(--codex-accent)",
           letterSpacing: "0.02em",
           boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5)",
           padding: "10px 14px",
@@ -161,7 +161,7 @@ function OAuthButton({
         fontSize: "0.78rem",
         letterSpacing: "0.06em",
         background: "transparent",
-        border: `1px solid ${hovered && !disabled ? "rgba(200,146,42,0.35)" : "rgba(80,65,45,0.65)"}`,
+        border: `1px solid ${hovered && !disabled ? "color-mix(in srgb, var(--codex-accent) 35%, transparent)" : "rgba(80,65,45,0.65)"}`,
         borderRadius: "2px",
         color: hovered && !disabled ? "rgba(210,185,130,0.92)" : "rgba(160,140,100,0.65)",
         transition: "border-color 0.15s ease, color 0.15s ease",
@@ -177,7 +177,7 @@ function Spinner() {
   return (
     <span
       className="inline-block w-3.5 h-3.5 rounded-full border-2 flex-shrink-0"
-      style={{ borderColor: "rgba(200,146,42,0.2)", borderTopColor: "rgba(200,146,42,0.7)", animation: "sg-spin 0.7s linear infinite" }}
+      style={{ borderColor: "color-mix(in srgb, var(--codex-accent) 20%, transparent)", borderTopColor: "color-mix(in srgb, var(--codex-accent) 70%, transparent)", animation: "sg-spin 0.7s linear infinite" }}
       aria-hidden="true"
     />
   );
@@ -255,9 +255,9 @@ export default function ScholarGate() {
         className="relative w-full max-w-sm flex flex-col px-8 pt-9 pb-8"
         style={{
           background: "linear-gradient(170deg, #161009 0%, #0e0b07 55%, #0a0806 100%)",
-          border: "1px solid rgba(200,146,42,0.2)",
+          border: "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
           borderRadius: "3px",
-          boxShadow: "0 0 80px rgba(200,146,42,0.06), 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,220,100,0.05)",
+          boxShadow: "0 0 80px color-mix(in srgb, var(--codex-accent) 6%, transparent), 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,220,100,0.05)",
           animation: shake ? "sg-shake 0.45s cubic-bezier(.36,.07,.19,.97) forwards" : undefined,
         }}
       >
@@ -266,7 +266,7 @@ export default function ScholarGate() {
         <div className="text-center mb-7">
           <p
             aria-hidden="true"
-            style={{ fontFamily: "Georgia, serif", fontSize: "0.9rem", letterSpacing: "0.4em", color: "rgba(200,146,42,0.35)", marginBottom: "0.75rem" }}
+            style={{ fontFamily: "Georgia, serif", fontSize: "0.9rem", letterSpacing: "0.4em", color: "color-mix(in srgb, var(--codex-accent) 35%, transparent)", marginBottom: "0.75rem" }}
           >
             ✦ ✦ ✦
           </p>
@@ -298,7 +298,7 @@ export default function ScholarGate() {
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="sg-email"
-              style={{ fontFamily: "Georgia, serif", fontSize: "0.56rem", letterSpacing: "0.25em", color: "rgba(200,146,42,0.48)", textTransform: "uppercase" }}
+              style={{ fontFamily: "Georgia, serif", fontSize: "0.56rem", letterSpacing: "0.25em", color: "color-mix(in srgb, var(--codex-accent) 48%, transparent)", textTransform: "uppercase" }}
             >
               Email
             </label>
@@ -317,17 +317,17 @@ export default function ScholarGate() {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.88rem",
                 background: "#0a0806",
-                border: "1px solid rgba(200,146,42,0.18)",
+                border: "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)",
                 borderRadius: "2px",
                 color: "rgba(220,205,170,0.9)",
-                caretColor: "#c8922a",
+                caretColor: "var(--codex-accent)",
                 boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5)",
                 padding: "10px 14px",
                 width: "100%",
                 transition: "border-color 0.15s ease",
               }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(200,146,42,0.5)"; }}
-              onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(200,146,42,0.18)"; }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 50%, transparent)"; }}
+              onBlur={(e)  => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 18%, transparent)"; }}
             />
           </div>
 
@@ -351,17 +351,17 @@ export default function ScholarGate() {
               fontFamily: "Georgia, serif",
               padding: "11px 0",
               background: "linear-gradient(160deg, #1d1408 0%, #120e07 100%)",
-              border: "1px solid rgba(200,146,42,0.35)",
+              border: "1px solid color-mix(in srgb, var(--codex-accent) 35%, transparent)",
               borderRadius: "2px",
-              color: "rgba(200,146,42,0.88)",
-              boxShadow: "0 0 24px rgba(200,146,42,0.07), inset 0 1px 0 rgba(255,220,100,0.05)",
+              color: "color-mix(in srgb, var(--codex-accent) 88%, transparent)",
+              boxShadow: "0 0 24px color-mix(in srgb, var(--codex-accent) 7%, transparent), inset 0 1px 0 rgba(255,220,100,0.05)",
             }}
             onMouseEnter={(e) => {
               if (!busy && email.trim() && password)
-                Object.assign(e.currentTarget.style, { color: "rgba(220,175,80,1)", borderColor: "rgba(200,146,42,0.6)", boxShadow: "0 0 40px rgba(200,146,42,0.13), inset 0 1px 0 rgba(255,220,100,0.08)" });
+                Object.assign(e.currentTarget.style, { color: "rgba(220,175,80,1)", borderColor: "color-mix(in srgb, var(--codex-accent) 60%, transparent)", boxShadow: "0 0 40px color-mix(in srgb, var(--codex-accent) 13%, transparent), inset 0 1px 0 rgba(255,220,100,0.08)" });
             }}
             onMouseLeave={(e) =>
-              Object.assign(e.currentTarget.style, { color: "rgba(200,146,42,0.88)", borderColor: "rgba(200,146,42,0.35)", boxShadow: "0 0 24px rgba(200,146,42,0.07), inset 0 1px 0 rgba(255,220,100,0.05)" })
+              Object.assign(e.currentTarget.style, { color: "color-mix(in srgb, var(--codex-accent) 88%, transparent)", borderColor: "color-mix(in srgb, var(--codex-accent) 35%, transparent)", boxShadow: "0 0 24px color-mix(in srgb, var(--codex-accent) 7%, transparent), inset 0 1px 0 rgba(255,220,100,0.05)" })
             }
           >
             {busy ? <Spinner /> : mode === "signin" ? "Enter the Archive" : "Register Scholar"}
@@ -400,7 +400,7 @@ export default function ScholarGate() {
         </div>
 
         {/* ── Mode toggle ── */}
-        <div className="mt-7 flex items-center justify-center gap-0 border" style={{ borderColor: "rgba(200,146,42,0.14)", borderRadius: "2px", overflow: "hidden" }}>
+        <div className="mt-7 flex items-center justify-center gap-0 border" style={{ borderColor: "color-mix(in srgb, var(--codex-accent) 14%, transparent)", borderRadius: "2px", overflow: "hidden" }}>
           {(["signin", "register"] as Mode[]).map((m) => (
             <button
               key={m}
@@ -411,9 +411,9 @@ export default function ScholarGate() {
               style={{
                 fontFamily: "Georgia, serif",
                 fontSize: "0.58rem",
-                background: mode === m ? "rgba(200,146,42,0.1)" : "transparent",
-                color: mode === m ? "rgba(200,146,42,0.9)" : "rgba(130,110,75,0.5)",
-                borderRight: m === "signin" ? "1px solid rgba(200,146,42,0.14)" : "none",
+                background: mode === m ? "color-mix(in srgb, var(--codex-accent) 10%, transparent)" : "transparent",
+                color: mode === m ? "color-mix(in srgb, var(--codex-accent) 90%, transparent)" : "rgba(130,110,75,0.5)",
+                borderRight: m === "signin" ? "1px solid color-mix(in srgb, var(--codex-accent) 14%, transparent)" : "none",
               }}
               aria-pressed={mode === m}
             >
@@ -432,18 +432,18 @@ export default function ScholarGate() {
             fontSize: "0.68rem",
             letterSpacing: "0.12em",
             color: "rgba(180,160,110,0.75)",
-            background: "rgba(200,146,42,0.05)",
-            border: "1px solid rgba(200,146,42,0.18)",
+            background: "color-mix(in srgb, var(--codex-accent) 5%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)",
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.color = "rgba(210,185,130,0.95)";
-            e.currentTarget.style.borderColor = "rgba(200,146,42,0.35)";
-            e.currentTarget.style.background = "rgba(200,146,42,0.1)";
+            e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 35%, transparent)";
+            e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 10%, transparent)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.color = "rgba(180,160,110,0.75)";
-            e.currentTarget.style.borderColor = "rgba(200,146,42,0.18)";
-            e.currentTarget.style.background = "rgba(200,146,42,0.05)";
+            e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 18%, transparent)";
+            e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 5%, transparent)";
           }}
         >
           Explore as Guest
@@ -459,7 +459,7 @@ export default function ScholarGate() {
         <p
           className="mt-6 text-center"
           aria-hidden="true"
-          style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem", letterSpacing: "0.45em", color: "rgba(200,146,42,0.18)" }}
+          style={{ fontFamily: "Georgia, serif", fontSize: "0.55rem", letterSpacing: "0.45em", color: "color-mix(in srgb, var(--codex-accent) 18%, transparent)" }}
         >
           — CODEX MATHEMATICA —
         </p>

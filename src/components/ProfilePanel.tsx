@@ -213,8 +213,8 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
             className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center mb-4"
             style={{
               background: isLightMode ? "linear-gradient(145deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(145deg, #1d1610 0%, #0a0806 100%)",
-              border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.2)",
-              boxShadow: isLightMode ? "inset 0 2px 5px rgba(0,0,0,0.05), 0 2px 10px rgba(0,0,0,0.03)" : "inset 0 2px 10px rgba(0,0,0,0.8), 0 4px 20px rgba(200,146,42,0.08)",
+              border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
+              boxShadow: isLightMode ? "inset 0 2px 5px rgba(0,0,0,0.05), 0 2px 10px rgba(0,0,0,0.03)" : "inset 0 2px 10px rgba(0,0,0,0.8), 0 4px 20px color-mix(in srgb, var(--codex-accent) 8%, transparent)",
             }}
           >
             {avatarUrl ? (
@@ -240,7 +240,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.6rem",
                 letterSpacing: "0.2em",
-                color: "rgba(200,146,42,0.5)",
+                color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
                 textTransform: "uppercase",
               }}
             >
@@ -258,14 +258,14 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                   fontFamily: "Georgia, serif",
                   fontSize: "0.9rem",
                   background: isLightMode ? "#ffffff" : "#0a0806",
-                  border: isLightMode ? "1px solid #d1d5db" : "1px solid rgba(200,146,42,0.2)",
+                  border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
                   borderRadius: "2px",
                   color: isLightMode ? "#44403c" : "rgba(220,205,170,0.9)",
                   padding: "8px 12px",
                   transition: "border-color 0.2s",
                 }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(200,146,42,0.5)"; }}
-                onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(200,146,42,0.2)"; }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 50%, transparent)"; }}
+                onBlur={(e)  => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 20%, transparent)"; }}
               />
               {!isGuestMode && (
                 <button
@@ -273,9 +273,9 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                   disabled={isSavingName || editedName.trim() === scholar?.displayName}
                   className="px-3 flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   style={{
-                    background: nameSaved ? "rgba(40,140,60,0.15)" : "rgba(200,146,42,0.1)",
-                    border: `1px solid ${nameSaved ? "rgba(60,180,80,0.4)" : "rgba(200,146,42,0.3)"}`,
-                    color: nameSaved ? "#6ebc50" : "rgba(200,146,42,0.9)",
+                    background: nameSaved ? "rgba(40,140,60,0.15)" : "color-mix(in srgb, var(--codex-accent) 10%, transparent)",
+                    border: `1px solid ${nameSaved ? "rgba(60,180,80,0.4)" : "color-mix(in srgb, var(--codex-accent) 30%, transparent)"}`,
+                    color: nameSaved ? "#6ebc50" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)",
                     borderRadius: "2px",
                   }}
                   title="Save Name"
@@ -297,7 +297,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.6rem",
                 letterSpacing: "0.2em",
-                color: "rgba(200,146,42,0.5)",
+                color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
                 textTransform: "uppercase",
               }}
             >
@@ -307,7 +307,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
               onClick={toggleTheme}
               className="flex items-center gap-3 w-full text-left py-2 px-3 transition-colors duration-200 hover:bg-stone-900/50"
               style={{
-                border: "1px solid rgba(200,146,42,0.15)",
+                border: "1px solid color-mix(in srgb, var(--codex-accent) 15%, transparent)",
                 borderRadius: "2px",
                 background: "transparent",
               }}
@@ -337,7 +337,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                   fontFamily: "Georgia, serif",
                   fontSize: "0.6rem",
                   letterSpacing: "0.2em",
-                  color: "rgba(200,146,42,0.5)",
+                  color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
                   textTransform: "uppercase",
                 }}
               >
@@ -376,7 +376,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.6rem",
                 letterSpacing: "0.2em",
-                color: "rgba(200,146,42,0.5)",
+                color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
                 textTransform: "uppercase",
               }}
             >
@@ -410,7 +410,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.6rem",
                 letterSpacing: "0.2em",
-                color: "rgba(200,146,42,0.5)",
+                color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
                 textTransform: "uppercase",
               }}
             >
@@ -439,7 +439,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
               onClick={() => setIsFocusMode(!isFocusMode)}
               className={`flex items-center gap-3 w-full text-left py-2 px-3 transition-colors duration-200 ${isLightMode ? "hover:bg-stone-100" : "hover:bg-stone-900/50"}`}
               style={{
-                border: isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(200,146,42,0.15)",
+                border: isLightMode ? "1px solid #e5e7eb" : "1px solid color-mix(in srgb, var(--codex-accent) 15%, transparent)",
                 borderRadius: "2px",
                 background: "transparent",
               }}
@@ -463,7 +463,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                   fontFamily: "Georgia, serif",
                   fontSize: "0.6rem",
                   letterSpacing: "0.2em",
-                  color: "rgba(200,146,42,0.5)",
+                  color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
                   textTransform: "uppercase",
                 }}
               >
@@ -474,7 +474,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                 onClick={handleExport}
                 className={`flex items-center gap-3 w-full text-left py-2 px-3 transition-colors duration-200 ${isLightMode ? "hover:bg-stone-100 text-stone-700" : "hover:bg-stone-900/50 text-stone-300"}`}
                 style={{
-                  border: isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(200,146,42,0.15)",
+                  border: isLightMode ? "1px solid #e5e7eb" : "1px solid color-mix(in srgb, var(--codex-accent) 15%, transparent)",
                   borderRadius: "2px",
                   background: "transparent",
                 }}
@@ -490,7 +490,7 @@ export default function ProfilePanel({ isOpen, onClose }: ProfilePanelProps) {
                 disabled={isGeneratingPdf}
                 className={`flex items-center gap-3 w-full text-left py-2 px-3 transition-colors duration-200 ${isLightMode ? "hover:bg-stone-100 text-stone-700" : "hover:bg-stone-900/50 text-stone-300"} disabled:opacity-50 disabled:cursor-wait`}
                 style={{
-                  border: isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(200,146,42,0.15)",
+                  border: isLightMode ? "1px solid #e5e7eb" : "1px solid color-mix(in srgb, var(--codex-accent) 15%, transparent)",
                   borderRadius: "2px",
                   background: "transparent",
                 }}

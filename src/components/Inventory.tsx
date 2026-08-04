@@ -37,7 +37,7 @@ export default function Inventory({ activeCategory }: InventoryProps) {
         <Package
           size={32}
           strokeWidth={1}
-          style={{ color: "rgba(200,146,42,0.25)", marginBottom: "1rem" }}
+          style={{ color: "color-mix(in srgb, var(--codex-accent) 25%, transparent)", marginBottom: "1rem" }}
         />
         <p
           className="italic"
@@ -78,12 +78,12 @@ export default function Inventory({ activeCategory }: InventoryProps) {
             style={{
               background: isLightMode ? "#ffffff" : "#12100d",
               border: isEquipped
-                ? "1px solid rgba(200,146,42,0.5)"
+                ? "1px solid color-mix(in srgb, var(--codex-accent) 50%, transparent)"
                 : isLightMode
                 ? "1px solid #e5e7eb"
-                : "1px solid rgba(200,146,42,0.12)",
+                : "1px solid color-mix(in srgb, var(--codex-accent) 12%, transparent)",
               boxShadow: isEquipped
-                ? "0 0 12px rgba(200,146,42,0.15)"
+                ? "0 0 12px color-mix(in srgb, var(--codex-accent) 15%, transparent)"
                 : "none",
             }}
           >
@@ -92,8 +92,8 @@ export default function Inventory({ activeCategory }: InventoryProps) {
               className="w-full flex items-center justify-center overflow-hidden relative"
               style={{
                 height: "80px",
-                background: isLightMode ? "#f5f0e8" : "rgba(200,146,42,0.04)",
-                borderBottom: "1px solid rgba(200,146,42,0.08)",
+                background: isLightMode ? "#f5f0e8" : "color-mix(in srgb, var(--codex-accent) 4%, transparent)",
+                borderBottom: "1px solid color-mix(in srgb, var(--codex-accent) 8%, transparent)",
               }}
             >
               {item.thumbnailUrl ? (
@@ -140,15 +140,15 @@ export default function Inventory({ activeCategory }: InventoryProps) {
                   style={{
                     fontFamily: "Georgia, serif",
                     fontSize: "0.58rem",
-                    color: "rgba(200,146,42,0.85)",
-                    background: "rgba(200,146,42,0.08)",
-                    border: "1px solid rgba(200,146,42,0.2)",
+                    color: "color-mix(in srgb, var(--codex-accent) 85%, transparent)",
+                    background: "color-mix(in srgb, var(--codex-accent) 8%, transparent)",
+                    border: "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
                   }}
                   onMouseEnter={(e) =>
-                    (e.currentTarget.style.background = "rgba(200,146,42,0.15)")
+                    (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 15%, transparent)")
                   }
                   onMouseLeave={(e) =>
-                    (e.currentTarget.style.background = "rgba(200,146,42,0.08)")
+                    (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 8%, transparent)")
                   }
                 >
                   Equip

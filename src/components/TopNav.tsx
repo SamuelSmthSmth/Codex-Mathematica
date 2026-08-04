@@ -50,7 +50,7 @@ export default function TopNav({
       }
     : {
         background: "#161009",
-        border: "1px solid rgba(200,146,42,0.25)",
+        border: "1px solid color-mix(in srgb, var(--codex-accent) 25%, transparent)",
         boxShadow: "0 4px 12px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.04)",
       };
 
@@ -72,13 +72,13 @@ export default function TopNav({
           <X
             size={18}
             strokeWidth={1.8}
-            style={{ color: isLightMode ? "#78716c" : "rgba(200,146,42,0.8)" }}
+            style={{ color: isLightMode ? "#78716c" : "color-mix(in srgb, var(--codex-accent) 80%, transparent)" }}
           />
         ) : (
           <ShoppingBag
             size={18}
             strokeWidth={1.6}
-            style={{ color: isLightMode ? "#78716c" : "rgba(200,146,42,0.7)" }}
+            style={{ color: isLightMode ? "#78716c" : "color-mix(in srgb, var(--codex-accent) 70%, transparent)" }}
           />
         )}
       </button>
@@ -96,7 +96,7 @@ export default function TopNav({
           <X
             size={18}
             strokeWidth={1.8}
-            style={{ color: isLightMode ? "#78716c" : "rgba(200,146,42,0.8)" }}
+            style={{ color: isLightMode ? "#78716c" : "color-mix(in srgb, var(--codex-accent) 80%, transparent)" }}
           />
         ) : avatarUrl ? (
           <img
@@ -108,14 +108,14 @@ export default function TopNav({
           <User
             size={18}
             strokeWidth={1.6}
-            style={{ color: isLightMode ? "#78716c" : "rgba(200,146,42,0.8)" }}
+            style={{ color: isLightMode ? "#78716c" : "color-mix(in srgb, var(--codex-accent) 80%, transparent)" }}
           />
         ) : (
           <span
             style={{
               fontFamily: "var(--font-playfair), serif",
               fontSize: "1.15rem",
-              color: isLightMode ? "#78716c" : "rgba(200,146,42,0.8)",
+              color: isLightMode ? "#78716c" : "color-mix(in srgb, var(--codex-accent) 80%, transparent)",
             }}
           >
             {avatarInitial}

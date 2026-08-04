@@ -8,6 +8,14 @@
 }
 
 /* ── Theme packs (Phase 2) ──────────────────────────────────────── */
+.theme-scribble {
+  --codex-accent: #e88080;
+}
+
+.theme-modern-desktop {
+  --codex-accent: #3b82f6;
+}
+
 .theme-plain-crimson {
   --codex-accent: #9b1b30;
 }

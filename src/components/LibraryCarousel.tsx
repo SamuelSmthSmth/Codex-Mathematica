@@ -53,9 +53,9 @@ function TechniqueCard({
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "0.52rem",
-            color: isLightMode ? "rgba(200,146,42,0.8)" : "#9ca3af",
-            background: isLightMode ? "rgba(200,146,42,0.1)" : "rgba(255,255,255,0.1)",
-            border: isLightMode ? "1px solid rgba(200,146,42,0.15)" : "1px solid rgba(255,255,255,0.2)",
+            color: isLightMode ? "color-mix(in srgb, var(--codex-accent) 80%, transparent)" : "#9ca3af",
+            background: isLightMode ? "color-mix(in srgb, var(--codex-accent) 10%, transparent)" : "rgba(255,255,255,0.1)",
+            border: isLightMode ? "1px solid color-mix(in srgb, var(--codex-accent) 15%, transparent)" : "1px solid rgba(255,255,255,0.2)",
           }}
         >
           {technique.category}
@@ -89,19 +89,19 @@ function TechniqueCard({
       {/* Read button */}
       <div
         className="px-4 py-3 flex items-center gap-2"
-        style={{ borderTop: "1px solid rgba(200,146,42,0.1)" }}
+        style={{ borderTop: "1px solid color-mix(in srgb, var(--codex-accent) 10%, transparent)" }}
       >
         <BookOpen
           size={13}
           strokeWidth={1.6}
-          style={{ color: "rgba(200,146,42,0.7)" }}
+          style={{ color: "color-mix(in srgb, var(--codex-accent) 70%, transparent)" }}
         />
         <span
           className="uppercase tracking-widest group-hover:text-amber-400 transition-colors"
           style={{
             fontFamily: "Georgia, serif",
             fontSize: "0.58rem",
-            color: "rgba(200,146,42,0.7)",
+            color: "color-mix(in srgb, var(--codex-accent) 70%, transparent)",
           }}
         >
           Read
@@ -153,10 +153,10 @@ export default function LibraryCarousel({ title, techniques, onSelect }: Library
             className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200"
             style={{
               background: "transparent",
-              border: "1px solid rgba(200,146,42,0.2)",
-              color: "rgba(200,146,42,0.6)",
+              border: "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
+              color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.1)")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 10%, transparent)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             aria-label="Scroll left"
           >
@@ -168,10 +168,10 @@ export default function LibraryCarousel({ title, techniques, onSelect }: Library
             className="w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200"
             style={{
               background: "transparent",
-              border: "1px solid rgba(200,146,42,0.2)",
-              color: "rgba(200,146,42,0.6)",
+              border: "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
+              color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.1)")}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 10%, transparent)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
             aria-label="Scroll right"
           >

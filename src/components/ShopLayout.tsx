@@ -22,7 +22,7 @@ import { Coins, Lock, Check, Sparkles } from "lucide-react";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const RANK_LABELS: Record<number, { label: string; color: string }> = {
-  1: { label: "RANK I — PRESTIGE",  color: "rgba(200,146,42,1)" },
+  1: { label: "RANK I — PRESTIGE",  color: "color-mix(in srgb, var(--codex-accent) 100%, transparent)" },
   2: { label: "RANK II — STANDARD", color: "rgba(120,180,200,0.85)" },
   3: { label: "RANK III — GRIND",   color: "rgba(160,155,150,0.7)" },
 };
@@ -59,10 +59,10 @@ function ShopItemCard({ item }: { item: ShopItem }) {
       style={{
         background: isLightMode ? "#ffffff" : "#13100d",
         border: isEquipped
-          ? "1px solid rgba(200,146,42,0.6)"
-          : isLightMode ? "1px solid #e5e7eb" : "1px solid rgba(200,146,42,0.12)",
+          ? "1px solid color-mix(in srgb, var(--codex-accent) 60%, transparent)"
+          : isLightMode ? "1px solid #e5e7eb" : "1px solid color-mix(in srgb, var(--codex-accent) 12%, transparent)",
         boxShadow: isEquipped
-          ? "0 0 20px rgba(200,146,42,0.12), 0 4px 16px rgba(0,0,0,0.1)"
+          ? "0 0 20px color-mix(in srgb, var(--codex-accent) 12%, transparent), 0 4px 16px rgba(0,0,0,0.1)"
           : isLightMode
           ? "0 2px 8px rgba(0,0,0,0.05)"
           : "0 4px 16px rgba(0,0,0,0.4)",
@@ -74,8 +74,8 @@ function ShopItemCard({ item }: { item: ShopItem }) {
         className="relative flex items-center justify-center overflow-hidden"
         style={{
           height: "100px",
-          background: isLightMode ? "#f5f0e8" : "rgba(200,146,42,0.04)",
-          borderBottom: "1px solid rgba(200,146,42,0.08)",
+          background: isLightMode ? "#f5f0e8" : "color-mix(in srgb, var(--codex-accent) 4%, transparent)",
+          borderBottom: "1px solid color-mix(in srgb, var(--codex-accent) 8%, transparent)",
         }}
       >
         {item.thumbnailUrl ? (
@@ -85,7 +85,7 @@ function ShopItemCard({ item }: { item: ShopItem }) {
             className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700"
           />
         ) : (
-          <Sparkles size={28} strokeWidth={1} style={{ color: "rgba(200,146,42,0.3)" }} />
+          <Sparkles size={28} strokeWidth={1} style={{ color: "color-mix(in srgb, var(--codex-accent) 30%, transparent)" }} />
         )}
 
         {/* Rank badge */}
@@ -111,7 +111,7 @@ function ShopItemCard({ item }: { item: ShopItem }) {
             className="absolute inset-0 flex items-center justify-center"
             style={{ background: "rgba(0,0,0,0.45)" }}
           >
-            <Lock size={22} strokeWidth={1.5} style={{ color: "rgba(200,146,42,0.6)" }} />
+            <Lock size={22} strokeWidth={1.5} style={{ color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)" }} />
           </div>
         )}
 
@@ -164,7 +164,7 @@ function ShopItemCard({ item }: { item: ShopItem }) {
             style={{
               fontFamily: "'Courier New', monospace",
               fontSize: "0.82rem",
-              color: item.price === 0 ? "rgba(110,200,80,0.8)" : "rgba(200,146,42,0.85)",
+              color: item.price === 0 ? "rgba(110,200,80,0.8)" : "color-mix(in srgb, var(--codex-accent) 85%, transparent)",
             }}
           >
             <Coins size={12} strokeWidth={1.6} />
@@ -181,12 +181,12 @@ function ShopItemCard({ item }: { item: ShopItem }) {
                   fontFamily: "Georgia, serif",
                   fontSize: "0.55rem",
                   letterSpacing: "0.12em",
-                  color: "rgba(200,146,42,0.9)",
-                  background: "rgba(200,146,42,0.08)",
-                  border: "1px solid rgba(200,146,42,0.25)",
+                  color: "color-mix(in srgb, var(--codex-accent) 90%, transparent)",
+                  background: "color-mix(in srgb, var(--codex-accent) 8%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--codex-accent) 25%, transparent)",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.15)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.08)")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 15%, transparent)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 8%, transparent)")}
               >
                 Equip
               </button>
@@ -213,12 +213,12 @@ function ShopItemCard({ item }: { item: ShopItem }) {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.55rem",
                 letterSpacing: "0.12em",
-                color: "rgba(200,146,42,0.9)",
-                background: "rgba(200,146,42,0.08)",
-                border: "1px solid rgba(200,146,42,0.25)",
+                color: "color-mix(in srgb, var(--codex-accent) 90%, transparent)",
+                background: "color-mix(in srgb, var(--codex-accent) 8%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--codex-accent) 25%, transparent)",
               }}
-              onMouseEnter={(e) => { if (!isLocked && canAfford) e.currentTarget.style.background = "rgba(200,146,42,0.18)"; }}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(200,146,42,0.08)")}
+              onMouseEnter={(e) => { if (!isLocked && canAfford) e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 18%, transparent)"; }}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "color-mix(in srgb, var(--codex-accent) 8%, transparent)")}
             >
               {isLocked ? "Locked" : !canAfford ? "Need Credits" : "Buy"}
             </button>
@@ -251,13 +251,13 @@ function SectionHeading({ label, count, isLightMode }: { label: string; count: n
         style={{
           fontFamily: "'Courier New', monospace",
           fontSize: "0.62rem",
-          color: "rgba(200,146,42,0.6)",
+          color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)",
           letterSpacing: "0.15em",
         }}
       >
         {count} items
       </span>
-      <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, rgba(200,146,42,0.3), transparent)" }} />
+      <div className="flex-1 h-px" style={{ background: "linear-gradient(to right, color-mix(in srgb, var(--codex-accent) 30%, transparent), transparent)" }} />
     </div>
   );
 }
@@ -272,7 +272,7 @@ export default function ShopLayout() {
 
   const bg = isLightMode ? "#fcfaf7" : "#0a0706";
   const headerBg = isLightMode ? "#f5f0e8" : "#0d0a07";
-  const borderColor = isLightMode ? "#e5e7eb" : "rgba(200,146,42,0.12)";
+  const borderColor = isLightMode ? "#e5e7eb" : "color-mix(in srgb, var(--codex-accent) 12%, transparent)";
 
   return (
     <div className="h-full flex flex-col" style={{ background: bg }}>
@@ -284,7 +284,7 @@ export default function ShopLayout() {
         <div>
           <p
             className="uppercase tracking-[0.4em] mb-1"
-            style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", color: "rgba(200,146,42,0.5)" }}
+            style={{ fontFamily: "Georgia, serif", fontSize: "0.58rem", color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)" }}
           >
             The Grand Archive
           </p>
@@ -308,7 +308,7 @@ export default function ShopLayout() {
                 fontFamily: "Georgia, serif",
                 fontSize: "0.55rem",
                 letterSpacing: "0.2em",
-                color: "rgba(200,146,42,0.6)",
+                color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)",
                 textTransform: "uppercase",
               }}
             >
@@ -317,18 +317,18 @@ export default function ShopLayout() {
             <div
               className="flex items-center gap-2 mt-0.5 px-3 py-1 rounded"
               style={{
-                background: "linear-gradient(90deg, rgba(200,146,42,0.1), rgba(200,146,42,0.05))",
-                border: "1px solid rgba(200,146,42,0.3)",
-                boxShadow: "0 0 10px rgba(200,146,42,0.1)"
+                background: "linear-gradient(90deg, color-mix(in srgb, var(--codex-accent) 10%, transparent), color-mix(in srgb, var(--codex-accent) 5%, transparent))",
+                border: "1px solid color-mix(in srgb, var(--codex-accent) 30%, transparent)",
+                boxShadow: "0 0 10px color-mix(in srgb, var(--codex-accent) 10%, transparent)"
               }}
             >
-              <Coins size={14} className="text-amber-500 drop-shadow-[0_0_2px_rgba(200,146,42,0.8)]" />
+              <Coins size={14} className="text-amber-500 drop-shadow-[0_0_2px_color-mix(in srgb, var(--codex-accent) 80%, transparent)]" />
               <span
                 style={{
                   fontFamily: "'Courier New', monospace",
                   fontSize: "1rem",
                   fontWeight: "bold",
-                  color: "rgba(200,146,42,1)",
+                  color: "color-mix(in srgb, var(--codex-accent) 100%, transparent)",
                 }}
               >
                 {credits.toLocaleString()}
@@ -339,7 +339,7 @@ export default function ShopLayout() {
       </header>
 
       {/* ── Content ── */}
-      <main className="flex-1 overflow-y-auto px-8 py-6 pb-24" style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(200,146,42,0.2) transparent" }}>
+      <main className="flex-1 overflow-y-auto px-8 py-6 pb-24" style={{ scrollbarWidth: "thin", scrollbarColor: "color-mix(in srgb, var(--codex-accent) 20%, transparent) transparent" }}>
         <div className="max-w-7xl mx-auto flex flex-col gap-8">
           {SHOP_CATEGORIES.map((cat) => {
             const items = SHOP_ITEMS.filter((i) => i.category === cat.id);
