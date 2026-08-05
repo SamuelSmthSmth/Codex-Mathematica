@@ -25,6 +25,7 @@ import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-
 import LibraryView from "@/components/LibraryViewDefault";
 import ShopLayout from "@/components/ShopLayoutDefault";
 import { AppArea, ThemeProps } from "@/components/ThemeRoot";
+import ProfilePanelDefault from "@/components/ProfilePanelDefault";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Bottom Dock
@@ -940,13 +941,14 @@ export default function ThemeDefault({ activeArea, onSelectArea, onOpenProfile, 
   }
 
   return (
-    <>
+    <main className="h-full flex flex-col">
       <div className="h-full flex flex-col">
         <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 flex-1 min-h-0">
           {content}
         </div>
       </div>
       <BottomDock active={activeArea} onSelect={onSelectArea} onOpenProfile={onOpenProfile} />
-    </>
+      <ProfilePanelDefault isOpen={isProfileOpen} onClose={onCloseProfile} />
+    </main>
   );
 }

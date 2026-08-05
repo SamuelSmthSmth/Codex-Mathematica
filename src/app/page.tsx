@@ -18,7 +18,6 @@
 import { useState } from "react";
 
 import ScholarGate from "@/components/ScholarGate";
-import ProfilePanelDefault from "@/components/ProfilePanelDefault";
 import { useAuth } from "@/context/AuthContext";
 import { AppArea } from "@/components/ThemeRoot";
 import ThemeRoot from "@/components/ThemeRoot";

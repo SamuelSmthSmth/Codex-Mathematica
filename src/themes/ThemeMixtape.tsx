@@ -22,11 +22,13 @@ import {
   BookOpen,
   ShoppingBag,
   Archive,
+  User,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
 import { AppArea, ThemeProps } from "@/components/ThemeRoot";
 import LibraryViewMixtape from "@/components/LibraryViewMixtape";
 import ShopLayoutMixtape from "@/components/ShopLayoutMixtape";
+import ProfilePanelMixtape from "@/components/ProfilePanelMixtape";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
@@ -491,9 +493,15 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
 // ─────────────────────────────────────────────────────────────────────────────
 // Mixtape Nav
 // ─────────────────────────────────────────────────────────────────────────────
-function MixtapeNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void }) {
+function MixtapeNav({ activeArea, onSelectArea, onOpenProfile }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void, onOpenProfile?: () => void }) {
   return (
-    <div className="absolute top-4 right-8 z-50 flex gap-4">
+    <div className="absolute top-4 right-8 z-40 flex flex-wrap justify-end gap-2 md:gap-4">
+      <button 
+        onClick={onOpenProfile}
+        className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] bg-white border-black text-black hover:bg-stone-100"
+      >
+        <User size={16} /> ID
+      </button>
       <button 
         onClick={() => onSelectArea("shop")}
         className={`flex items-center gap-2 px-4 py-2 rounded-lg border-2 font-sans font-bold uppercase tracking-wider transition-all shadow-[4px_4px_0_rgba(0,0,0,1)] hover:-translate-y-1 hover:shadow-[4px_8px_0_rgba(0,0,0,1)] ${
@@ -564,10 +572,11 @@ export default function ThemeMixtape({ activeArea, onSelectArea, onOpenProfile, 
   if (activeArea !== "archive") {
     return (
       <MixtapeBackground>
-        <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
+        <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} onOpenProfile={onOpenProfile} />
         <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full flex flex-col">
           {content}
         </div>
+        <ProfilePanelMixtape isOpen={isProfileOpen} onClose={onCloseProfile} />
       </MixtapeBackground>
     );
   }
@@ -575,10 +584,11 @@ export default function ThemeMixtape({ activeArea, onSelectArea, onOpenProfile, 
   // For archive, some views like CDShelf have their own background wrapper (or they render full screen)
   return (
     <>
-      <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
+      <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} onOpenProfile={onOpenProfile} />
       <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full flex flex-col">
         {content}
       </div>
+      <ProfilePanelMixtape isOpen={isProfileOpen} onClose={onCloseProfile} />
     </>
   );
 }

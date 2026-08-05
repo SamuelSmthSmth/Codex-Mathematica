@@ -11,6 +11,7 @@ import { useTheme } from "../context/ThemeContext";
 import { AppArea, ThemeProps } from "@/components/ThemeRoot";
 import LibraryViewWindowsXP from "@/components/LibraryViewWindowsXP";
 import ShopLayoutWindowsXP from "@/components/ShopLayoutWindowsXP";
+import ProfilePanelWindowsXP from "@/components/ProfilePanelWindowsXP";
 
 // Simple MathRenderer wrapper
 function MathRenderer({ children, className }: { children: string; className?: string }) {
@@ -429,6 +430,8 @@ export default function ThemeWindowsXP({ activeArea, onSelectArea, onOpenProfile
           <span className="text-white text-xs">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
       </div>
+
+      <ProfilePanelWindowsXP isOpen={isProfileOpen} onClose={onCloseProfile} />
     </div>
   );
 }

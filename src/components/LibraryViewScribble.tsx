@@ -19,7 +19,7 @@ export default function LibraryViewScribble() {
   }
 
   return (
-    <div className="flex-1 min-h-0 p-4 md:p-8 bg-[#fdf7ee] overflow-y-auto" style={{ fontFamily: "'Caveat', cursive" }}>
+    <div className="p-4 md:p-8 bg-[#fdf7ee]" style={{ fontFamily: "'Caveat', cursive" }}>
       <h1 className="text-5xl font-bold text-stone-800 mb-12 text-center" style={{ transform: "rotate(-2deg)" }}>
         My Messy Desk
       </h1>

@@ -92,7 +92,7 @@ export default function ShopLayoutScribble() {
 } = useShopLogic();
 
   return (
-    <div className="flex-1 min-h-0 p-4 md:p-8 bg-[#fdf7ee] overflow-y-auto" style={{ fontFamily: "'Caveat', cursive", backgroundImage: "radial-gradient(#d6d3d1 1px, transparent 1px)", backgroundSize: "24px 24px" }}>
+    <div className="p-4 md:p-8 bg-[#fdf7ee]" style={{ fontFamily: "'Caveat', cursive", backgroundImage: "radial-gradient(#d6d3d1 1px, transparent 1px)", backgroundSize: "24px 24px" }}>
       
       {/* Corkboard / Bulletin Board Header */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-12 max-w-5xl mx-auto gap-6">

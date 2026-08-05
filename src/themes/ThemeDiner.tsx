@@ -22,11 +22,13 @@ import {
   BookOpen,
   ShoppingBag,
   Archive,
+  User,
 } from "lucide-react";
 import { VOLUMES, type Volume, type Chapter, type Fragment } from "@/data/codex-data";
 import { AppArea, ThemeProps } from "@/components/ThemeRoot";
 import LibraryView from "@/components/LibraryViewDiner";
 import ShopLayout from "@/components/ShopLayoutDiner";
+import ProfilePanelDiner from "@/components/ProfilePanelDiner";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Utility
@@ -410,9 +412,15 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
 // ─────────────────────────────────────────────────────────────────────────────
 // Diner Nav
 // ─────────────────────────────────────────────────────────────────────────────
-function DinerNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void }) {
+function DinerNav({ activeArea, onSelectArea, onOpenProfile }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void, onOpenProfile?: () => void }) {
   return (
-    <div className="absolute top-4 right-8 z-50 flex gap-4">
+    <div className="absolute top-4 right-8 z-40 flex flex-wrap justify-end gap-2 md:gap-4">
+      <button 
+        onClick={onOpenProfile}
+        className="flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all bg-stone-900 border-stone-700 text-stone-300 hover:bg-stone-800"
+      >
+        <User size={16} /> Guest Check
+      </button>
       <button 
         onClick={() => onSelectArea("shop")}
         className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 font-mono uppercase tracking-widest transition-all ${
@@ -502,10 +510,11 @@ export default function ThemeDiner({ activeArea, onSelectArea, onOpenProfile, is
 
   return (
     <>
-      <DinerNav activeArea={activeArea} onSelectArea={onSelectArea} />
+      <DinerNav activeArea={activeArea} onSelectArea={onSelectArea} onOpenProfile={onOpenProfile} />
       <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100%-4rem)] w-full flex flex-col">
         {content}
       </div>
+      <ProfilePanelDiner isOpen={isProfileOpen} onClose={onCloseProfile} />
     </>
   );
 }

@@ -13,6 +13,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { AppArea, ThemeProps } from "@/components/ThemeRoot";
 import LibraryViewModernDesktop from "@/components/LibraryViewModernDesktop";
 import ShopLayoutModernDesktop from "@/components/ShopLayoutModernDesktop";
+import ProfilePanelModernDesktop from "@/components/ProfilePanelModernDesktop";
 
 function MathRenderer({ children, className }: { children: string; className?: string }) {
   const processedText = children.replace(/\$\$([\s\S]*?)\$\$/g, (_match, inner: string) => {
@@ -434,6 +435,8 @@ export default function ThemeModernDesktop({ activeArea, onSelectArea, onOpenPro
           </>
         )}
       </div>
+      
+      <ProfilePanelModernDesktop isOpen={isProfileOpen} onClose={onCloseProfile} />
     </div>
   );
 }

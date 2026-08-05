@@ -12,7 +12,8 @@ import { AppArea, ThemeProps } from "@/components/ThemeRoot";
 import LibraryView from "@/components/LibraryViewScribble";
 import ShopLayout from "@/components/ShopLayoutScribble";
 import { useProgress, type SelfGrade } from "@/context/ProgressContext";
-import { ArrowLeft, ChevronLeft, ChevronRight, Play, CheckCheck, Minus, RotateCcw, ShoppingBag, Archive, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Play, CheckCheck, Minus, RotateCcw, ShoppingBag, Archive, BookOpen, User } from "lucide-react";
+import ProfilePanelScribble from "@/components/ProfilePanelScribble";
 
 const CAVEAT_IMPORT = `@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');`;
 
@@ -40,7 +41,7 @@ function MathRenderer({ children, className }: { children: string; className?: s
 function ScribbleBackground({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="min-h-screen flex flex-col items-center pt-24 pb-10 px-4 relative overflow-x-hidden overflow-y-auto"
+      className="h-full flex flex-col items-center pt-24 pb-10 px-4 relative overflow-x-hidden overflow-y-auto"
       style={{
         backgroundColor: "#faf9f0", // cream
         backgroundImage: `linear-gradient(rgba(184, 212, 232, 0.5) 2px, transparent 2px)`,
@@ -57,13 +58,16 @@ function ScribbleBackground({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ScribbleNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void }) {
+function ScribbleNav({ activeArea, onSelectArea, onOpenProfile }: { activeArea: AppArea, onSelectArea: (a: AppArea) => void, onOpenProfile?: () => void }) {
   const btnClass = (area: AppArea) => `
     px-4 py-2 md:px-6 md:py-2 flex items-center gap-2 transform transition-transform hover:-translate-y-1 focus:outline-none
     font-bold text-lg md:text-2xl cursor-pointer text-stone-800
   `;
   return (
-    <div className="fixed top-4 right-4 z-50 flex gap-2 md:gap-4" style={{ fontFamily: "'Caveat', cursive" }}>
+    <div className="fixed top-4 right-4 z-40 flex flex-wrap justify-end gap-2 md:gap-4" style={{ fontFamily: "'Caveat', cursive" }}>
+      <button onClick={onOpenProfile} className="px-4 py-2 md:px-6 md:py-2 flex items-center gap-2 transform transition-transform hover:-translate-y-1 focus:outline-none font-bold text-lg md:text-2xl cursor-pointer text-stone-800" style={{ backgroundColor: "#e0f2fe", border: "3px solid #333", borderRadius: "8px 2px 5px 3px", boxShadow: "3px 3px 0 #333", transform: "rotate(1deg)" }}>
+        <User size={20} /> Me
+      </button>
       <button onClick={() => onSelectArea("shop")} className={btnClass("shop") + (activeArea === "shop" ? " scale-110" : "")} style={{ backgroundColor: "#ffc0cb", border: "3px solid #333", borderRadius: "2px 8px 3px 6px", boxShadow: "3px 3px 0 #333", transform: activeArea === "shop" ? "rotate(-2deg)" : "rotate(1deg)" }}>
         <ShoppingBag size={20} /> Store
       </button>
@@ -315,16 +319,16 @@ export default function ThemeScribble({ activeArea, onSelectArea, onOpenProfile,
 
   if (activeArea === "library") {
     content = (
-      <div className="w-full flex-1 min-h-0 flex flex-col p-4 md:p-8 max-w-6xl mx-auto pl-8 md:pl-16 relative">
-        <div className="bg-white rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col relative border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
+      <div className="w-full pl-8 md:pl-16 pr-4 pb-16 relative">
+        <div className="bg-white border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
           <LibraryView />
         </div>
       </div>
     );
   } else if (activeArea === "shop") {
     content = (
-      <div className="w-full flex-1 min-h-0 flex flex-col p-4 md:p-8 max-w-6xl mx-auto pl-8 md:pl-16 relative">
-        <div className="bg-white rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col relative border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
+      <div className="w-full pl-8 md:pl-16 pr-4 pb-16 relative">
+        <div className="bg-white border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
           <ShopLayout />
         </div>
       </div>
@@ -357,10 +361,11 @@ export default function ThemeScribble({ activeArea, onSelectArea, onOpenProfile,
 
   return (
     <ScribbleBackground>
-      <ScribbleNav activeArea={activeArea} onSelectArea={onSelectArea} />
+      <ScribbleNav activeArea={activeArea} onSelectArea={onSelectArea} onOpenProfile={onOpenProfile} />
       <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 w-full flex-1 min-h-0 flex flex-col">
         {content}
       </div>
+      <ProfilePanelScribble isOpen={isProfileOpen} onClose={onCloseProfile} />
     </ScribbleBackground>
   );
 }
