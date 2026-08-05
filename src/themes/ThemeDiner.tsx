@@ -291,7 +291,7 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
         </div>
 
         {/* Table layout (Left: Plate, Right: Receipt) */}
-        <div className="flex-1 flex flex-col lg:flex-row gap-8 lg:gap-16 pb-8 min-h-0">
+        <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-8 lg:gap-16 pb-8 min-h-0">
           
           {/* LEFT PAN (The Plate) */}
           <div className="flex-1 flex items-center justify-center relative min-h-0">
@@ -348,14 +348,14 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
                   backgroundSize: "16px 16px"
                 }} />
 
-                <div className="p-8 pt-12 flex-1 flex flex-col relative z-10">
+                <div className="p-8 pt-12 flex-1 min-h-0 flex flex-col relative z-10">
                   <div className="text-center border-b-2 border-stone-300 border-dashed pb-4 mb-6">
                     <h2 className="font-mono text-xl font-bold text-stone-800 uppercase tracking-widest">GUEST CHECK</h2>
                     <p className="font-mono text-sm text-stone-500 mt-1">Table 4 • 2 Guests</p>
                   </div>
 
                   {gradePhase === "problem" && (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center">
+                    <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">
                       <Ticket className="w-16 h-16 text-stone-300 mb-6" />
                       <p className="text-stone-500 font-mono mb-8">Waiting on kitchen...</p>
                       <button
@@ -368,7 +368,7 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
                   )}
 
                   {(gradePhase === "revealed" || gradePhase === "graded") && (
-                    <div className="flex-1 flex flex-col animate-in slide-in-from-top-8 duration-500 ease-out">
+                    <div className="flex-1 min-h-0 flex flex-col animate-in slide-in-from-top-8 duration-500 ease-out">
                       <div className="flex-1 flex items-center justify-center font-serif text-stone-900 border-b-2 border-stone-300 border-dashed pb-6 mb-6">
                          <MathRenderer className="math-lg text-stone-900 [&_.katex]:text-stone-900 [&_.katex]:text-5xl w-full text-center overflow-auto py-2">{`$$${fragment.solution_latex}$$`}</MathRenderer>
                       </div>
@@ -445,13 +445,7 @@ function DinerNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectA
 // Main Component exported for the theme engine
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ThemeDiner({
-  activeArea,
-  onSelectArea,
-}: {
-  activeArea: AppArea;
-  onSelectArea: (area: AppArea) => void;
-}) {
+export default function ThemeDiner({ activeArea, onSelectArea, onOpenProfile, isProfileOpen, onCloseProfile }: ThemeProps) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
   const { setIsLightMode } = useTheme();
 
@@ -463,16 +457,16 @@ export default function ThemeDiner({
 
   if (activeArea === "library") {
     content = (
-      <div className="w-full h-full p-8 max-w-6xl mx-auto">
-        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden h-full border-4 border-stone-300">
+      <div className="flex-1 min-h-0 flex flex-col p-8 max-w-6xl mx-auto w-full">
+        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden flex-1 min-h-0 border-4 border-stone-300">
           <LibraryView />
         </div>
       </div>
     );
   } else if (activeArea === "shop") {
     content = (
-      <div className="w-full h-full p-8 max-w-6xl mx-auto">
-        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden h-full border-4 border-stone-300">
+      <div className="flex-1 min-h-0 flex flex-col p-8 max-w-6xl mx-auto w-full">
+        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden flex-1 min-h-0 border-4 border-stone-300">
           <ShopLayout />
         </div>
       </div>
@@ -505,7 +499,7 @@ export default function ThemeDiner({
   return (
     <>
       <DinerNav activeArea={activeArea} onSelectArea={onSelectArea} />
-      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100%-4rem)] w-full">
+      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-bottom-4 duration-500 h-[calc(100%-4rem)] w-full flex flex-col">
         {content}
       </div>
     </>

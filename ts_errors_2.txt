@@ -1,0 +1,66 @@
+src/components/LibraryViewDiner.tsx(8,65): error TS2339: Property 'TECHNIQUE_ROWS' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewDiner.tsx(55,32): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/LibraryViewDiner.tsx(55,37): error TS7006: Parameter 'rowIndex' implicitly has an 'any' type.
+src/components/LibraryViewDiner.tsx(61,38): error TS7006: Parameter 'tech' implicitly has an 'any' type.
+src/components/LibraryViewDiner.tsx(61,44): error TS7006: Parameter 'techIndex' implicitly has an 'any' type.
+src/components/LibraryViewMixtape.tsx(7,65): error TS2339: Property 'TECHNIQUE_ROWS' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewMixtape.tsx(52,32): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/LibraryViewMixtape.tsx(58,38): error TS7006: Parameter 'tech' implicitly has an 'any' type.
+src/components/LibraryViewModernDesktop.tsx(10,5): error TS2339: Property 'searchQuery' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewModernDesktop.tsx(11,5): error TS2339: Property 'setSearchQuery' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewModernDesktop.tsx(12,5): error TS2339: Property 'filteredTechniques' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewModernDesktop.tsx(57,38): error TS7006: Parameter 'tech' implicitly has an 'any' type.
+src/components/LibraryViewScribble.tsx(9,65): error TS2339: Property 'TECHNIQUE_ROWS' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewScribble.tsx(53,32): error TS7006: Parameter 'row' implicitly has an 'any' type.
+src/components/LibraryViewScribble.tsx(53,37): error TS7006: Parameter 'rIdx' implicitly has an 'any' type.
+src/components/LibraryViewScribble.tsx(60,38): error TS7006: Parameter 'tech' implicitly has an 'any' type.
+src/components/LibraryViewScribble.tsx(60,44): error TS7006: Parameter 'tIdx' implicitly has an 'any' type.
+src/components/LibraryViewWindowsXP.tsx(6,28): error TS2339: Property 'setActiveCategory' does not exist on type '{ activeTechnique: Technique | null; setActiveTechnique: Dispatch<SetStateAction<Technique | null>>; todaysTechnique: Technique; techniqueRows: TechniqueRow[]; }'.
+src/components/LibraryViewWindowsXP.tsx(20,30): error TS2339: Property 'title' does not exist on type 'Technique'.
+src/components/LibraryViewWindowsXP.tsx(24,12): error TS2741: Property 'onBack' is missing in type '{ technique: Technique; }' but required in type 'LibraryArticleProps'.
+src/components/LibraryViewWindowsXP.tsx(55,101): error TS2339: Property 'category' does not exist on type 'TechniqueRow'.
+src/components/LibraryViewWindowsXP.tsx(64,27): error TS2339: Property 'icon' does not exist on type 'Technique'.
+src/components/LibraryViewWindowsXP.tsx(67,27): error TS2339: Property 'title' does not exist on type 'Technique'.
+src/components/ProfilePanelWindowsXP.tsx(5,10): error TS2614: Module '"@/themes/ThemeWindowsXP"' has no exported member 'XPWindow'. Did you mean to use 'import XPWindow from "@/themes/ThemeWindowsXP"' instead?
+src/components/ShopLayoutDiner.tsx(57,54): error TS2339: Property 'has' does not exist on type 'ShopItem[]'.
+src/components/ShopLayoutDiner.tsx(58,42): error TS7053: Element implicitly has an 'any' type because expression of type 'ShopCategory' can't be used to index type '(category: string, id: string) => boolean'.
+  Property 'themes' does not exist on type '(category: string, id: string) => boolean'.
+src/components/ShopLayoutDiner.tsx(63,37): error TS2304: Cannot find name 'isAchievementUnlocked'.
+src/components/ShopLayoutDiner.tsx(94,48): error TS2304: Cannot find name 'handlePurchase'.
+src/components/ShopLayoutMixtape.tsx(49,43): error TS2345: Argument of type '"collection"' is not assignable to parameter of type 'SetStateAction<"browse" | "inventory">'.
+src/components/ShopLayoutMixtape.tsx(50,87): error TS2367: This comparison appears to be unintentional because the types '"browse" | "inventory"' and '"collection"' have no overlap.
+src/components/ShopLayoutMixtape.tsx(57,14): error TS2552: Cannot find name 'SHOP_CATEGORIES'. Did you mean 'categories'?
+src/components/ShopLayoutMixtape.tsx(57,35): error TS7006: Parameter 'cat' implicitly has an 'any' type.
+src/components/ShopLayoutMixtape.tsx(75,12): error TS2367: This comparison appears to be unintentional because the types '"browse" | "inventory"' and '"collection"' have no overlap.
+src/components/ShopLayoutMixtape.tsx(77,16): error TS2304: Cannot find name 'shopItems'.
+src/components/ShopLayoutMixtape.tsx(77,33): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ShopLayoutMixtape.tsx(77,77): error TS2304: Cannot find name 'ownedItems'.
+src/components/ShopLayoutMixtape.tsx(82,17): error TS2304: Cannot find name 'shopItems'.
+src/components/ShopLayoutMixtape.tsx(82,34): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ShopLayoutMixtape.tsx(82,78): error TS2304: Cannot find name 'ownedItems'.
+src/components/ShopLayoutMixtape.tsx(82,107): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ShopLayoutMixtape.tsx(83,38): error TS2304: Cannot find name 'equippedItems'.
+src/components/ShopLayoutMixtape.tsx(94,42): error TS2304: Cannot find name 'equipItem'.
+src/components/ShopLayoutMixtape.tsx(107,16): error TS2304: Cannot find name 'itemsInCategory'.
+src/components/ShopLayoutMixtape.tsx(107,37): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ShopLayoutMixtape.tsx(108,33): error TS2304: Cannot find name 'ownedItems'.
+src/components/ShopLayoutMixtape.tsx(110,63): error TS2304: Cannot find name 'isAchievementUnlocked'.
+src/components/ShopLayoutMixtape.tsx(111,36): error TS2304: Cannot find name 'equippedItems'.
+src/components/ShopLayoutMixtape.tsx(115,34): error TS2304: Cannot find name 'buyItem'.
+src/components/ShopLayoutMixtape.tsx(117,21): error TS2304: Cannot find name 'equipItem'.
+src/components/ShopLayoutModernDesktop.tsx(76,34): error TS2304: Cannot find name 'equippedItems'.
+src/components/ShopLayoutModernDesktop.tsx(135,42): error TS2304: Cannot find name 'handlePurchase'.
+src/components/ShopLayoutScribble.tsx(94,39): error TS2339: Property 'id' does not exist on type 'ShopCategory'.
+  Property 'id' does not exist on type '"themes"'.
+src/components/ShopLayoutScribble.tsx(99,152): error TS2339: Property 'label' does not exist on type 'ShopCategory'.
+  Property 'label' does not exist on type '"themes"'.
+src/components/ShopLayoutScribble.tsx(102,25): error TS2339: Property 'items' does not exist on type 'ShopItem'.
+src/components/ShopLayoutScribble.tsx(102,35): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/components/ShopLayoutScribble.tsx(106,28): error TS2304: Cannot find name 'ownedItems'.
+src/components/ShopLayoutScribble.tsx(107,58): error TS2304: Cannot find name 'isAchievementUnlocked'.
+src/components/ShopLayoutScribble.tsx(108,31): error TS2304: Cannot find name 'equippedItems'.
+src/components/ShopLayoutScribble.tsx(108,63): error TS2339: Property 'id' does not exist on type 'ShopCategory'.
+  Property 'id' does not exist on type '"themes"'.
+src/components/ShopLayoutScribble.tsx(110,35): error TS2304: Cannot find name 'handlePurchase'.
+src/components/ShopLayoutWindowsXP.tsx(81,22): error TS2367: This comparison appears to be unintentional because the types '"emoji"' and '"color"' have no overlap.
+src/components/ShopLayoutWindowsXP.tsx(132,22): error TS2367: This comparison appears to be unintentional because the types '"emoji"' and '"color"' have no overlap.

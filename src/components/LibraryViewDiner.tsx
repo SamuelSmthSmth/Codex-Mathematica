@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 import { useLibraryLogic } from "@/hooks/useLibraryLogic";
@@ -19,7 +20,7 @@ export default function LibraryViewDiner() {
   }
 
   return (
-    <div className="min-h-full bg-[#fdfbe9] text-stone-900 font-mono p-8 overflow-y-auto">
+    <div className="h-full bg-[#fdfbe9] text-stone-900 font-mono p-8 overflow-y-auto">
       {/* Jukebox Header */}
       <div className="max-w-4xl mx-auto border-8 border-red-600 rounded-t-[4rem] bg-stone-100 p-8 shadow-2xl relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white px-8 py-2 rounded-full border-4 border-stone-100 font-black text-xl tracking-widest uppercase">

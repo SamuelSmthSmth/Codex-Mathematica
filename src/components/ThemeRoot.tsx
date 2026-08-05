@@ -42,7 +42,7 @@ export default function ThemeRoot({ activeArea, onSelectArea, onOpenProfile, isP
       themeContent = <ThemeScribble activeArea={activeArea} onSelectArea={onSelectArea} isProfileOpen={isProfileOpen} onCloseProfile={onCloseProfile} />;
       break;
     default:
-      themeContent = <ThemeDefault activeArea={activeArea} onSelectArea={onSelectArea} />;
+      themeContent = <ThemeDefault activeArea={activeArea} onSelectArea={onSelectArea} isProfileOpen={isProfileOpen} onCloseProfile={onCloseProfile} />;
       break;
   }
 

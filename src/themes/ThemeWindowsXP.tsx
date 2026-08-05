@@ -93,15 +93,7 @@ function XPWindow({ title, icon: Icon, onClose, children, style, className = "",
 }
 
 
-export default function ThemeWindowsXP({
-  activeArea,
-  onSelectArea,
-  onOpenProfile,
-}: {
-  activeArea: AppArea;
-  onSelectArea: (area: AppArea) => void;
-  onOpenProfile?: () => void;
-}) {
+export default function ThemeWindowsXP({ activeArea, onSelectArea, onOpenProfile, isProfileOpen, onCloseProfile }: ThemeProps) {
   const [explorerVolume, setExplorerVolume] = useState<Volume | null>(null);
   const [notepadContext, setNotepadContext] = useState<{ volume: Volume, chapterIndex: number } | null>(null);
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
@@ -247,7 +239,7 @@ export default function ThemeWindowsXP({
               </div>
             </div>
           </div>
-          <div className="h-[calc(100%-5rem)] bg-white overflow-hidden">
+          <div className="h-[calc(100%-5rem)] bg-white overflow-hidden relative">
             <LibraryViewWindowsXP />
           </div>
         </XPWindow>
@@ -278,7 +270,7 @@ export default function ThemeWindowsXP({
               </div>
             </div>
           </div>
-          <div className="h-[calc(100%-5rem)] bg-white overflow-hidden">
+          <div className="h-[calc(100%-5rem)] bg-white overflow-hidden relative">
             <ShopLayoutWindowsXP />
           </div>
         </XPWindow>

@@ -113,6 +113,9 @@ export default function OnboardingTour({ activeArea }: { activeArea: AppArea }) 
                 ))}
               </div>
               <div className="flex gap-3">
+                <button onClick={handleClose} className="px-4 py-2 text-stone-500 font-medium hover:text-stone-700 hover:bg-stone-200 rounded-lg transition-colors flex items-center">
+                  Skip Tour
+                </button>
                 {stepIndex > 0 && (
                   <button onClick={handlePrev} className="px-4 py-2 text-stone-600 font-semibold hover:bg-stone-200 rounded-lg transition-colors flex items-center">
                     <ChevronLeft size={16} className="mr-1" /> Back

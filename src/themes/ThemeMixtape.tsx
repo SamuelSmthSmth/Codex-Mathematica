@@ -526,13 +526,7 @@ function MixtapeNav({ activeArea, onSelectArea }: { activeArea: AppArea, onSelec
 // Export
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ThemeMixtape({
-  activeArea,
-  onSelectArea,
-}: {
-  activeArea: AppArea;
-  onSelectArea: (area: AppArea) => void;
-}) {
+export default function ThemeMixtape({ activeArea, onSelectArea, onOpenProfile, isProfileOpen, onCloseProfile }: ThemeProps) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
   const { setIsLightMode } = useTheme();
 
@@ -571,7 +565,7 @@ export default function ThemeMixtape({
     return (
       <MixtapeBackground>
         <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
-        <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full">
+        <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full flex flex-col">
           {content}
         </div>
       </MixtapeBackground>
@@ -582,7 +576,7 @@ export default function ThemeMixtape({
   return (
     <>
       <MixtapeNav activeArea={activeArea} onSelectArea={onSelectArea} />
-      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full">
+      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in slide-in-from-left-4 duration-500 h-[calc(100%-4rem)] w-full flex flex-col">
         {content}
       </div>
     </>

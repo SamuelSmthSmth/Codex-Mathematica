@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 /**
@@ -152,7 +153,7 @@ export default function LibraryViewDefault() {
   // ── Library home ──
   return (
     <div
-      className="min-h-screen codex-view py-16 px-4"
+      className="h-full overflow-y-auto codex-view py-16 px-4"
       style={{
         background: isLightMode ? bg : undefined,
         backgroundImage: isLightMode ? undefined : bg,

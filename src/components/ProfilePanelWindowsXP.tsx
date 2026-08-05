@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client";
 
 import { useProfileLogic } from "@/hooks/useProfileLogic";

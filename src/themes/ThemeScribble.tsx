@@ -50,7 +50,7 @@ function ScribbleBackground({ children }: { children: React.ReactNode }) {
     >
       <style>{CAVEAT_IMPORT}</style>
       <div className="absolute top-0 bottom-0 left-8 md:left-16 w-[3px] bg-[#e88080]/60 z-0 pointer-events-none" />
-      <div className="relative z-10 w-full h-full flex flex-col max-w-6xl mx-auto">
+      <div className="relative z-10 w-full flex-1 min-h-0 flex flex-col max-w-6xl mx-auto">
         {children}
       </div>
     </div>
@@ -303,7 +303,7 @@ function ScribbleReader({ volume, chapterIndex, fragmentIndex, onBack, onComplet
   );
 }
 
-export default function ThemeScribble({ activeArea, onSelectArea }: { activeArea: AppArea, onSelectArea: (area: AppArea) => void }) {
+export default function ThemeScribble({ activeArea, onSelectArea, onOpenProfile, isProfileOpen, onCloseProfile }: ThemeProps) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
   const { setIsLightMode } = useTheme();
 
@@ -315,16 +315,16 @@ export default function ThemeScribble({ activeArea, onSelectArea }: { activeArea
 
   if (activeArea === "library") {
     content = (
-      <div className="w-full h-full p-4 md:p-8 max-w-6xl mx-auto pl-8 md:pl-16">
-        <div className="bg-white rounded-lg overflow-hidden h-full border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
+      <div className="w-full flex-1 min-h-0 flex flex-col p-4 md:p-8 max-w-6xl mx-auto pl-8 md:pl-16 relative">
+        <div className="bg-white rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col relative border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
           <LibraryView />
         </div>
       </div>
     );
   } else if (activeArea === "shop") {
     content = (
-      <div className="w-full h-full p-4 md:p-8 max-w-6xl mx-auto pl-8 md:pl-16">
-        <div className="bg-white rounded-lg overflow-hidden h-full border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
+      <div className="w-full flex-1 min-h-0 flex flex-col p-4 md:p-8 max-w-6xl mx-auto pl-8 md:pl-16 relative">
+        <div className="bg-white rounded-lg overflow-hidden flex-1 min-h-0 flex flex-col relative border-[4px] border-stone-800" style={{ borderRadius: "4px 12px 6px 8px", boxShadow: "8px 8px 0 rgba(0,0,0,0.8)" }}>
           <ShopLayout />
         </div>
       </div>
@@ -358,7 +358,7 @@ export default function ThemeScribble({ activeArea, onSelectArea }: { activeArea
   return (
     <ScribbleBackground>
       <ScribbleNav activeArea={activeArea} onSelectArea={onSelectArea} />
-      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 w-full h-full">
+      <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 w-full flex-1 min-h-0 flex flex-col">
         {content}
       </div>
     </ScribbleBackground>

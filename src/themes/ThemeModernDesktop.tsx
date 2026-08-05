@@ -226,15 +226,7 @@ function TerminalWorkspace({
   );
 }
 
-export default function ThemeModernDesktop({
-  activeArea,
-  onSelectArea,
-  onOpenProfile,
-}: {
-  activeArea: AppArea;
-  onSelectArea: (area: AppArea) => void;
-  onOpenProfile?: () => void;
-}) {
+export default function ThemeModernDesktop({ activeArea, onSelectArea, onOpenProfile, isProfileOpen, onCloseProfile }: ThemeProps) {
   const { setIsLightMode } = useTheme();
   useEffect(() => {
     setIsLightMode(false);
@@ -354,7 +346,7 @@ export default function ThemeModernDesktop({
             onPointerDown={() => bringToFront("library")}
             style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: getZIndex("library") }}
           >
-            <div className="h-full overflow-auto bg-[#111111]">
+            <div className="h-full overflow-auto bg-[#111111] relative">
               <LibraryViewModernDesktop />
             </div>
           </ModernWindow>
@@ -370,7 +362,7 @@ export default function ThemeModernDesktop({
             onPointerDown={() => bringToFront("shop")}
             style={{ top: "10%", left: "10%", width: "80%", height: "80%", zIndex: getZIndex("shop") }}
           >
-            <div className="h-full overflow-auto bg-[#111111]">
+            <div className="h-full overflow-auto bg-[#111111] relative">
               <ShopLayoutModernDesktop />
             </div>
           </ModernWindow>

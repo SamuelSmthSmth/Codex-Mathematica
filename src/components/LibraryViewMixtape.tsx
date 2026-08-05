@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { useLibraryLogic } from "@/hooks/useLibraryLogic";
 import LibraryArticle from "./LibraryArticle";

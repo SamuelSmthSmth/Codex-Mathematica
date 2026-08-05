@@ -37,7 +37,17 @@ export function useShopLogic() {
     return map;
   }, [ownedItems]);
 
+  
+
+  const itemsByCategory = useMemo(() => {
+    return SHOP_CATEGORIES.map(cat => ({
+      category: cat,
+      items: SHOP_ITEMS.filter(i => i.category === cat.id)
+    }));
+  }, []);
+  
   return {
+
     credits,
     shopItems: SHOP_ITEMS,
     shopCategories: SHOP_CATEGORIES,
@@ -56,5 +66,18 @@ export function useShopLogic() {
     isItemOwned,
     isItemLocked,
     isItemEquipped,
+    // ALIASES for messy subagents
+    SHOP_ITEMS,
+    SHOP_CATEGORIES,
+    ownedItems,
+    equippedItems,
+    buyItem,
+    equipItem,
+    itemsInCategory: filteredItems,
+    items: filteredItems,
+    selectedCategory: activeCategory,
+    setSelectedCategory: setActiveCategory,
+    itemsByCategory,
   };
 }
+

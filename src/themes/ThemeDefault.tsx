@@ -390,7 +390,7 @@ function ChapterTOC({ volume, onSelectChapter, onClose }: { volume: Volume; onSe
   return (
     <SceneBackground volume={volume}>
       <nav className="w-full max-w-2xl z-10 mb-6"><BackButton onClick={onClose} label="Return to the Archive" /></nav>
-      <div className="w-full max-w-2xl z-10 flex-1 flex flex-col items-center">
+      <div className="w-full max-w-2xl z-10 flex-1 min-h-0 flex flex-col items-center">
         <div 
           className="w-full rounded-[2px_12px_12px_2px] relative overflow-hidden transition-all duration-700 p-10 md:p-16"
           style={{
@@ -815,7 +815,7 @@ function ChapterEndCard({ volume, chapterIndex, onNext, onBack }: { volume: Volu
   return (
     <SceneBackground volume={volume}>
       <nav className="w-full max-w-2xl z-10 mb-6"><BackButton onClick={onBack} label="Back to Contents" /></nav>
-      <div className="w-full max-w-2xl flex-1 flex flex-col items-center justify-center z-10">
+      <div className="w-full max-w-2xl flex-1 min-h-0 flex flex-col items-center justify-center z-10">
          <div className="text-center mb-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="mb-6 leading-none select-none mx-auto flex justify-center" style={{ fontFamily: "var(--font-playfair), 'Palatino Linotype', Palatino, serif", fontSize: "5rem", color: volume.accent, textShadow: `0 0 50px ${volume.accent}60` }}>
               {volume.symbol}
@@ -892,15 +892,7 @@ function BackButton({ onClick, label }: { onClick: () => void; label: string }) 
 // Export Theme Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function ThemeDefault({
-  activeArea,
-  onSelectArea,
-  onOpenProfile,
-}: {
-  activeArea: AppArea;
-  onSelectArea: (area: AppArea) => void;
-  onOpenProfile?: () => void;
-}) {
+export default function ThemeDefault({ activeArea, onSelectArea, onOpenProfile, isProfileOpen, onCloseProfile }: ThemeProps) {
   const [view, setView] = useState<AppView>({ screen: "shelf" });
 
   const openVolume = useCallback((volume: Volume) => {
@@ -949,8 +941,8 @@ export default function ThemeDefault({
 
   return (
     <>
-      <div className="h-full overflow-y-auto pb-16">
-        <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 h-full">
+      <div className="h-full flex flex-col">
+        <div key={`${activeArea}-${view.screen}`} className="animate-in fade-in zoom-in-95 duration-500 flex-1 min-h-0">
           {content}
         </div>
       </div>
