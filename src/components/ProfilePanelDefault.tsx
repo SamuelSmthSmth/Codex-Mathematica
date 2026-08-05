@@ -3,6 +3,7 @@
 import { X, User, LogOut, Check, Sun, Moon, BookOpen, Clock, EyeOff, Eye, Download, Flame, FileText } from "lucide-react";
 import { SHOP_ITEMS } from "@/data/shop-items";
 import { useProfileLogic } from "@/hooks/useProfileLogic";
+import WipeProgressWidget from "./WipeProgressWidget";
 
 interface ProfilePanelProps {
   isOpen: boolean;
@@ -11,7 +12,7 @@ interface ProfilePanelProps {
 
 export default function ProfilePanelDefault({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const {
-    scholar, isGuestMode, signOut, isLightMode, toggleTheme, isFocusMode, setIsFocusMode, activeThemeName, activeThemeId, activeBanner, equippedItems, equipItem, isSavingName, nameSaved, conqueredCount, isGeneratingPdf, editedName, setEditedName, handleExport, handleExportPdf, handleBurn, handleUpdateName, getProviderLabel, avatarUrl
+    scholar, isGuestMode, signOut, isLightMode, toggleTheme, isFocusMode, setIsFocusMode, activeThemeName, activeThemeId, activeBanner, equippedItems, equipItem, isSavingName, nameSaved, conqueredCount, isGeneratingPdf, editedName, setEditedName, handleExport, handleExportPdf, handleBurn, handleUpdateName, getProviderLabel, avatarUrl, wipeConfirmStep, setWipeConfirmStep, wipeInput, setWipeInput, handleWipeClick, handleWipeConfirm
   } = useProfileLogic(isOpen);
 
   if (!scholar && !isGuestMode) return null;
@@ -366,6 +367,41 @@ export default function ProfilePanelDefault({ isOpen, onClose }: { isOpen: boole
                   Burn Grimoire (Reset Progress)
                 </span>
               </button>
+              <WipeProgressWidget 
+                wipeConfirmStep={wipeConfirmStep}
+                setWipeConfirmStep={setWipeConfirmStep}
+                wipeInput={wipeInput}
+                setWipeInput={setWipeInput}
+                handleWipeClick={handleWipeClick}
+                handleWipeConfirm={handleWipeConfirm}
+                isLightMode={isLightMode}
+              />
+            </div>
+          )}
+          
+          {/* Always show wipe progress for guests too, below data management */}
+          {isGuestMode && (
+            <div className="flex flex-col gap-2 mt-4">
+              <label
+                style={{
+                  fontFamily: "Georgia, serif",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.2em",
+                  color: "color-mix(in srgb, var(--codex-accent) 50%, transparent)",
+                  textTransform: "uppercase",
+                }}
+              >
+                Data Management
+              </label>
+              <WipeProgressWidget 
+                wipeConfirmStep={wipeConfirmStep}
+                setWipeConfirmStep={setWipeConfirmStep}
+                wipeInput={wipeInput}
+                setWipeInput={setWipeInput}
+                handleWipeClick={handleWipeClick}
+                handleWipeConfirm={handleWipeConfirm}
+                isLightMode={isLightMode}
+              />
             </div>
           )}
         </div>

@@ -14,8 +14,28 @@ export function useProfileLogic(isOpen: boolean) {
   const [conqueredCount, setConqueredCount] = useState<number | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [editedName, setEditedName] = useState("");
-  const { equippedItems, equipItem } = useProgress();
+  const { equippedItems, equipItem, wipeProgress } = useProgress();
   
+  // Wipe Progress State
+  const [wipeConfirmStep, setWipeConfirmStep] = useState(0);
+  const [wipeInput, setWipeInput] = useState("");
+
+  const handleWipeClick = useCallback(() => {
+    if (wipeConfirmStep === 0) setWipeConfirmStep(1);
+  }, [wipeConfirmStep]);
+
+  const handleWipeConfirm = useCallback(() => {
+    if (wipeConfirmStep === 1 && wipeInput === "START FROM SCRATCH") {
+      const confirm = window.confirm("Are you absolutely sure? This will permanently erase ALL your progress.");
+      if (confirm) {
+        wipeProgress();
+        setWipeConfirmStep(0);
+        setWipeInput("");
+        window.location.reload();
+      }
+    }
+  }, [wipeConfirmStep, wipeInput, wipeProgress]);
+
   const activeBannerId = equippedItems["banners"];
   const activeBanner = SHOP_ITEMS.find((item) => item.id === activeBannerId);
 
@@ -179,6 +199,12 @@ export function useProfileLogic(isOpen: boolean) {
     handleBurn,
     handleUpdateName,
     getProviderLabel,
-    avatarUrl
+    avatarUrl,
+    wipeConfirmStep,
+    setWipeConfirmStep,
+    wipeInput,
+    setWipeInput,
+    handleWipeClick,
+    handleWipeConfirm
   };
 }

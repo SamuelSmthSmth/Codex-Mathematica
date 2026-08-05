@@ -292,134 +292,143 @@ export default function ScholarGate() {
           </p>
         </div>
 
-        {/* ── Email form ── */}
-        <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3" noValidate>
-          {/* Render a hidden input to pass the ref correctly */}
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="sg-email"
-              style={{ fontFamily: "Georgia, serif", fontSize: "0.56rem", letterSpacing: "0.25em", color: "color-mix(in srgb, var(--codex-accent) 48%, transparent)", textTransform: "uppercase" }}
-            >
-              Email
-            </label>
-            <input
-              ref={emailRef}
-              id="sg-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="scholar@archive.ac"
-              disabled={busy}
-              autoComplete="email"
-              spellCheck={false}
-              className="focus:outline-none"
-              style={{
-                fontFamily: "Georgia, serif",
-                fontSize: "0.88rem",
-                background: "#0a0806",
-                border: "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)",
-                borderRadius: "2px",
-                color: "rgba(220,205,170,0.9)",
-                caretColor: "var(--codex-accent)",
-                boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5)",
-                padding: "10px 14px",
-                width: "100%",
-                transition: "border-color 0.15s ease",
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 50%, transparent)"; }}
-              onBlur={(e)  => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 18%, transparent)"; }}
-            />
+        <div className="relative">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-sm">
+             <span className="text-amber-500 font-serif tracking-[0.2em] text-xs uppercase px-4 py-2 border border-amber-500/30 bg-black/80 rounded shadow-lg">
+               In Development
+             </span>
           </div>
+          <div className="opacity-30 pointer-events-none">
+            {/* ── Email form ── */}
+            <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3" noValidate>
+              {/* Render a hidden input to pass the ref correctly */}
+              <div className="flex flex-col gap-1.5">
+                <label
+                  htmlFor="sg-email"
+                  style={{ fontFamily: "Georgia, serif", fontSize: "0.56rem", letterSpacing: "0.25em", color: "color-mix(in srgb, var(--codex-accent) 48%, transparent)", textTransform: "uppercase" }}
+                >
+                  Email
+                </label>
+                <input
+                  ref={emailRef}
+                  id="sg-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="scholar@archive.ac"
+                  disabled={busy}
+                  autoComplete="email"
+                  spellCheck={false}
+                  className="focus:outline-none"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                    fontSize: "0.88rem",
+                    background: "#0a0806",
+                    border: "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)",
+                    borderRadius: "2px",
+                    color: "rgba(220,205,170,0.9)",
+                    caretColor: "var(--codex-accent)",
+                    boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5)",
+                    padding: "10px 14px",
+                    width: "100%",
+                    transition: "border-color 0.15s ease",
+                  }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 50%, transparent)"; }}
+                  onBlur={(e)  => { e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 18%, transparent)"; }}
+                />
+              </div>
 
-          <DarkInput
-            id="sg-password"
-            type="password"
-            value={password}
-            onChange={setPassword}
-            placeholder={mode === "register" ? "Min. 6 characters" : "••••••••"}
-            disabled={busy}
-            autoComplete={mode === "signin" ? "current-password" : "new-password"}
-            label="Password"
-          />
+              <DarkInput
+                id="sg-password"
+                type="password"
+                value={password}
+                onChange={setPassword}
+                placeholder={mode === "register" ? "Min. 6 characters" : "••••••••"}
+                disabled={busy}
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
+                label="Password"
+              />
 
-          <button
-            id="sg-submit"
-            type="submit"
-            disabled={busy || !email.trim() || !password}
-            className="w-full flex items-center justify-center gap-2.5 mt-1 uppercase tracking-[0.22em] text-xs font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{
-              fontFamily: "Georgia, serif",
-              padding: "11px 0",
-              background: "linear-gradient(160deg, #1d1408 0%, #120e07 100%)",
-              border: "1px solid color-mix(in srgb, var(--codex-accent) 35%, transparent)",
-              borderRadius: "2px",
-              color: "color-mix(in srgb, var(--codex-accent) 88%, transparent)",
-              boxShadow: "0 0 24px color-mix(in srgb, var(--codex-accent) 7%, transparent), inset 0 1px 0 rgba(255,220,100,0.05)",
-            }}
-            onMouseEnter={(e) => {
-              if (!busy && email.trim() && password)
-                Object.assign(e.currentTarget.style, { color: "rgba(220,175,80,1)", borderColor: "color-mix(in srgb, var(--codex-accent) 60%, transparent)", boxShadow: "0 0 40px color-mix(in srgb, var(--codex-accent) 13%, transparent), inset 0 1px 0 rgba(255,220,100,0.08)" });
-            }}
-            onMouseLeave={(e) =>
-              Object.assign(e.currentTarget.style, { color: "color-mix(in srgb, var(--codex-accent) 88%, transparent)", borderColor: "color-mix(in srgb, var(--codex-accent) 35%, transparent)", boxShadow: "0 0 24px color-mix(in srgb, var(--codex-accent) 7%, transparent), inset 0 1px 0 rgba(255,220,100,0.05)" })
-            }
-          >
-            {busy ? <Spinner /> : mode === "signin" ? "Enter the Archive" : "Register Scholar"}
-          </button>
-        </form>
+              <button
+                id="sg-submit"
+                type="submit"
+                disabled={busy || !email.trim() || !password}
+                className="w-full flex items-center justify-center gap-2.5 mt-1 uppercase tracking-[0.22em] text-xs font-semibold transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  fontFamily: "Georgia, serif",
+                  padding: "11px 0",
+                  background: "linear-gradient(160deg, #1d1408 0%, #120e07 100%)",
+                  border: "1px solid color-mix(in srgb, var(--codex-accent) 35%, transparent)",
+                  borderRadius: "2px",
+                  color: "color-mix(in srgb, var(--codex-accent) 88%, transparent)",
+                  boxShadow: "0 0 24px color-mix(in srgb, var(--codex-accent) 7%, transparent), inset 0 1px 0 rgba(255,220,100,0.05)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!busy && email.trim() && password)
+                    Object.assign(e.currentTarget.style, { color: "rgba(220,175,80,1)", borderColor: "color-mix(in srgb, var(--codex-accent) 60%, transparent)", boxShadow: "0 0 40px color-mix(in srgb, var(--codex-accent) 13%, transparent), inset 0 1px 0 rgba(255,220,100,0.08)" });
+                }}
+                onMouseLeave={(e) =>
+                  Object.assign(e.currentTarget.style, { color: "color-mix(in srgb, var(--codex-accent) 88%, transparent)", borderColor: "color-mix(in srgb, var(--codex-accent) 35%, transparent)", boxShadow: "0 0 24px color-mix(in srgb, var(--codex-accent) 7%, transparent), inset 0 1px 0 rgba(255,220,100,0.05)" })
+                }
+              >
+                {busy ? <Spinner /> : mode === "signin" ? "Enter the Archive" : "Register Scholar"}
+              </button>
+            </form>
 
-        {/* ── Error message ── */}
-        {authError && (
-          <p
-            className="mt-4 text-center italic"
-            style={{ fontFamily: "Georgia, serif", fontSize: "0.72rem", color: "rgba(190,80,60,0.85)", lineHeight: 1.5 }}
-            role="alert"
-          >
-            {authError}
-          </p>
-        )}
+            {/* ── Error message ── */}
+            {authError && (
+              <p
+                className="mt-4 text-center italic"
+                style={{ fontFamily: "Georgia, serif", fontSize: "0.72rem", color: "rgba(190,80,60,0.85)", lineHeight: 1.5 }}
+                role="alert"
+              >
+                {authError}
+              </p>
+            )}
 
-        <GoldDivider label="or continue with" />
+            <GoldDivider label="or continue with" />
 
-        {/* ── OAuth buttons ── */}
-        <div className="flex flex-col gap-2.5">
-          <OAuthButton
-            id="sg-google"
-            label="Continue with Google"
-            icon={<GoogleIcon />}
-            onClick={() => run(signInWithGoogle)}
-            disabled={busy}
-          />
-          <OAuthButton
-            id="sg-github"
-            label="Continue with GitHub"
-            icon={<GitHubIcon />}
-            onClick={() => run(signInWithGitHub)}
-            disabled={busy}
-          />
-        </div>
+            {/* ── OAuth buttons ── */}
+            <div className="flex flex-col gap-2.5">
+              <OAuthButton
+                id="sg-google"
+                label="Continue with Google"
+                icon={<GoogleIcon />}
+                onClick={() => run(signInWithGoogle)}
+                disabled={busy}
+              />
+              <OAuthButton
+                id="sg-github"
+                label="Continue with GitHub"
+                icon={<GitHubIcon />}
+                onClick={() => run(signInWithGitHub)}
+                disabled={busy}
+              />
+            </div>
 
-        {/* ── Mode toggle ── */}
-        <div className="mt-7 flex items-center justify-center gap-0 border" style={{ borderColor: "color-mix(in srgb, var(--codex-accent) 14%, transparent)", borderRadius: "2px", overflow: "hidden" }}>
-          {(["signin", "register"] as Mode[]).map((m) => (
-            <button
-              key={m}
-              id={`sg-mode-${m}`}
-              type="button"
-              onClick={() => switchMode(m)}
-              className="flex-1 py-2 text-xs uppercase tracking-[0.18em] transition-all duration-200"
-              style={{
-                fontFamily: "Georgia, serif",
-                fontSize: "0.58rem",
-                background: mode === m ? "color-mix(in srgb, var(--codex-accent) 10%, transparent)" : "transparent",
-                color: mode === m ? "color-mix(in srgb, var(--codex-accent) 90%, transparent)" : "rgba(130,110,75,0.5)",
-                borderRight: m === "signin" ? "1px solid color-mix(in srgb, var(--codex-accent) 14%, transparent)" : "none",
-              }}
-              aria-pressed={mode === m}
-            >
-              {m === "signin" ? "Sign In" : "Register"}
-            </button>
-          ))}
+            {/* ── Mode toggle ── */}
+            <div className="mt-7 flex items-center justify-center gap-0 border" style={{ borderColor: "color-mix(in srgb, var(--codex-accent) 14%, transparent)", borderRadius: "2px", overflow: "hidden" }}>
+              {(["signin", "register"] as Mode[]).map((m) => (
+                <button
+                  key={m}
+                  id={`sg-mode-${m}`}
+                  type="button"
+                  onClick={() => switchMode(m)}
+                  className="flex-1 py-2 text-xs uppercase tracking-[0.18em] transition-all duration-200"
+                  style={{
+                    fontFamily: "Georgia, serif",
+                    fontSize: "0.58rem",
+                    background: mode === m ? "color-mix(in srgb, var(--codex-accent) 10%, transparent)" : "transparent",
+                    color: mode === m ? "color-mix(in srgb, var(--codex-accent) 90%, transparent)" : "rgba(130,110,75,0.5)",
+                    borderRight: m === "signin" ? "1px solid color-mix(in srgb, var(--codex-accent) 14%, transparent)" : "none",
+                  }}
+                  aria-pressed={mode === m}
+                >
+                  {m === "signin" ? "Sign In" : "Register"}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ── Explore as Guest ── */}

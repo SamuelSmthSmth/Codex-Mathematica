@@ -89,6 +89,9 @@ export interface ProgressContextValue {
   // ── Tour ──────────────────────────────────────────────────────────────────
   hasSeenTour: boolean;
   markTourSeen: () => void;
+  
+  // ── Wipe ──────────────────────────────────────────────────────────────────
+  wipeProgress: () => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -285,6 +288,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     updateSave((prev) => ({ ...prev, hasSeenTour: true }));
   }, [updateSave]);
 
+  const wipeProgress = useCallback(() => {
+    setSave(buildDefaultSave());
+    localStorage.removeItem(SAVE_KEY);
+  }, []);
+
   // ── Save file I/O ─────────────────────────────────────────────────────────
 
   const exportSave = useCallback((): string => {
@@ -338,6 +346,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         importSave,
         hasSeenTour: save?.hasSeenTour ?? false,
         markTourSeen,
+        wipeProgress,
       }}
     >
       {children}

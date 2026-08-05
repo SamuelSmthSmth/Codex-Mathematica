@@ -2,6 +2,7 @@
 
 import { X, User, LogOut, Sun, Moon, BookOpen, Clock, EyeOff, Eye, Download, Flame, FileText, Minus, Square } from "lucide-react";
 import { useProfileLogic } from "@/hooks/useProfileLogic";
+import WipeProgressWidget from "./WipeProgressWidget";
 
 interface ProfilePanelProps {
   isOpen: boolean;
@@ -10,7 +11,7 @@ interface ProfilePanelProps {
 
 export default function ProfilePanelWindowsXP({ isOpen, onClose }: ProfilePanelProps) {
   const {
-    scholar, isGuestMode, signOut, isLightMode, toggleTheme, isFocusMode, setIsFocusMode, activeThemeName, conqueredCount, isGeneratingPdf, handleExport, handleExportPdf, handleBurn, getProviderLabel, avatarUrl
+    scholar, isGuestMode, signOut, isLightMode, toggleTheme, isFocusMode, setIsFocusMode, activeThemeName, conqueredCount, isGeneratingPdf, handleExport, handleExportPdf, handleBurn, getProviderLabel, avatarUrl, wipeConfirmStep, setWipeConfirmStep, wipeInput, setWipeInput, handleWipeClick, handleWipeConfirm
   } = useProfileLogic(isOpen);
 
   if (!scholar && !isGuestMode) return null;
@@ -138,6 +139,16 @@ export default function ProfilePanelWindowsXP({ isOpen, onClose }: ProfilePanelP
                     <Flame size={14} /> Delete this account
                   </button>
                 )}
+                
+                <WipeProgressWidget 
+                  wipeConfirmStep={wipeConfirmStep}
+                  setWipeConfirmStep={setWipeConfirmStep}
+                  wipeInput={wipeInput}
+                  setWipeInput={setWipeInput}
+                  handleWipeClick={handleWipeClick}
+                  handleWipeConfirm={handleWipeConfirm}
+                  isLightMode={true}
+                />
                 <button onClick={() => { onClose(); signOut(); }} className="w-full bg-[#ece9d8] border-2 border-t-white border-l-white border-b-stone-500 border-r-stone-500 py-1 active:border-t-stone-500 active:border-l-stone-500 active:border-b-white active:border-r-white text-sm flex items-center justify-center gap-2">
                   <LogOut size={14} /> Log Off
                 </button>

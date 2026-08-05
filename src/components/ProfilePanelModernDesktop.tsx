@@ -2,6 +2,7 @@
 
 import { X, User, LogOut, Sun, Moon, BookOpen, Clock, EyeOff, Eye, Download, Flame, FileText, Settings, Activity, Shield } from "lucide-react";
 import { useProfileLogic } from "@/hooks/useProfileLogic";
+import WipeProgressWidget from "./WipeProgressWidget";
 
 interface ProfilePanelProps {
   isOpen: boolean;
@@ -10,7 +11,7 @@ interface ProfilePanelProps {
 
 export default function ProfilePanelModernDesktop({ isOpen, onClose }: ProfilePanelProps) {
   const {
-    scholar, isGuestMode, signOut, isLightMode, toggleTheme, isFocusMode, setIsFocusMode, activeThemeName, conqueredCount, isGeneratingPdf, handleExport, handleExportPdf, handleBurn, getProviderLabel, avatarUrl
+    scholar, isGuestMode, signOut, isLightMode, toggleTheme, isFocusMode, setIsFocusMode, activeThemeName, conqueredCount, isGeneratingPdf, handleExport, handleExportPdf, handleBurn, getProviderLabel, avatarUrl, wipeConfirmStep, setWipeConfirmStep, wipeInput, setWipeInput, handleWipeClick, handleWipeConfirm
   } = useProfileLogic(isOpen);
 
   if (!scholar && !isGuestMode) return null;
@@ -158,6 +159,16 @@ export default function ProfilePanelModernDesktop({ isOpen, onClose }: ProfilePa
                 </button>
               )}
               
+              <WipeProgressWidget 
+                wipeConfirmStep={wipeConfirmStep}
+                setWipeConfirmStep={setWipeConfirmStep}
+                wipeInput={wipeInput}
+                setWipeInput={setWipeInput}
+                handleWipeClick={handleWipeClick}
+                handleWipeConfirm={handleWipeConfirm}
+                isLightMode={isLightMode}
+              />
+
               <button
                 onClick={() => {
                   onClose();
