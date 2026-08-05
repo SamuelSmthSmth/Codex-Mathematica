@@ -457,19 +457,23 @@ export default function ThemeDiner({ activeArea, onSelectArea, onOpenProfile, is
 
   if (activeArea === "library") {
     content = (
-      <div className="flex-1 min-h-0 flex flex-col p-8 max-w-6xl mx-auto w-full">
-        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden flex-1 min-h-0 border-4 border-stone-300">
-          <LibraryView />
+      <DinerBackground>
+        <div className="flex-1 min-h-0 flex flex-col md:p-8 max-w-6xl mx-auto w-full relative z-10">
+          <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden flex-1 min-h-0 border-4 border-stone-300">
+            <LibraryView />
+          </div>
         </div>
-      </div>
+      </DinerBackground>
     );
   } else if (activeArea === "shop") {
     content = (
-      <div className="flex-1 min-h-0 flex flex-col p-8 max-w-6xl mx-auto w-full">
-        <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden flex-1 min-h-0 border-4 border-stone-300">
-          <ShopLayout />
+      <DinerBackground>
+        <div className="flex-1 min-h-0 flex flex-col md:p-8 max-w-6xl mx-auto w-full relative z-10">
+          <div className="bg-[#fdfbe9] rounded-lg shadow-2xl overflow-hidden flex-1 min-h-0 border-4 border-stone-300">
+            <ShopLayout />
+          </div>
         </div>
-      </div>
+      </DinerBackground>
     );
   } else {
     if (view.screen === "shelf") {

@@ -7,65 +7,52 @@ export default function ShopLayoutMixtape() {
   const {
     credits,
     shopItems,
-    shopCategories,
-    categories,
     activeTab,
     setActiveTab,
     activeCategory,
     setActiveCategory,
-    filteredItems,
-    inventoryItems,
-    unlocks,
     isAchievementUnlocked,
     handleBuy,
     handlePurchase,
     handleEquip,
-    isItemOwned,
-    isItemLocked,
-    isItemEquipped,
-    SHOP_ITEMS,
     SHOP_CATEGORIES,
     ownedItems,
     equippedItems,
     buyItem,
     equipItem,
     itemsInCategory,
-    items,
-    selectedCategory,
-    setSelectedCategory,
-    itemsByCategory,
 } = useShopLogic();
 
   return (
-    <div className="h-full overflow-y-auto bg-stone-950 text-stone-300 font-mono p-4 md:p-8 selection:bg-pink-500 selection:text-stone-950">
+    <div className="h-full overflow-y-auto bg-transparent text-stone-800 font-mono p-4 md:p-8 selection:bg-pink-500 selection:text-white">
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
         
         {/* Sidebar - Zine Index */}
         <aside className="md:col-span-1 flex flex-col">
-          <div className="border-4 border-stone-100 bg-stone-100 text-stone-900 p-6 mb-8 transform -rotate-2 shadow-[8px_8px_0_#ec4899] z-10 relative">
+          <div className="border-4 border-white bg-white text-stone-900 p-6 mb-8 transform -rotate-2 shadow-[8px_8px_0_#ec4899] z-10 relative">
             <h1 className="text-3xl font-black uppercase tracking-tighter leading-none mb-4">
               Zine<br/>Catalog
             </h1>
-            <div className="bg-stone-900 text-stone-100 px-4 py-2 font-bold flex items-center justify-between text-sm shadow-inner">
+            <div className="bg-stone-50 border-t-2 border-stone-200 text-stone-800 px-4 py-2 font-bold flex items-center justify-between text-sm shadow-inner">
               <span>CREDITS</span>
-              <span className="flex items-center gap-1 text-pink-400">
+              <span className="flex items-center gap-1 text-pink-500">
                 <Coins size={14} /> {credits.toLocaleString()}
               </span>
             </div>
             {/* Rough edge detail */}
-            <div className="absolute top-0 right-0 w-8 h-8 bg-stone-950 transform rotate-45 translate-x-4 -translate-y-4"></div>
+            <div className="absolute top-0 right-0 w-8 h-8 bg-[#e8dcce] transform rotate-45 translate-x-4 -translate-y-4"></div>
           </div>
 
-          <div className="flex bg-stone-900 border-2 border-stone-800 mb-6 sticky top-4 z-20">
+          <div className="flex bg-white border-2 border-stone-300 mb-6 sticky top-4 z-20 shadow-md">
             <button
               onClick={() => setActiveTab("browse")}
-              className={`flex-1 py-3 text-sm font-bold uppercase transition-colors ${activeTab === "browse" ? "bg-pink-500 text-stone-950" : "text-stone-500 hover:text-stone-300 hover:bg-stone-800"}`}
+              className={`flex-1 py-3 text-sm font-bold uppercase transition-colors ${activeTab === "browse" ? "bg-pink-500 text-white" : "text-stone-500 hover:text-stone-800 hover:bg-stone-50"}`}
             >
               Browse
             </button>
             <button
               onClick={() => setActiveTab("collection")}
-              className={`flex-1 py-3 text-sm font-bold uppercase transition-colors ${activeTab === "collection" ? "bg-pink-500 text-stone-950" : "text-stone-500 hover:text-stone-300 hover:bg-stone-800"}`}
+              className={`flex-1 py-3 text-sm font-bold uppercase transition-colors ${activeTab === "collection" ? "bg-pink-500 text-white" : "text-stone-500 hover:text-stone-800 hover:bg-stone-50"}`}
             >
               Stash
             </button>
@@ -78,8 +65,8 @@ export default function ShopLayoutMixtape() {
                 onClick={() => setActiveCategory(cat.id)}
                 className={`text-left px-4 py-3 font-bold uppercase tracking-widest text-sm border-l-4 transition-all ${
                   activeCategory === cat.id 
-                    ? "border-pink-500 bg-stone-900 text-white" 
-                    : "border-transparent text-stone-500 hover:text-stone-300 hover:bg-stone-900/50"
+                    ? "border-pink-500 bg-white text-stone-900 shadow-sm" 
+                    : "border-transparent text-stone-500 hover:text-stone-800 hover:bg-white/50"
                 }`}
               >
                 <span className="mr-2 opacity-50">{cat.icon}</span> {cat.label}
@@ -93,24 +80,24 @@ export default function ShopLayoutMixtape() {
           {activeTab === "collection" ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {shopItems.filter(item => item.category === activeCategory && ownedItems.has(item.id)).length === 0 ? (
-                <div className="col-span-full border-4 border-dashed border-stone-800 p-12 text-center text-stone-600 font-bold uppercase tracking-widest">
+                <div className="col-span-full border-4 border-dashed border-stone-300 p-12 text-center text-stone-500 font-bold uppercase tracking-widest">
                   Nothing in your stash yet.
                 </div>
               ) : (
                 shopItems.filter(item => item.category === activeCategory && ownedItems.has(item.id)).map(item => {
                   const isEquipped = equippedItems[item.category] === item.id;
                   return (
-                    <div key={item.id} className={`p-6 border-2 flex flex-col ${isEquipped ? "border-pink-500 bg-stone-900 shadow-[4px_4px_0_#ec4899]" : "border-stone-700 bg-stone-900/50"}`}>
-                      <h3 className="text-xl font-bold text-stone-100 mb-2">{item.name}</h3>
-                      <p className="text-stone-400 text-sm mb-6 flex-1">{item.description}</p>
+                    <div key={item.id} className={`p-6 border-2 flex flex-col ${isEquipped ? "border-pink-500 bg-white shadow-[4px_4px_0_#ec4899]" : "border-stone-200 bg-white/80 hover:bg-white"}`}>
+                      <h3 className="text-xl font-bold text-stone-900 mb-2">{item.name}</h3>
+                      <p className="text-stone-500 text-sm mb-6 flex-1">{item.description}</p>
                       {isEquipped ? (
-                        <div className="flex items-center gap-2 text-pink-500 font-bold uppercase tracking-widest text-sm bg-pink-500/10 p-2 justify-center border border-pink-500/20">
+                        <div className="flex items-center gap-2 text-pink-600 font-bold uppercase tracking-widest text-sm bg-pink-50 p-2 justify-center border border-pink-200">
                           <Check size={16} /> Equipped
                         </div>
                       ) : (
                         <button
                           onClick={() => equipItem(item.category, item.id)}
-                          className="bg-stone-800 text-stone-300 font-bold uppercase tracking-widest text-sm py-2 hover:bg-stone-700 hover:text-white transition-colors"
+                          className="bg-stone-800 text-white font-bold uppercase tracking-widest text-sm py-2 hover:bg-stone-700 transition-colors"
                         >
                           Equip
                         </button>
@@ -140,26 +127,26 @@ export default function ShopLayoutMixtape() {
                   <div 
                     key={item.id}
                     className={`relative p-5 border-2 flex flex-col transition-all ${
-                      isEquipped ? "border-pink-500 bg-stone-900 shadow-[4px_4px_0_#ec4899]" : 
-                      isOwned ? "border-stone-700 bg-stone-900/50 opacity-80" : 
-                      "border-stone-800 bg-stone-900 hover:border-stone-600 hover:-translate-y-1 hover:shadow-[4px_4px_0_rgba(0,0,0,0.5)]"
+                      isEquipped ? "border-pink-500 bg-white shadow-[4px_4px_0_#ec4899]" : 
+                      isOwned ? "border-stone-200 bg-white/50 opacity-80" : 
+                      "border-stone-300 bg-white hover:border-stone-400 hover:-translate-y-1 hover:shadow-[4px_4px_0_rgba(0,0,0,0.1)]"
                     }`}
                   >
                     {isEquipped && (
-                      <div className="absolute -top-3 -right-3 bg-pink-500 text-stone-950 font-black text-xs px-3 py-1 uppercase transform rotate-6 shadow-md z-10 border-2 border-stone-950">
+                      <div className="absolute -top-3 -right-3 bg-pink-500 text-white font-black text-xs px-3 py-1 uppercase transform rotate-6 shadow-md z-10 border-2 border-pink-600">
                         Equipped
                       </div>
                     )}
                     
-                    <h3 className="text-xl font-bold text-stone-100 mb-2 leading-tight">{item.name}</h3>
-                    <p className="text-stone-400 text-xs mb-6 flex-1">{item.description}</p>
+                    <h3 className="text-xl font-bold text-stone-900 mb-2 leading-tight">{item.name}</h3>
+                    <p className="text-stone-500 text-xs mb-6 flex-1">{item.description}</p>
                     
-                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-stone-800/50">
+                    <div className="flex items-center justify-between mt-auto pt-4 border-t border-stone-200">
                       {isOwned ? (
                         <span className="text-pink-500 font-bold text-xs uppercase tracking-widest">Owned</span>
                       ) : (
-                        <span className="flex items-center gap-1.5 text-stone-300 font-bold text-sm">
-                          <Coins size={14} className="text-stone-500" />
+                        <span className="flex items-center gap-1.5 text-stone-800 font-bold text-sm">
+                          <Coins size={14} className="text-stone-400" />
                           {item.price.toLocaleString()}
                         </span>
                       )}
@@ -169,9 +156,9 @@ export default function ShopLayoutMixtape() {
                           onClick={handleBuy}
                           disabled={isLocked || !canAfford}
                           className={`px-3 py-1.5 text-xs font-bold uppercase tracking-widest transition-transform ${
-                            isLocked ? "bg-stone-800 text-stone-600 cursor-not-allowed" :
-                            !canAfford ? "bg-stone-800 text-stone-500 cursor-not-allowed" :
-                            "bg-stone-200 text-stone-900 hover:bg-white active:scale-95"
+                            isLocked ? "bg-stone-200 text-stone-400 cursor-not-allowed" :
+                            !canAfford ? "bg-stone-200 text-stone-400 cursor-not-allowed" :
+                            "bg-stone-800 text-white hover:bg-stone-700 active:scale-95"
                           }`}
                         >
                           {isLocked ? "Locked" : !canAfford ? "Broke" : "Cop It"}
@@ -180,11 +167,11 @@ export default function ShopLayoutMixtape() {
                     </div>
 
                     {isLocked && (
-                      <div className="h-full bg-stone-950/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center border-2 border-stone-800 z-10">
-                        <Skull className="text-stone-600 mb-3" size={32} />
-                        <p className="text-stone-400 text-xs font-bold uppercase tracking-widest leading-relaxed">
+                      <div className="h-full bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center border-2 border-stone-200 z-10 absolute inset-0">
+                        <Skull className="text-stone-400 mb-3" size={32} />
+                        <p className="text-stone-500 text-xs font-bold uppercase tracking-widest leading-relaxed">
                           Requires:<br/>
-                          <span className="text-pink-400">{item.achievementLocked}</span>
+                          <span className="text-pink-500">{item.achievementLocked}</span>
                         </p>
                       </div>
                     )}
