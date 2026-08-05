@@ -263,7 +263,7 @@ function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
                   value={userAnswer}
                   onChange={(e) => setUserAnswer(e.target.value)}
                   placeholder={fragment.answer_hint || "Enter your answer"}
-                  className="w-full max-w-sm px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded font-mono text-center text-stone-800 focus:border-pink-500 outline-none transition-colors shadow-inner"
+                  className="w-full max-w-sm px-4 py-3 bg-stone-800 border-2 border-stone-600 rounded font-mono text-center text-white focus:border-pink-500 outline-none transition-colors shadow-inner"
                 />
                 <button
                   type="submit"
@@ -292,14 +292,15 @@ function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
             <h4 className="font-mono font-bold text-pink-600 text-sm mb-4">{"/// SOLUTION"}</h4>
             
             {fragment.answer_type === "hybrid" && (
-              <div className="bg-stone-50/80 border-2 border-stone-200 p-6 rounded shadow-sm mb-4">
+              <div className="bg-stone-800 border-2 border-stone-600 p-6 rounded shadow-sm mb-4">
                  <p className="font-mono font-bold text-stone-400 text-xs mb-2 uppercase">Your Answer</p>
-                 <div className="text-2xl font-bold font-mono text-stone-800">{userAnswer}</div>
+                 <div className="text-2xl font-bold font-mono text-white">{userAnswer}</div>
               </div>
             )}
 
             {/* LED Screen aesthetic for answer */}
-            <div className="bg-stone-900 border-4 border-stone-700 p-6 rounded-lg shadow-inner mb-8 font-mono relative overflow-hidden">
+            <div className="bg-stone-900 border-4 border-stone-700 p-6 rounded-lg shadow-inner mb-8 font-mono relative overflow-hidden mixtape-led-screen">
+               <style>{`.mixtape-led-screen .katex, .mixtape-led-screen .katex * { color: white !important; }`}</style>
                {fragment.answer_type === "hybrid" && <p className="font-mono font-bold text-stone-500 text-xs mb-2 uppercase relative z-10">Correct Answer</p>}
                {/* LED scanline */}
                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none" />
@@ -362,26 +363,17 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
   const numSpreads = Math.ceil(chapter.fragments.length / 2);
   const [currentIndex, setCurrentIndex] = useState(initialSpreadIndex);
   
-  // Flat flip animation state
-  const [animState, setAnimState] = useState<{ type: 'next' | 'prev', fromIndex: number, toIndex: number } | null>(null);
-
   const handleNext = () => {
-    if (animState) return;
     if (currentIndex < numSpreads - 1) {
-      setAnimState({ type: 'next', fromIndex: currentIndex, toIndex: currentIndex + 1 });
       setCurrentIndex(currentIndex + 1);
-      setTimeout(() => setAnimState(null), 350);
     } else {
       onComplete();
     }
   };
 
   const handlePrev = () => {
-    if (animState) return;
     if (currentIndex > 0) {
-      setAnimState({ type: 'prev', fromIndex: currentIndex, toIndex: currentIndex - 1 });
       setCurrentIndex(currentIndex - 1);
-      setTimeout(() => setAnimState(null), 350);
     } else {
       onBack();
     }
@@ -393,61 +385,6 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
 
   let staticLeftFrag = currentLeftFrag;
   let staticRightFrag = currentRightFrag;
-  let flipper = null;
-
-  if (animState) {
-    const isNext = animState.type === 'next';
-    const oldLeftFrag = chapter.fragments[animState.fromIndex * 2];
-    const oldRightFrag = chapter.fragments[animState.fromIndex * 2 + 1];
-
-    if (isNext) {
-      staticLeftFrag = oldLeftFrag;
-      staticRightFrag = currentRightFrag;
-      flipper = (
-        <div className="absolute inset-0 origin-left flex transition-transform duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
-             style={{ transform: "rotateY(-90deg) scaleX(0)" }}
-             ref={el => {
-               if (el) {
-                 requestAnimationFrame(() => {
-                   el.style.transform = "rotateY(-180deg) scaleX(1)";
-                 });
-               }
-             }}
-        >
-          {/* Flipper front (shows old right frag swinging over) */}
-          <div className="absolute inset-0 backface-hidden flex">
-            {oldRightFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={oldRightFrag} isLeftPage={false} /> : <div className="w-full h-full bg-white rounded-r-lg shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-l border-stone-200" />}
-          </div>
-          {/* Flipper back (shows new left frag swinging in) */}
-          <div className="absolute inset-0 backface-hidden flex" style={{ transform: "rotateY(180deg)" }}>
-            {currentLeftFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={currentLeftFrag} isLeftPage={true} /> : <div className="w-full h-full bg-white rounded-l-lg shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-r border-stone-200" />}
-          </div>
-        </div>
-      );
-    } else {
-      staticLeftFrag = currentLeftFrag;
-      staticRightFrag = oldRightFrag;
-      flipper = (
-        <div className="absolute inset-0 origin-right flex transition-transform duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
-             style={{ transform: "rotateY(90deg) scaleX(0)", left: "-100%" }}
-             ref={el => {
-               if (el) {
-                 requestAnimationFrame(() => {
-                   el.style.transform = "rotateY(180deg) scaleX(1)";
-                 });
-               }
-             }}
-        >
-          <div className="absolute inset-0 backface-hidden flex">
-            {oldLeftFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={oldLeftFrag} isLeftPage={true} /> : <div className="w-full h-full bg-white rounded-l-lg shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-r border-stone-200" />}
-          </div>
-          <div className="absolute inset-0 backface-hidden flex" style={{ transform: "rotateY(180deg)" }}>
-            {currentRightFrag ? <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={currentRightFrag} isLeftPage={false} /> : <div className="w-full h-full bg-white rounded-r-lg shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-l border-stone-200" />}
-          </div>
-        </div>
-      );
-    }
-  }
 
   // Draw spiral rings in CSS
   const binderRings = Array.from({ length: 24 }).map((_, i) => (
@@ -463,13 +400,13 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
            {/* Center pin */}
            <div className="absolute w-6 h-6 bg-stone-900 rounded-full border-2 border-stone-700 z-20" />
            {/* Spinning disc */}
-           <div className={`absolute inset-1 rounded-full bg-gradient-to-tr from-stone-400 via-white to-stone-400 z-10 flex items-center justify-center ${animState ? '' : 'animate-[spin_4s_linear_infinite]'}`} style={{ backgroundImage: 'conic-gradient(from 0deg, #d6d3d1, #f5f5f4, #d6d3d1, #a8a29e, #d6d3d1)' }}>
+           <div className="absolute inset-1 rounded-full bg-gradient-to-tr from-stone-400 via-white to-stone-400 z-10 flex items-center justify-center animate-[spin_4s_linear_infinite]" style={{ backgroundImage: 'conic-gradient(from 0deg, #d6d3d1, #f5f5f4, #d6d3d1, #a8a29e, #d6d3d1)' }}>
               <div className="w-12 h-12 rounded-full bg-transparent border-4 border-white/40" />
               <div className="absolute inset-0 bg-[repeating-radial-gradient(circle_at_center,transparent,transparent_2px,rgba(0,0,0,0.03)_3px)]" />
            </div>
         </div>
         <div className="bg-stone-900 text-pink-500 font-mono text-xs px-4 py-1 mt-[-10px] z-20 rounded-full border border-stone-700 shadow-lg flex items-center gap-2">
-          {animState ? <Pause size={12} fill="currentColor" /> : <Play size={12} fill="currentColor" className="animate-pulse" />}
+          <Play size={12} fill="currentColor" className="animate-pulse" />
           TRACK {pad3(currentLeftFrag?.id || currentRightFrag?.id || 0)}
         </div>
       </div>
@@ -479,7 +416,6 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
         {/* Nav Arrows */}
         <button
           onClick={handlePrev}
-          disabled={!!animState && animState.type !== 'prev'}
           className={`absolute left-0 -ml-16 md:-ml-20 top-1/2 -translate-y-1/2 z-40 bg-stone-800 text-white p-4 rounded-full shadow-lg border-2 border-stone-700 hover:bg-stone-700 active:scale-95 transition-all ${currentIndex === 0 ? "opacity-50 hover:bg-stone-800" : ""}`}
         >
           <ChevronLeft size={24} strokeWidth={3} />
@@ -487,10 +423,9 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
 
         <button
           onClick={handleNext}
-          disabled={!!animState && animState.type !== 'next'}
-          className={`absolute right-0 -mr-16 md:-mr-20 top-1/2 -translate-y-1/2 z-40 bg-stone-800 text-white p-4 rounded-full shadow-lg border-2 border-stone-700 hover:bg-stone-700 active:scale-95 transition-all ${(currentIndex === numSpreads - 1 && !animState) ? "bg-pink-600 border-pink-500 hover:bg-pink-500" : ""}`}
+          className={`absolute right-0 -mr-16 md:-mr-20 top-1/2 -translate-y-1/2 z-40 bg-stone-800 text-white p-4 rounded-full shadow-lg border-2 border-stone-700 hover:bg-stone-700 active:scale-95 transition-all ${(currentIndex === numSpreads - 1) ? "bg-pink-600 border-pink-500 hover:bg-pink-500" : ""}`}
         >
-          {(currentIndex === numSpreads - 1 && !animState) ? <CheckCheck size={24} strokeWidth={3} /> : <ChevronRight size={24} strokeWidth={3} />}
+          {(currentIndex === numSpreads - 1) ? <CheckCheck size={24} strokeWidth={3} /> : <ChevronRight size={24} strokeWidth={3} />}
         </button>
 
         {/* Notebook Spread */}
@@ -515,13 +450,6 @@ function BinderReader({ volume, chapterIndex, initialSpreadIndex, onBack, onComp
                 <NotebookPage volume={volume} chapterIndex={chapterIndex} fragment={staticRightFrag} isLeftPage={false} />
              ) : (
                 <div className="w-full h-full bg-white rounded-r-lg shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-l border-stone-200" />
-             )}
-             
-             {/* Flipper overlays right page */}
-             {flipper && (
-                <div className="absolute inset-0 z-30 pointer-events-none">
-                  {flipper}
-                </div>
              )}
            </div>
         </div>

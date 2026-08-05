@@ -18,7 +18,7 @@ export default function LibraryViewWindowsXP() {
           </button>
           <div className="text-gray-500">|</div>
           <div className="flex-1 truncate font-bold">
-            {activeTechnique.title}
+            {activeTechnique.name || activeTechnique.title}
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
@@ -53,7 +53,7 @@ export default function LibraryViewWindowsXP() {
       <div id="tour-library-list" className="flex-1 p-4 overflow-y-auto bg-white h-full">
         {techniqueRows.map((row, idx) => (
           <div key={idx} className="mb-6">
-            <h2 className="text-gray-500 text-xs font-bold border-b border-gray-200 pb-1 mb-3">{row.category}</h2>
+            <h2 className="text-gray-700 text-xs font-bold border-b border-gray-200 pb-1 mb-3">{row.category}</h2>
             <div className="flex flex-wrap gap-4">
               {row.techniques.map((tech) => (
                 <div 
@@ -64,8 +64,8 @@ export default function LibraryViewWindowsXP() {
                   <div className="text-4xl mb-1 drop-shadow-sm text-yellow-500">
                     {tech.icon === "Sparkles" ? "📝" : "📁"}
                   </div>
-                  <div className="text-black text-xs text-center line-clamp-2 leading-tight select-none">
-                    {tech.title}
+                  <div className="text-black text-xs font-medium text-center line-clamp-2 leading-tight select-none">
+                    {tech.name || tech.title}
                   </div>
                 </div>
               ))}

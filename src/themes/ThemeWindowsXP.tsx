@@ -537,7 +537,8 @@ function XPWorkspace({ volume, chapterIndex, onClose, onPointerDown, style }: { 
                   </div>
                 )}
                 <span className="text-stone-400 mb-4">{"// Solution Generated:"}</span>
-                <div className="math-lg [&_.katex]:text-blue-800 [&_.katex]:text-2xl text-blue-800 mb-4 flex items-center">
+                <div className="math-lg [&_.katex]:text-blue-800 [&_.katex]:text-2xl text-blue-800 mb-4 flex items-center xp-notepad-solution">
+                  <style>{`.xp-notepad-solution .katex, .xp-notepad-solution .katex * { color: #1e40af !important; }`}</style>
                   <MathRenderer>{`$$${fragment.solution_latex}$$`}</MathRenderer>
                   <span className="inline-block w-2 h-6 bg-black ml-1 animate-pulse" /> {/* Blinking cursor */}
                 </div>
