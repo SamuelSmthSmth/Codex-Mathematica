@@ -62,7 +62,7 @@ export default function ShopLayoutDiner() {
               if (categoryItems.length === 0) return null;
 
               return (
-                <div key={category.id} className="w-full">
+                <div key={category.id} id={`tour-shop-${category.id}`} className="w-full">
                   {/* Category Header */}
                   <div className="flex items-center gap-4 mb-6 border-b-4 border-stone-800 pb-2">
                     <h2 className="text-4xl font-black font-serif text-stone-900 uppercase">{category.label}</h2>

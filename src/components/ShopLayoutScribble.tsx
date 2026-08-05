@@ -109,7 +109,7 @@ export default function ShopLayoutScribble() {
 
       <div className="max-w-6xl mx-auto space-y-16 pb-20">
         {itemsByCategory.map(category => (
-          <div key={category.category.id} className="bg-[#f5f5f4] border-4 border-stone-800 p-8 shadow-[8px_8px_0_rgba(0,0,0,0.8)] relative" style={{ borderRadius: "4px 12px 6px 8px" }}>
+          <div key={category.category.id} id={`tour-shop-${category.category.id}`} className="bg-[#f5f5f4] border-4 border-stone-800 p-8 shadow-[8px_8px_0_rgba(0,0,0,0.8)] relative" style={{ borderRadius: "4px 12px 6px 8px" }}>
             {/* Push pins */}
             <div className="absolute top-4 left-4 w-4 h-4 rounded-full bg-[#e88080] border-2 border-stone-800 shadow-[2px_2px_0_rgba(0,0,0,0.8)]" />
             <div className="absolute top-4 right-4 w-4 h-4 rounded-full bg-[#e88080] border-2 border-stone-800 shadow-[2px_2px_0_rgba(0,0,0,0.8)]" />

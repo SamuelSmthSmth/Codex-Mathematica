@@ -46,7 +46,7 @@ export default function LibraryViewMixtape() {
         </section>
 
         {/* The Cardboard Box / Rack */}
-        <div className="bg-white/50 border-4 border-dashed border-stone-300 p-6 sm:p-8 rounded-lg relative">
+        <div id="tour-library-list" className="bg-white/50 border-4 border-dashed border-stone-300 p-6 sm:p-8 rounded-lg relative">
           <div className="absolute top-0 left-4 -translate-y-1/2 bg-[#e8dcce] px-2 text-stone-500 font-bold tracking-widest text-sm uppercase">
             Cardboard Box
           </div>

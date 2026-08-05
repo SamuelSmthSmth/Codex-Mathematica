@@ -192,7 +192,7 @@ export default function ThemeWindowsXP({ activeArea, onSelectArea, onOpenProfile
       <div className="absolute inset-0 bg-[url('/bliss.png')] bg-cover bg-center" />
       
       {/* Desktop Icons */}
-      <div className="absolute inset-0 p-4 flex flex-col gap-6 items-start flex-wrap content-start">
+      <div id="tour-volume-shelf" className="absolute inset-0 p-4 flex flex-col gap-6 items-start flex-wrap content-start">
         <DesktopIcon icon={Monitor} label="My Computer" color="text-blue-200" fill="fill-blue-500" onClick={() => onSelectArea("archive")} />
         <DesktopIcon icon={Folder} label="My Documents" color="text-yellow-200" fill="fill-yellow-500" onClick={() => onSelectArea("archive")} />
         <DesktopIcon icon={Globe} label="Internet Explorer" color="text-blue-400" fill="fill-blue-600" onClick={() => onSelectArea("library")} />
@@ -451,6 +451,13 @@ function XPWorkspace({ volume, chapterIndex, onClose, onPointerDown, style }: { 
   const fragment = allFragments[currentIndex];
   const { gradePhase, setGradePhase, handleGrade } = useWorkspaceLogic({ fragment, volume, chapterIndex });
 
+  const [userAnswer, setUserAnswer] = useState("");
+  useEffect(() => {
+    if (gradePhase === "problem") {
+      setUserAnswer("");
+    }
+  }, [gradePhase]);
+
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === allFragments.length - 1;
 
@@ -485,18 +492,50 @@ function XPWorkspace({ volume, chapterIndex, onClose, onPointerDown, style }: { 
           <div className="mt-auto border-t border-dashed border-stone-300 pt-4">
             {gradePhase === "problem" && (
               <div className="flex flex-col gap-2">
-                <span className="text-stone-400">{"// Awaiting solution generation..."}</span>
-                <button 
-                  onClick={() => setGradePhase("revealed")}
-                  className="self-start bg-[#ece9d8] border-2 border-t-white border-l-white border-b-stone-500 border-r-stone-500 px-4 py-1 active:border-t-stone-500 active:border-l-stone-500 active:border-b-white active:border-r-white"
-                >
-                  Generate Solution.exe
-                </button>
+                {fragment.answer_type === "hybrid" ? (
+                  <form onSubmit={(e) => { e.preventDefault(); setGradePhase("revealed"); }} className="flex flex-col gap-2 w-full">
+                    <span className="text-stone-400">{"// Input required:"}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-blue-600 font-bold">{">"}</span>
+                      <input 
+                        type="text"
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        placeholder={fragment.answer_hint || "Type here"}
+                        className="flex-1 bg-transparent border-none outline-none font-mono"
+                        autoFocus
+                      />
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={!userAnswer.trim()}
+                      className="self-start bg-[#ece9d8] border-2 border-t-white border-l-white border-b-stone-500 border-r-stone-500 px-4 py-1 active:border-t-stone-500 active:border-l-stone-500 active:border-b-white active:border-r-white disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      Check Answer.exe
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <span className="text-stone-400">{"// Awaiting solution generation..."}</span>
+                    <button 
+                      onClick={() => setGradePhase("revealed")}
+                      className="self-start bg-[#ece9d8] border-2 border-t-white border-l-white border-b-stone-500 border-r-stone-500 px-4 py-1 active:border-t-stone-500 active:border-l-stone-500 active:border-b-white active:border-r-white"
+                    >
+                      Generate Solution.exe
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
             {(gradePhase === "revealed" || gradePhase === "graded") && (
               <div className="flex flex-col animate-in fade-in duration-300">
+                {fragment.answer_type === "hybrid" && (
+                  <div className="mb-4">
+                     <span className="text-stone-400">{"// User Input:"}</span>
+                     <div className="text-stone-900 font-bold">{userAnswer}</div>
+                  </div>
+                )}
                 <span className="text-stone-400 mb-4">{"// Solution Generated:"}</span>
                 <div className="math-lg [&_.katex]:text-blue-800 [&_.katex]:text-2xl text-blue-800 mb-4 flex items-center">
                   <MathRenderer>{`$$${fragment.solution_latex}$$`}</MathRenderer>

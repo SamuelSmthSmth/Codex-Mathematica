@@ -282,7 +282,7 @@ export function LibraryShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
           Select a volume to begin your study
         </p>
       </header>
-      <div className="z-10 flex flex-col md:flex-row items-center justify-center md:items-end flex-wrap gap-6 sm:gap-8 lg:gap-10 px-2 pb-12 md:pb-0" role="list">
+      <div id="tour-volume-shelf" className="z-10 flex flex-col md:flex-row items-center justify-center md:items-end flex-wrap gap-6 sm:gap-8 lg:gap-10 px-2 pb-12 md:pb-0" role="list">
         {visibleVolumes.map((vol) => (
           <BookSpine key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
@@ -692,6 +692,13 @@ function FragmentPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
 
   const { gradePhase, setGradePhase, chosenGrade, isAlreadyConquered, handleGrade, handleRetry } = useWorkspaceLogic({ volume, chapterIndex, fragment });
 
+  const [userAnswer, setUserAnswer] = useState("");
+  useEffect(() => {
+    if (gradePhase === "problem") {
+      setUserAnswer("");
+    }
+  }, [gradePhase]);
+
   const radius = isLeftPage ? "12px 2px 2px 12px" : "2px 12px 12px 2px";
   const spineGradient = isLeftPage
     ? { right: 0, bg: isLightMode ? "linear-gradient(to left, rgba(0,0,0,0.05), transparent)" : "linear-gradient(to left, rgba(0,0,0,0.6), transparent)", border: `1px solid ${volume.accent}20` }
@@ -728,16 +735,41 @@ $$`}</MathRenderer>
           {/* Reveal & Answer */}
           <section className="flex flex-col items-center w-full max-w-full mx-auto" aria-label="Answer reveal and grading">
             {gradePhase === "problem" && (
-              <div className="my-8">
-                <button
-                  onClick={() => setGradePhase("revealed")}
-                  className="group flex items-center gap-2.5 px-8 py-3 text-xs uppercase tracking-[0.22em] transition-all duration-200 active:scale-95"
-                  style={{ fontFamily: "Georgia, serif", background: isLightMode ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)", border: isLightMode ? "1px solid color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "1px solid color-mix(in srgb, var(--codex-accent) 30%, transparent)", borderRadius: "2px", color: isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px color-mix(in srgb, var(--codex-accent) 8%, transparent), inset 0 1px 0 rgba(255,220,100,0.06)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)"; e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 60%, transparent)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)"; e.currentTarget.style.borderColor = isLightMode ? "color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "color-mix(in srgb, var(--codex-accent) 30%, transparent)"; }}
-                >
-                  <BookMarked size={14} strokeWidth={1.8} /> Reveal Answer
-                </button>
+              <div className="my-8 w-full flex justify-center">
+                {fragment.answer_type === "hybrid" ? (
+                  <form 
+                    onSubmit={(e) => { e.preventDefault(); setGradePhase("revealed"); }}
+                    className="flex flex-col items-center gap-4 w-full max-w-sm"
+                  >
+                    <input 
+                      type="text" 
+                      value={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                      placeholder={fragment.answer_hint || "Enter your answer..."}
+                      className={`w-full px-4 py-3 text-center outline-none ${isLightMode ? "bg-white border-stone-300 text-stone-800 focus:border-stone-400" : "bg-black/40 border-stone-800 text-stone-200 focus:border-stone-600"} border rounded-sm transition-colors shadow-inner`}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!userAnswer.trim()}
+                      className="group flex items-center gap-2.5 px-8 py-3 text-xs uppercase tracking-[0.22em] transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                      style={{ fontFamily: "Georgia, serif", background: isLightMode ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)", border: isLightMode ? "1px solid color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "1px solid color-mix(in srgb, var(--codex-accent) 30%, transparent)", borderRadius: "2px", color: isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px color-mix(in srgb, var(--codex-accent) 8%, transparent), inset 0 1px 0 rgba(255,220,100,0.06)" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)"; e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 60%, transparent)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)"; e.currentTarget.style.borderColor = isLightMode ? "color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "color-mix(in srgb, var(--codex-accent) 30%, transparent)"; }}
+                    >
+                      <BookMarked size={14} strokeWidth={1.8} /> Check Answer
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    onClick={() => setGradePhase("revealed")}
+                    className="group flex items-center gap-2.5 px-8 py-3 text-xs uppercase tracking-[0.22em] transition-all duration-200 active:scale-95"
+                    style={{ fontFamily: "Georgia, serif", background: isLightMode ? "linear-gradient(135deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(135deg, #1a1208 0%, #0f0c06 100%)", border: isLightMode ? "1px solid color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "1px solid color-mix(in srgb, var(--codex-accent) 30%, transparent)", borderRadius: "2px", color: isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 20px color-mix(in srgb, var(--codex-accent) 8%, transparent), inset 0 1px 0 rgba(255,220,100,0.06)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = isLightMode ? "#44403c" : "rgba(220,175,80,0.95)"; e.currentTarget.style.borderColor = "color-mix(in srgb, var(--codex-accent) 60%, transparent)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = isLightMode ? "#966812" : "color-mix(in srgb, var(--codex-accent) 90%, transparent)"; e.currentTarget.style.borderColor = isLightMode ? "color-mix(in srgb, var(--codex-accent) 50%, transparent)" : "color-mix(in srgb, var(--codex-accent) 30%, transparent)"; }}
+                  >
+                    <BookMarked size={14} strokeWidth={1.8} /> Reveal Answer
+                  </button>
+                )}
               </div>
             )}
 
@@ -748,9 +780,23 @@ $$`}</MathRenderer>
                   <p style={{ fontFamily: "Georgia, serif", fontSize: "0.5rem", letterSpacing: "0.32em", color: "color-mix(in srgb, var(--codex-accent) 60%, transparent)", textTransform: "uppercase" }}>The Solution</p>
                   <div className="flex-1 h-px" style={{ background: "linear-gradient(to left, transparent, color-mix(in srgb, var(--codex-accent) 25%, transparent))" }} />
                 </div>
-                <div className="w-full py-10 px-6 text-center mb-8" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px color-mix(in srgb, var(--codex-accent) 4%, transparent), inset 0 1px 0 color-mix(in srgb, var(--codex-accent) 6%, transparent)" }}>
-                  <MathRenderer className={`[&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden ${isLightMode ? "[&_.katex]:text-stone-900 text-stone-900" : "[&_.katex]:text-amber-100/85 text-amber-100/85"}`}>{`$$${fragment.solution_latex}$$`}</MathRenderer>
-                </div>
+                
+                {fragment.answer_type === "hybrid" ? (
+                  <div className="flex flex-col md:flex-row gap-4 w-full mb-8">
+                    <div className="flex-1 py-8 px-6 flex flex-col items-center justify-center text-center" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "inset 0 1px 0 color-mix(in srgb, var(--codex-accent) 6%, transparent)" }}>
+                      <p className="text-[0.6rem] uppercase tracking-widest mb-4 text-stone-500/70" style={{ fontFamily: "Georgia, serif" }}>Your Answer</p>
+                      <div className={`text-2xl font-serif ${isLightMode ? "text-stone-900" : "text-amber-100/85"}`}>{userAnswer}</div>
+                    </div>
+                    <div className="flex-1 py-8 px-6 flex flex-col items-center justify-center text-center" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px color-mix(in srgb, var(--codex-accent) 4%, transparent), inset 0 1px 0 color-mix(in srgb, var(--codex-accent) 6%, transparent)" }}>
+                      <p className="text-[0.6rem] uppercase tracking-widest mb-4 text-stone-500/70" style={{ fontFamily: "Georgia, serif" }}>Correct Answer</p>
+                      <MathRenderer className={`[&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden ${isLightMode ? "[&_.katex]:text-stone-900 text-stone-900" : "[&_.katex]:text-amber-100/85 text-amber-100/85"}`}>{`$$${fragment.solution_latex}$$`}</MathRenderer>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-full py-10 px-6 text-center mb-8" style={{ background: isLightMode ? "linear-gradient(160deg, #ffffff 0%, #f4f0ea 100%)" : "linear-gradient(160deg, #110e09 0%, #0c0a07 100%)", border: isLightMode ? "1px solid #d1d5db" : "1px solid color-mix(in srgb, var(--codex-accent) 18%, transparent)", borderRadius: "2px", boxShadow: isLightMode ? "0 2px 5px rgba(0,0,0,0.05)" : "0 0 40px color-mix(in srgb, var(--codex-accent) 4%, transparent), inset 0 1px 0 color-mix(in srgb, var(--codex-accent) 6%, transparent)" }}>
+                    <MathRenderer className={`[&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden ${isLightMode ? "[&_.katex]:text-stone-900 text-stone-900" : "[&_.katex]:text-amber-100/85 text-amber-100/85"}`}>{`$$${fragment.solution_latex}$$`}</MathRenderer>
+                  </div>
+                )}
 
                 {gradePhase === "revealed" && (
                   <div className="flex flex-col items-center gap-5 pb-10">

@@ -103,6 +103,13 @@ function TerminalWorkspace({
   const fragment = allFragments[currentIndex];
   const { gradePhase, setGradePhase, handleGrade } = useWorkspaceLogic({ fragment, volume, chapterIndex });
 
+  const [userAnswer, setUserAnswer] = useState("");
+  useEffect(() => {
+    if (gradePhase === "problem") {
+      setUserAnswer("");
+    }
+  }, [gradePhase]);
+
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === allFragments.length - 1;
 
@@ -145,19 +152,47 @@ function TerminalWorkspace({
           <div className="mt-auto pt-4 border-t border-slate-800">
             {gradePhase === "problem" && (
               <div className="flex flex-col gap-2">
-                <div>
-                  <span className="text-emerald-400">samuel@codex</span>
-                  <span className="text-slate-400">:</span>
-                  <span className="text-blue-400">~/problems</span>
-                  <span className="text-slate-400">$ </span>
-                  <span className="animate-pulse">_</span>
-                </div>
-                <button
-                  onClick={() => setGradePhase("revealed")}
-                  className="self-start mt-2 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-600 transition-colors flex items-center gap-2"
-                >
-                  <Terminal className="w-4 h-4" /> ./solve.sh
-                </button>
+                {fragment.answer_type === "hybrid" ? (
+                  <form onSubmit={(e) => { e.preventDefault(); setGradePhase("revealed"); }} className="flex flex-col gap-2 w-full">
+                    <div>
+                      <span className="text-emerald-400">samuel@codex</span>
+                      <span className="text-slate-400">:</span>
+                      <span className="text-blue-400">~/problems</span>
+                      <span className="text-slate-400">$ </span>
+                      <span className="text-slate-200">./check_answer.sh</span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-slate-400">{"> "}</span>
+                      <input 
+                        type="text" 
+                        value={userAnswer}
+                        onChange={(e) => setUserAnswer(e.target.value)}
+                        placeholder={fragment.answer_hint || "input answer"}
+                        className="flex-1 bg-transparent border-none outline-none text-slate-200 font-mono"
+                        autoFocus
+                      />
+                    </div>
+                    <button type="submit" disabled={!userAnswer.trim()} className="self-start mt-2 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:pointer-events-none">
+                      <Terminal className="w-4 h-4" /> run
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <div>
+                      <span className="text-emerald-400">samuel@codex</span>
+                      <span className="text-slate-400">:</span>
+                      <span className="text-blue-400">~/problems</span>
+                      <span className="text-slate-400">$ </span>
+                      <span className="animate-pulse">_</span>
+                    </div>
+                    <button
+                      onClick={() => setGradePhase("revealed")}
+                      className="self-start mt-2 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-600 transition-colors flex items-center gap-2"
+                    >
+                      <Terminal className="w-4 h-4" /> ./solve.sh
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
@@ -168,8 +203,14 @@ function TerminalWorkspace({
                   <span className="text-slate-400">:</span>
                   <span className="text-blue-400">~/problems</span>
                   <span className="text-slate-400">$ </span>
-                  <span className="text-slate-200">./solve.sh</span>
+                  <span className="text-slate-200">{fragment.answer_type === "hybrid" ? "./check_answer.sh" : "./solve.sh"}</span>
                 </div>
+                
+                {fragment.answer_type === "hybrid" && (
+                  <div className="text-slate-300 mb-2">
+                    <span className="text-slate-500">Output given:</span> {userAnswer}
+                  </div>
+                )}
                 
                 <div className="math-lg [&_.katex]:text-white [&_.katex]:text-xl text-white bg-blue-900/10 p-4 rounded-lg border border-blue-900/30">
                   <MathRenderer>{`$$${fragment.solution_latex}$$`}</MathRenderer>
@@ -371,7 +412,7 @@ export default function ThemeModernDesktop({ activeArea, onSelectArea, onOpenPro
       </div>
 
       {/* Dock */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 flex gap-2 items-end z-50 shadow-2xl">
+      <div id="tour-volume-shelf" className="absolute bottom-4 left-1/2 transform -translate-x-1/2 h-16 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 flex gap-2 items-end z-50 shadow-2xl">
         {visibleVolumes.map((vol) => (
           <button
             key={vol.id}

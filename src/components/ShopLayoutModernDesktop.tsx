@@ -58,6 +58,7 @@ export default function ShopLayoutModernDesktop() {
           {categories.map((cat) => (
             <button
               key={cat.id}
+              id={`tour-shop-${cat.id}`}
               onClick={() => setActiveCategory(cat.id)}
               className={`text-left px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 activeCategory === cat.id

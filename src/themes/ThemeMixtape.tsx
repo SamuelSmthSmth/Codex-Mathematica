@@ -95,7 +95,7 @@ function CDShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
         </h1>
       </header>
 
-      <div className="z-10 flex flex-wrap justify-center gap-10 px-4 max-w-5xl">
+      <div id="tour-volume-shelf" className="z-10 flex flex-wrap justify-center gap-10 px-4 max-w-5xl">
         {VOLUMES.map((vol) => (
           <CDCase key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
@@ -222,6 +222,13 @@ const GRADE_OPTIONS: { grade: SelfGrade; label: string; icon: React.ReactNode; s
 function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: Volume; chapterIndex: number; fragment: Fragment; isLeftPage: boolean; }) {
   const { gradePhase, setGradePhase, chosenGrade, handleGrade, handleRetry } = useWorkspaceLogic({ volume, chapterIndex, fragment });
 
+  const [userAnswer, setUserAnswer] = useState("");
+  useEffect(() => {
+    if (gradePhase === "problem") {
+      setUserAnswer("");
+    }
+  }, [gradePhase]);
+
   const radius = isLeftPage ? "8px 0px 0px 8px" : "0px 8px 8px 0px";
   
   return (
@@ -245,13 +252,38 @@ function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
 
         {/* Controls */}
         {gradePhase === "problem" && (
-          <button
-            onClick={() => setGradePhase("revealed")}
-            className="flex items-center gap-2 bg-stone-800 text-white font-mono font-bold px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_4px_0_#444] hover:shadow-[0_2px_0_#444] hover:translate-y-[2px]"
-          >
-            <Play size={16} fill="white" />
-            PLAY SOLUTION
-          </button>
+          <div className="flex justify-center">
+            {fragment.answer_type === "hybrid" ? (
+              <form 
+                onSubmit={(e) => { e.preventDefault(); setGradePhase("revealed"); }}
+                className="flex flex-col items-center gap-4 w-full"
+              >
+                <input
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => setUserAnswer(e.target.value)}
+                  placeholder={fragment.answer_hint || "Enter your answer"}
+                  className="w-full max-w-sm px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded font-mono text-center text-stone-800 focus:border-pink-500 outline-none transition-colors shadow-inner"
+                />
+                <button
+                  type="submit"
+                  disabled={!userAnswer.trim()}
+                  className="flex items-center gap-2 bg-stone-800 text-white font-mono font-bold px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_4px_0_#444] hover:shadow-[0_2px_0_#444] hover:translate-y-[2px] disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <Play size={16} fill="white" />
+                  CHECK ANSWER
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setGradePhase("revealed")}
+                className="flex items-center gap-2 bg-stone-800 text-white font-mono font-bold px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-all shadow-[0_4px_0_#444] hover:shadow-[0_2px_0_#444] hover:translate-y-[2px]"
+              >
+                <Play size={16} fill="white" />
+                PLAY SOLUTION
+              </button>
+            )}
+          </div>
         )}
 
         {/* Revealed */}
@@ -259,8 +291,16 @@ function NotebookPage({ volume, chapterIndex, fragment, isLeftPage }: { volume: 
           <div className="animate-in fade-in slide-in-from-top-4 duration-300">
             <h4 className="font-mono font-bold text-pink-600 text-sm mb-4">{"/// SOLUTION"}</h4>
             
+            {fragment.answer_type === "hybrid" && (
+              <div className="bg-stone-50/80 border-2 border-stone-200 p-6 rounded shadow-sm mb-4">
+                 <p className="font-mono font-bold text-stone-400 text-xs mb-2 uppercase">Your Answer</p>
+                 <div className="text-2xl font-bold font-mono text-stone-800">{userAnswer}</div>
+              </div>
+            )}
+
             {/* LED Screen aesthetic for answer */}
             <div className="bg-stone-900 border-4 border-stone-700 p-6 rounded-lg shadow-inner mb-8 font-mono relative overflow-hidden">
+               {fragment.answer_type === "hybrid" && <p className="font-mono font-bold text-stone-500 text-xs mb-2 uppercase relative z-10">Correct Answer</p>}
                {/* LED scanline */}
                <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none" />
                <MathRenderer className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] relative z-10 [&_.katex]:text-white [&_.katex]:text-3xl [&_.katex-display]:my-2 overflow-x-auto overflow-y-hidden">

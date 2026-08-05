@@ -87,7 +87,7 @@ function ScribbleShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
       <h1 className="text-5xl md:text-7xl font-bold mb-16 text-stone-800 text-center" style={{ fontFamily: "'Caveat', cursive", transform: "rotate(-2deg)" }}>
         My Notebooks
       </h1>
-      <div className="flex flex-wrap justify-center gap-8 md:gap-12 pl-8 md:pl-16">
+      <div id="tour-volume-shelf" className="flex flex-wrap justify-center gap-8 md:gap-12 pl-8 md:pl-16">
         {VOLUMES.map(vol => (
           <button
             key={vol.id}
@@ -176,6 +176,7 @@ function ScribbleReader({ volume, chapterIndex, fragmentIndex, onBack, onComplet
   const fragment = chapter.fragments[fragmentIndex];
   const { gradePhase, setGradePhase, chosenGrade, handleGrade, handleRetry } = useWorkspaceLogic({ volume, chapterIndex, fragment });
   const [animKey, setAnimKey] = useState(0);
+  const [userAnswer, setUserAnswer] = useState("");
 
   const goNext = () => {
     if (fragmentIndex < chapter.fragments.length - 1) {
@@ -196,6 +197,12 @@ function ScribbleReader({ volume, chapterIndex, fragmentIndex, onBack, onComplet
   useEffect(() => {
     setAnimKey(prev => prev + 1);
   }, [fragmentIndex]);
+
+  useEffect(() => {
+    if (gradePhase === "problem") {
+      setUserAnswer("");
+    }
+  }, [gradePhase, fragmentIndex]);
 
   return (
     <div className="flex flex-col w-full max-w-3xl pl-8 md:pl-16 mx-auto relative z-10" key={animKey}>
@@ -225,18 +232,55 @@ function ScribbleReader({ volume, chapterIndex, fragmentIndex, onBack, onComplet
 
         {gradePhase === "problem" && (
           <div className="flex justify-center my-12">
-            <button
-              onClick={() => setGradePhase("revealed")}
-              className="flex items-center gap-2 bg-[#ffc0cb] text-stone-900 font-bold text-3xl px-8 py-3 transition-transform hover:scale-105 active:scale-95 border-[3px] border-stone-800"
-              style={{ fontFamily: "'Caveat', cursive", borderRadius: "5px 2px 6px 3px", boxShadow: "4px 4px 0 rgba(0,0,0,0.8)", transform: "rotate(-2deg)" }}
-            >
-              <Play size={24} fill="currentColor" /> show answer
-            </button>
+            {fragment.answer_type === "hybrid" ? (
+              <form 
+                onSubmit={(e) => { e.preventDefault(); setGradePhase("revealed"); }}
+                className="flex flex-col items-center gap-6 w-full max-w-md"
+              >
+                <input
+                  type="text"
+                  value={userAnswer}
+                  onChange={(e) => setUserAnswer(e.target.value)}
+                  placeholder={fragment.answer_hint || "your answer"}
+                  className="w-full text-center text-3xl font-bold bg-transparent border-b-[3px] border-stone-800 border-dashed focus:outline-none focus:border-red-500 transition-colors py-2 text-stone-800"
+                  style={{ fontFamily: "'Caveat', cursive" }}
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={!userAnswer.trim()}
+                  className="flex items-center gap-2 bg-[#ffc0cb] text-stone-900 font-bold text-3xl px-8 py-3 transition-transform hover:scale-105 active:scale-95 border-[3px] border-stone-800 disabled:opacity-50 disabled:pointer-events-none"
+                  style={{ fontFamily: "'Caveat', cursive", borderRadius: "5px 2px 6px 3px", boxShadow: "4px 4px 0 rgba(0,0,0,0.8)", transform: "rotate(-2deg)" }}
+                >
+                  <Play size={24} fill="currentColor" /> check
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setGradePhase("revealed")}
+                className="flex items-center gap-2 bg-[#ffc0cb] text-stone-900 font-bold text-3xl px-8 py-3 transition-transform hover:scale-105 active:scale-95 border-[3px] border-stone-800"
+                style={{ fontFamily: "'Caveat', cursive", borderRadius: "5px 2px 6px 3px", boxShadow: "4px 4px 0 rgba(0,0,0,0.8)", transform: "rotate(-2deg)" }}
+              >
+                <Play size={24} fill="currentColor" /> show answer
+              </button>
+            )}
           </div>
         )}
 
         {(gradePhase === "revealed" || gradePhase === "graded") && (
           <div className="animate-in fade-in slide-in-from-top-4 duration-500 mt-12">
+            {fragment.answer_type === "hybrid" && (
+              <div 
+                className="bg-white/80 p-4 md:p-6 mb-8 border-[3px] border-stone-800 border-dashed"
+                style={{ 
+                  borderRadius: "4px 2px 5px 3px", 
+                  transform: "rotate(1deg)"
+                }}
+              >
+                <div className="text-xl text-stone-600 mb-1 font-bold" style={{ fontFamily: "'Caveat', cursive" }}>you said:</div>
+                <div className="text-3xl text-stone-900 font-bold" style={{ fontFamily: "'Caveat', cursive" }}>{userAnswer}</div>
+              </div>
+            )}
             <div 
               className="bg-[#c8f0d8]/80 p-6 md:p-10 mb-8 border-[3px] border-stone-800"
               style={{ 
@@ -245,7 +289,7 @@ function ScribbleReader({ volume, chapterIndex, fragmentIndex, onBack, onComplet
                 transform: "rotate(-1deg)"
               }}
             >
-              <div className="text-2xl text-stone-800 mb-2 font-bold" style={{ fontFamily: "'Caveat', cursive", color: "#e88080" }}>A:</div>
+              <div className="text-2xl text-stone-800 mb-2 font-bold" style={{ fontFamily: "'Caveat', cursive", color: "#e88080" }}>{fragment.answer_type === "hybrid" ? "actual A:" : "A:"}</div>
               <MathRenderer className="text-xl md:text-2xl text-stone-900 font-bold overflow-x-auto [&_.katex]:font-bold [&_.katex]:text-stone-900">
                 {`$$${fragment.solution_latex}$$`}
               </MathRenderer>

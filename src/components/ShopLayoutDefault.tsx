@@ -361,7 +361,7 @@ export default function ShopLayoutDefault() {
             if (itemsInCategory.length === 0) return null;
 
             return (
-              <section key={category.id}>
+              <section key={category.id} id={`tour-shop-${category.id}`}>
                 <SectionHeading label={category.label} count={itemsInCategory.length} isLightMode={isLightMode} />
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                   {itemsInCategory.map((item) => (

@@ -52,7 +52,7 @@ export default function LibraryViewDiner() {
         )}
 
         {/* Tracks List (Techniques) */}
-        <div className="grid md:grid-cols-2 gap-8 bg-stone-200 p-6 rounded-2xl shadow-inner border-4 border-stone-300">
+        <div id="tour-library-list" className="grid md:grid-cols-2 gap-8 bg-stone-200 p-6 rounded-2xl shadow-inner border-4 border-stone-300">
           {TECHNIQUE_ROWS.map((row, rowIndex) => (
             <div key={row.id} className="flex flex-col gap-3">
               <div className="bg-red-600 text-white text-center font-black py-2 rounded shadow-sm border-2 border-red-800 uppercase tracking-widest">

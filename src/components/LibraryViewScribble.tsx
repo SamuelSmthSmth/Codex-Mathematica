@@ -50,7 +50,7 @@ export default function LibraryViewScribble() {
         </div>
 
         {/* Categories / Scattered Notebooks */}
-        <div className="w-full space-y-16">
+        <div id="tour-library-list" className="w-full space-y-16">
           {TECHNIQUE_ROWS.map((row, rIdx) => (
             <div key={row.id} className="relative">
               <div className="absolute -top-6 left-4 bg-[#ffc0cb] px-4 py-1 border-4 border-stone-800 shadow-[4px_4px_0_rgba(0,0,0,0.8)] z-10" style={{ transform: "rotate(-3deg)", borderRadius: "2px 8px 3px 6px" }}>

@@ -102,7 +102,7 @@ function DinerMenuShelf({ onSelect }: { onSelect: (v: Volume) => void }) {
         </h1>
       </header>
 
-      <div className="z-10 mt-12 w-full max-w-6xl mx-auto flex flex-wrap justify-center gap-10 px-4">
+      <div id="tour-volume-shelf" className="z-10 mt-12 w-full max-w-6xl mx-auto flex flex-wrap justify-center gap-10 px-4">
         {VOLUMES.map((vol) => (
           <DinerMenu key={vol.id} volume={vol} onSelect={onSelect} />
         ))}
@@ -268,6 +268,13 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
   const fragment = allFragments[currentIndex];
   const { gradePhase, setGradePhase, handleGrade } = useWorkspaceLogic({ fragment, volume, chapterIndex });
 
+  const [userAnswer, setUserAnswer] = useState("");
+  useEffect(() => {
+    if (gradePhase === "problem") {
+      setUserAnswer("");
+    }
+  }, [gradePhase]);
+
   const isFirst = currentIndex === 0;
   const isLast = currentIndex === allFragments.length - 1;
 
@@ -359,19 +366,50 @@ function DinerSpread({ volume, chapterIndex, initialSpreadIndex, onBack }: { vol
                   {gradePhase === "problem" && (
                     <div className="flex-1 min-h-0 flex flex-col items-center justify-center text-center">
                       <Ticket className="w-16 h-16 text-stone-300 mb-6" />
-                      <p className="text-stone-500 font-mono mb-8">Waiting on kitchen...</p>
-                      <button
-                        onClick={() => setGradePhase("revealed")}
-                        className="bg-red-600 text-white font-bold font-mono px-8 py-4 rounded shadow-[4px_4px_0_#991b1b] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#991b1b] active:translate-y-[4px] active:shadow-none transition-all"
-                      >
-                        PRINT TICKET (REVEAL)
-                      </button>
+                      {fragment.answer_type === "hybrid" ? (
+                        <form 
+                          onSubmit={(e) => { e.preventDefault(); setGradePhase("revealed"); }} 
+                          className="flex flex-col items-center w-full px-6"
+                        >
+                          <input
+                            type="text"
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            placeholder={fragment.answer_hint || "What's the order?"}
+                            className="w-full bg-stone-100 border-2 border-dashed border-stone-300 p-3 mb-6 text-center font-mono focus:border-red-500 outline-none text-stone-800"
+                          />
+                          <button
+                            type="submit"
+                            disabled={!userAnswer.trim()}
+                            className="bg-red-600 text-white font-bold font-mono px-8 py-4 rounded shadow-[4px_4px_0_#991b1b] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#991b1b] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-50 disabled:pointer-events-none"
+                          >
+                            PRINT TICKET (REVEAL)
+                          </button>
+                        </form>
+                      ) : (
+                        <>
+                          <p className="text-stone-500 font-mono mb-8">Waiting on kitchen...</p>
+                          <button
+                            onClick={() => setGradePhase("revealed")}
+                            className="bg-red-600 text-white font-bold font-mono px-8 py-4 rounded shadow-[4px_4px_0_#991b1b] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#991b1b] active:translate-y-[4px] active:shadow-none transition-all"
+                          >
+                            PRINT TICKET (REVEAL)
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
 
                   {(gradePhase === "revealed" || gradePhase === "graded") && (
                     <div className="flex-1 min-h-0 flex flex-col animate-in slide-in-from-top-8 duration-500 ease-out">
-                      <div className="flex-1 flex items-center justify-center font-serif text-stone-900 border-b-2 border-stone-300 border-dashed pb-6 mb-6">
+                      {fragment.answer_type === "hybrid" && (
+                        <div className="flex-none flex flex-col items-center justify-center font-serif text-stone-900 border-b-2 border-stone-300 border-dashed pb-4 mb-4">
+                           <p className="font-mono text-xs font-bold text-stone-500 text-center mb-2 uppercase">Your Ticket:</p>
+                           <div className="text-2xl font-bold font-mono text-stone-800">{userAnswer}</div>
+                        </div>
+                      )}
+                      <div className="flex-1 flex flex-col items-center justify-center font-serif text-stone-900 border-b-2 border-stone-300 border-dashed pb-6 mb-6">
+                         {fragment.answer_type === "hybrid" && <p className="font-mono text-xs font-bold text-stone-500 text-center mb-2 uppercase">Correct Ticket:</p>}
                          <MathRenderer className="math-lg text-stone-900 [&_.katex]:text-stone-900 [&_.katex]:text-5xl w-full text-center overflow-auto py-2">{`$$${fragment.solution_latex}$$`}</MathRenderer>
                       </div>
 

@@ -67,6 +67,7 @@ export default function ShopLayoutWindowsXP() {
           {activeTab === 'browse' && categories.map((cat: any) => (
             <button
               key={cat.id}
+              id={`tour-shop-${cat.id}`}
               onClick={() => setActiveCategory(cat.id)}
               className={`flex flex-col items-center justify-center py-4 px-2 rounded border cursor-pointer transition-all ${
                 activeCategory === cat.id 

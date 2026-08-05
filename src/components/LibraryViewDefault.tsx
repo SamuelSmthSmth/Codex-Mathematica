@@ -203,14 +203,16 @@ export default function LibraryViewDefault() {
         />
 
         {/* Carousel rows */}
-        {techniqueRows.map((row) => (
-          <LibraryCarousel
-            key={row.id}
-            title={row.title}
-            techniques={row.techniques}
-            onSelect={setActiveTechnique}
-          />
-        ))}
+        <div id="tour-library-list">
+          {techniqueRows.map((row) => (
+            <LibraryCarousel
+              key={row.id}
+              title={row.title}
+              techniques={row.techniques}
+              onSelect={setActiveTechnique}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

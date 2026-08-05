@@ -50,7 +50,7 @@ export default function LibraryViewWindowsXP() {
       </div>
 
       {/* Right pane - Icons */}
-      <div className="flex-1 p-4 overflow-y-auto bg-white h-full">
+      <div id="tour-library-list" className="flex-1 p-4 overflow-y-auto bg-white h-full">
         {techniqueRows.map((row, idx) => (
           <div key={idx} className="mb-6">
             <h2 className="text-gray-500 text-xs font-bold border-b border-gray-200 pb-1 mb-3">{row.category}</h2>

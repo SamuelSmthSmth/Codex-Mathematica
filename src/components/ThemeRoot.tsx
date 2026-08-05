@@ -7,7 +7,7 @@ import ThemeDiner from "@/themes/ThemeDiner";
 import ThemeWindowsXP from "@/themes/ThemeWindowsXP";
 import ThemeModernDesktop from "@/themes/ThemeModernDesktop";
 import ThemeScribble from "@/themes/ThemeScribble";
-import OnboardingTour from "./OnboardingTour";
+import SpotlightTour, { TourStep } from "./SpotlightTour";
 
 export type AppArea = "archive" | "library" | "shop";
 
@@ -45,10 +45,37 @@ export default function ThemeRoot({ activeArea, onSelectArea, onOpenProfile, isP
       break;
   }
 
+  const tourSteps: TourStep[] = [
+    {
+      targetId: "tour-volume-shelf",
+      title: "Welcome to the Archive",
+      content: "This is where your mathematical journey begins. The Archive contains all the Volumes of knowledge.",
+      onEnter: () => onSelectArea("archive")
+    },
+    {
+      targetId: "tour-shop-themes",
+      title: "The Store: Themes",
+      content: "Spend credits you earn by solving problems to customize your experience with new themes.",
+      onEnter: () => onSelectArea("shop")
+    },
+    {
+      targetId: "tour-shop-archives",
+      title: "The Store: Expansions",
+      content: "You can also purchase Expansion Packs to unlock new volumes and harder problems.",
+      onEnter: () => onSelectArea("shop")
+    },
+    {
+      targetId: "tour-library-list",
+      title: "The Library",
+      content: "A collection of techniques and formulas. Reference these when you're stuck on a problem.",
+      onEnter: () => onSelectArea("library")
+    }
+  ];
+
   return (
     <>
       {themeContent}
-      <OnboardingTour activeArea={activeArea} />
+      <SpotlightTour steps={tourSteps} activeArea={activeArea} />
     </>
   );
 }

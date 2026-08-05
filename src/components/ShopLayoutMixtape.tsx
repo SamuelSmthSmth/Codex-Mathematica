@@ -62,6 +62,7 @@ export default function ShopLayoutMixtape() {
             {SHOP_CATEGORIES.map((cat) => (
               <button
                 key={cat.id}
+                id={`tour-shop-${cat.id}`}
                 onClick={() => setActiveCategory(cat.id)}
                 className={`text-left px-4 py-3 font-bold uppercase tracking-widest text-sm border-l-4 transition-all ${
                   activeCategory === cat.id 

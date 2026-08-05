@@ -16,6 +16,8 @@ export interface Fragment {
   original_id: string;
   problem_latex: string;
   solution_latex: string;
+  answer_type?: "hybrid";
+  answer_hint?: string;
 }
 
 export interface Chapter {
