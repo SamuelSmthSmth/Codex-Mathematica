@@ -197,21 +197,11 @@ export default function ScholarGate() {
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy]         = useState(false);
-  const [shake, setShake]       = useState(false);
 
   const emailRef = useRef<HTMLInputElement>(null);
 
   // Focus email on mount
   useEffect(() => { emailRef.current?.focus(); }, []);
-
-  // Shake card on new error
-  useEffect(() => {
-    if (authError) {
-      setShake(true);
-      const t = setTimeout(() => setShake(false), 500);
-      return () => clearTimeout(t);
-    }
-  }, [authError]);
 
   const switchMode = useCallback((next: Mode) => {
     clearError();
@@ -258,7 +248,7 @@ export default function ScholarGate() {
           border: "1px solid color-mix(in srgb, var(--codex-accent) 20%, transparent)",
           borderRadius: "3px",
           boxShadow: "0 0 80px color-mix(in srgb, var(--codex-accent) 6%, transparent), 0 40px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,220,100,0.05)",
-          animation: shake ? "sg-shake 0.45s cubic-bezier(.36,.07,.19,.97) forwards" : undefined,
+          animation: authError ? "sg-shake 0.45s cubic-bezier(.36,.07,.19,.97) forwards" : undefined,
         }}
       >
 
@@ -293,12 +283,6 @@ export default function ScholarGate() {
         </div>
 
         <div className="relative">
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm rounded-sm">
-             <span className="text-amber-500 font-serif tracking-[0.2em] text-xs uppercase px-4 py-2 border border-amber-500/30 bg-black/80 rounded shadow-lg">
-               In Development
-             </span>
-          </div>
-          <div className="opacity-30 pointer-events-none">
             {/* ── Email form ── */}
             <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3" noValidate>
               {/* Render a hidden input to pass the ref correctly */}
@@ -428,7 +412,6 @@ export default function ScholarGate() {
                 </button>
               ))}
             </div>
-          </div>
         </div>
 
         {/* ── Explore as Guest ── */}
