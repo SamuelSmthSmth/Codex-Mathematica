@@ -118,6 +118,7 @@ function emailToName(email: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const AUTH_BOOT_TIMEOUT_MS = 4000;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Provider
@@ -125,21 +126,30 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [scholar, setScholar] = useState<User | null>(null);
-  const [loading, setLoading]  = useState(true);
+  const [loading, setLoading]  = useState(isConfigured);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isGuestMode, setIsGuestMode] = useState(false);
 
   useEffect(() => {
-    if (!isConfigured) {
-      setLoading(false);
-      return;
-    }
+    if (!isConfigured) return;
 
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setScholar(user);
-      setLoading(false);
-    });
-    return unsub;
+    // Auth should never prevent the archive from becoming usable. Firebase can
+    // be slow to resolve in a fresh browser profile or on a restricted network;
+    // the listener may still hydrate a signed-in user after this fallback.
+    const bootTimeout = window.setTimeout(() => setLoading(false), AUTH_BOOT_TIMEOUT_MS);
+    const unsub = onAuthStateChanged(
+      auth,
+      (user) => {
+        setScholar(user);
+        setLoading(false);
+      },
+      () => setLoading(false),
+    );
+
+    return () => {
+      window.clearTimeout(bootTimeout);
+      unsub();
+    };
   }, []);
 
   const clearError = useCallback(() => setAuthError(null), []);
