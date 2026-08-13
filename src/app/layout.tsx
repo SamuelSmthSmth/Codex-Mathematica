@@ -24,11 +24,23 @@ export const metadata: Metadata = {
   description:
     "An immersive dark-academia calculus ledger. Open an ancient volume, study its fragments, and commit your proofs to the parchment.",
   keywords: ["calculus", "mathematics", "integrals", "limits", "series", "education"],
+  metadataBase: new URL("https://codex.sous.systems"),
+  alternates: { canonical: "/" },
+  icons: { icon: "/icon.svg" },
   openGraph: {
     title: "Codex Mathematica",
     description:
       "Select a volume from the Grand Archive. Study. Reason. Commit your proof.",
     type: "website",
+    url: "https://codex.sous.systems",
+    siteName: "Codex Mathematica",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Codex Mathematica — the mathematics archive" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Codex Mathematica",
+    description: "A deliberate workspace for mastering calculus.",
+    images: ["/opengraph-image"],
   },
 };
 
